@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.iocoder.yudao</groupId>
+        <artifactId>yudao</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>adcreater-server</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>adcreater-server-common</module>
+        <module>module-ai</module>
+        <module>module-billing</module>
+        <module>module-ad</module>
+        <module>module-delivery</module>
+        <module>module-template</module>
+    </modules>
+</project>
