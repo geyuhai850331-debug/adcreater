@@ -39,7 +39,7 @@
             <el-table-column prop="id" label="交易编号" width="180" />
             <el-table-column prop="amount" label="点数" width="100">
               <template #default="{ row }">
-                <span :style="{ color: row.type === 'CHARGE' ? '#67c23a' : '#f56c6c' }">
+                <span :style="{ color: row.type === 'CHARGE' ? 'var(--color-success)' : 'var(--color-error)' }">
                   {{ row.type === 'CHARGE' ? '+' : '-' }}{{ row.amount }}
                 </span>
               </template>
@@ -138,9 +138,9 @@ import client from '@/api/client'
 const balance = ref(0)
 const balancePercentage = computed(() => Math.min((balance.value / 1000) * 100, 100))
 const balanceColor = computed(() => {
-  if (balance.value < 100) return '#f56c6c'
-  if (balance.value < 500) return '#e6a23c'
-  return '#67c23a'
+  if (balance.value < 100) return 'var(--color-error)'
+  if (balance.value < 500) return 'var(--color-warning)'
+  return 'var(--color-success)'
 })
 
 const transactions = ref<any[]>([])
@@ -237,96 +237,111 @@ onMounted(() => {
 
 <style scoped>
 .billing-page {
-  max-width: 1200px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
 .page-title {
-  margin: 0 0 20px 0;
-  color: #303133;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .balance-card {
   height: 100%;
+  border-top: 3px solid var(--color-cta);
 }
 
 .balance-display {
   text-align: center;
-  padding: 20px 0;
+  padding: var(--space-6) 0;
 }
 
 .balance-label {
-  color: #909399;
-  margin: 0 0 8px;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
 }
 
 .balance-amount {
-  font-size: 48px;
-  font-weight: bold;
-  color: #303133;
-  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 3.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 var(--space-1);
+  line-height: 1;
 }
 
 .balance-unit {
-  color: #909399;
-  font-size: 14px;
-  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-3);
 }
 
 .recharge-btn {
-  margin-top: 16px;
+  margin-top: var(--space-4);
   width: 200px;
+  height: 42px;
+  font-weight: 600;
 }
 
 .pagination-wrap {
-  margin-top: 16px;
+  margin-top: var(--space-4);
   display: flex;
   justify-content: flex-end;
 }
 
 .guide-card {
-  margin-top: 20px;
+  margin-top: var(--space-5);
 }
 
 .package-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .package-item {
-  border: 2px solid #ebeef5;
-  border-radius: 8px;
-  padding: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color var(--transition-normal), background var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .package-item:hover {
-  border-color: #409EFF;
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .package-item.active {
-  border-color: #409EFF;
-  background: #ecf5ff;
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .package-points {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .package-price {
-  font-size: 16px;
-  color: #f56c6c;
-  margin: 4px 0;
+  font-size: var(--text-lg);
+  color: var(--color-error);
+  margin: var(--space-1) 0;
+  font-weight: 600;
 }
 
 .package-bonus {
-  font-size: 12px;
-  color: #67c23a;
+  font-size: var(--text-xs);
+  color: var(--color-success);
+  font-weight: 500;
 }
 </style>

@@ -2,8 +2,8 @@
   <div class="home-page">
     <!-- Welcome -->
     <div class="welcome-section">
-      <h1>欢迎回来，{{ username }}</h1>
-      <p class="welcome-desc">这里是你的广告创意工作台，快速开始创作吧。</p>
+      <h1>{{ username }} 的工作台</h1>
+      <p class="welcome-desc">广告创意制作 · 模板管理 · 素材预览</p>
     </div>
 
     <!-- Quick Actions -->
@@ -31,7 +31,7 @@
         <el-card shadow="hover">
           <el-statistic title="本月生成数" :value="stats.monthlyGenerated">
             <template #prefix>
-              <el-icon color="#409EFF"><TrendCharts /></el-icon>
+              <el-icon color="var(--color-primary)"><TrendCharts /></el-icon>
             </template>
           </el-statistic>
         </el-card>
@@ -40,7 +40,7 @@
         <el-card shadow="hover">
           <el-statistic title="剩余点数" :value="stats.balance">
             <template #prefix>
-              <el-icon color="#67C23A"><Coin /></el-icon>
+              <el-icon color="var(--color-cta)"><Coin /></el-icon>
             </template>
           </el-statistic>
         </el-card>
@@ -49,7 +49,7 @@
         <el-card shadow="hover">
           <el-statistic title="可用模板数" :value="stats.templateCount">
             <template #prefix>
-              <el-icon color="#E6A23C"><Files /></el-icon>
+              <el-icon color="var(--color-warning)"><Files /></el-icon>
             </template>
           </el-statistic>
         </el-card>
@@ -66,31 +66,41 @@
           </el-button>
         </div>
       </template>
-      <el-table :data="recentProjects" stripe style="width: 100%" v-if="recentProjects.length">
-        <el-table-column prop="name" label="项目名称" min-width="180" />
-        <el-table-column prop="type" label="类型" width="120">
-          <template #default="{ row }">
-            <el-tag :type="row.type === 'image' ? 'success' : 'warning'" size="small">
-              {{ row.type === 'image' ? '图片广告' : '视频广告' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column prop="status" label="状态" width="120">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small">
-              {{ row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="120">
-          <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="$router.push('/ad/preview')">
+
+      <div v-if="recentProjects.length" class="project-grid">
+        <el-card
+          v-for="project in recentProjects"
+          :key="project.name"
+          class="project-card"
+          shadow="hover"
+        >
+          <div class="project-thumb" @click="$router.push('/ad/preview')">
+            <div class="thumb-placeholder">
+              <el-icon :size="40" color="var(--color-text-muted)">
+                <PictureFilled v-if="project.type === 'image'" />
+                <VideoCameraFilled v-else />
+              </el-icon>
+            </div>
+          </div>
+          <div class="project-info">
+            <h4 class="project-name">{{ project.name }}</h4>
+            <div class="project-meta">
+              <el-tag :type="project.type === 'image' ? 'success' : 'warning'" size="small">
+                {{ project.type === 'image' ? '图片广告' : '视频广告' }}
+              </el-tag>
+              <el-tag :type="statusTagType(project.status)" size="small" effect="plain">
+                {{ project.status }}
+              </el-tag>
+            </div>
+            <span class="project-date">{{ formatTime(project.createdAt) }}</span>
+          </div>
+          <div class="project-actions">
+            <el-button type="primary" size="small" @click="$router.push('/ad/preview')">
               查看
             </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          </div>
+        </el-card>
+      </div>
       <el-empty v-else description="暂无项目，快去创建吧" />
     </el-card>
   </div>
@@ -100,7 +110,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  Edit, Files, FolderOpened, TrendCharts, Coin
+  Edit, Files, FolderOpened, TrendCharts, Coin,
+  PictureFilled, VideoCameraFilled
 } from '@element-plus/icons-vue'
 import client from '@/api/client'
 
@@ -108,9 +119,9 @@ const router = useRouter()
 const username = ref(localStorage.getItem('username') || '用户')
 
 const quickActions = [
-  { key: 'create', title: '创建广告', desc: '开始新的广告创意制作', path: '/ad/create', icon: Edit, color: '#409EFF' },
-  { key: 'templates', title: '管理模板', desc: '浏览和管理广告模板', path: '/templates', icon: Files, color: '#67C23A' },
-  { key: 'resources', title: '查看资源', desc: '浏览本地素材资源', path: '/resources', icon: FolderOpened, color: '#E6A23C' }
+  { key: 'create', title: '新建广告', desc: '文案 → 图片 → 视频，三步完成', path: '/ad/create', icon: Edit, color: 'var(--color-primary)' },
+  { key: 'templates', title: '模板浏览', desc: '管理端同步模板，一键套用', path: '/templates', icon: Files, color: 'var(--color-secondary)' },
+  { key: 'resources', title: '本地素材', desc: '已生成图片/视频统一管理', path: '/resources', icon: FolderOpened, color: 'var(--color-cta)' }
 ]
 
 const stats = reactive({
@@ -128,6 +139,13 @@ function statusTagType(status: string) {
     '失败': 'danger'
   }
   return map[status] || 'info'
+}
+
+function formatTime(iso: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 async function fetchData() {
@@ -163,64 +181,175 @@ onMounted(() => {
 
 <style scoped>
 .home-page {
-  max-width: 1200px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
 .welcome-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .welcome-section h1 {
+  font-family: var(--font-heading);
   margin: 0;
-  font-size: 24px;
-  color: #303133;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .welcome-desc {
-  color: #909399;
-  margin: 8px 0 0 0;
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0 0;
+  font-size: var(--text-base);
 }
 
 .quick-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .action-card {
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: border-color var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
+  border-top: 3px solid transparent;
 }
 
 .action-card:hover {
+  border-top-color: var(--color-primary);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .action-content {
-  text-align: center;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.action-content .el-icon {
+  margin-bottom: var(--space-1);
 }
 
 .action-content h3 {
-  margin: 12px 0 4px;
-  color: #303133;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .action-content p {
   margin: 0;
-  color: #909399;
-  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .stats-row {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
+}
+
+.stats-row :deep(.el-card) {
+  border-top: 3px solid transparent;
+}
+
+.stats-row :deep(.el-card:nth-child(1)) { border-top-color: var(--color-primary); }
+.stats-row :deep(.el-card:nth-child(2)) { border-top-color: var(--color-cta); }
+.stats-row :deep(.el-card:nth-child(3)) { border-top-color: var(--color-warning); }
+
+.stats-row :deep(.el-statistic__head) {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stats-row :deep(.el-statistic__number) {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.recent-section {
+  border-top: 1px solid var(--color-border);
 }
 
 .recent-section .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.project-card {
+  transition: border-color var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
+  border-top: 3px solid transparent;
+}
+
+.project-card:hover {
+  border-top-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.project-thumb {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 140px;
+  margin-bottom: var(--space-3);
+}
+
+.thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-info {
+  margin-bottom: var(--space-3);
+}
+
+.project-name {
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.project-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.project-actions {
+  display: flex;
+  gap: var(--space-2);
 }
 </style>

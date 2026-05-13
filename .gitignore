@@ -40,3 +40,6 @@ temp/
 *.swp
 *.swo
 *~
+release/
+.agents/
+skills-lock.json

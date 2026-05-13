@@ -18,6 +18,33 @@
     "vue": "^3.4.0",
     "vue-router": "^4.3.0"
   },
+  "build": {
+    "appId": "com.adcreater.desktop",
+    "productName": "AdCreater",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "AdCreater"
+    }
+  },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
     "concurrently": "^8.0.0",

@@ -161,19 +161,24 @@ function handleNext() {
 
 <style scoped>
 .ad-copy-panel h3 {
-  margin: 0 0 20px 0;
-  color: #303133;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
 }
 
 .tags-section {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1);
   align-items: center;
 }
 
 .tag-item {
   margin: 0;
+  border-radius: var(--radius-sm);
 }
 
 .tag-input {
@@ -181,28 +186,32 @@ function handleNext() {
 }
 
 .result-section {
-  margin-top: 24px;
+  margin-top: var(--space-8);
 }
 
 .result-section h4 {
-  margin: 0 0 12px 0;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .copy-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .copy-original p,
 .copy-translated p {
-  margin: 6px 0 0 0;
-  line-height: 1.6;
-  color: #303133;
+  margin: var(--space-1) 0 0 0;
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
 }
 
 .step-actions {
-  margin-top: 20px;
+  margin-top: var(--space-5);
   text-align: right;
 }
 </style>

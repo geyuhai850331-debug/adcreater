@@ -185,12 +185,12 @@ const avatarVideo = ref<any>(null)
 const savingAvatar = ref(false)
 
 const avatars = [
-  { id: 'a1', name: '晓月', color: '#409EFF', lang: '中文女声' },
-  { id: 'a2', name: '浩然', color: '#67C23A', lang: '中文男声' },
-  { id: 'a3', name: 'Emma', color: '#E6A23C', lang: 'English Female' },
-  { id: 'a4', name: 'David', color: '#F56C6C', lang: 'English Male' },
-  { id: 'a5', name: '凛子', color: '#909399', lang: '日本語女性' },
-  { id: 'a6', name: 'Carlos', color: '#303133', lang: 'Español Male' }
+  { id: 'a1', name: '晓月', color: 'var(--color-primary)', lang: '中文女声' },
+  { id: 'a2', name: '浩然', color: 'var(--color-success)', lang: '中文男声' },
+  { id: 'a3', name: 'Emma', color: 'var(--color-warning)', lang: 'English Female' },
+  { id: 'a4', name: 'David', color: 'var(--color-error)', lang: 'English Male' },
+  { id: 'a5', name: '凛子', color: 'var(--color-text-muted)', lang: '日本語女性' },
+  { id: 'a6', name: 'Carlos', color: 'var(--color-text)', lang: 'Español Male' }
 ]
 
 const voices = [
@@ -363,56 +363,65 @@ function downloadSize(item: any) {
 
 <style scoped>
 .delivery-page {
-  max-width: 1100px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
 .page-title {
-  margin: 0 0 20px 0;
-  color: #303133;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .tab-content {
-  padding: 8px 0;
+  padding: var(--space-2) 0;
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .section h4 {
-  margin: 0 0 12px 0;
-  color: #606266;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .avatar-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .avatar-item {
   text-align: center;
   cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  padding: 12px 8px;
-  transition: all 0.2s;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-2);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .avatar-item:hover {
-  border-color: #409EFF;
+  border-color: var(--color-primary);
 }
 
 .avatar-item.active {
-  border-color: #409EFF;
-  background: #ecf5ff;
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .avatar-img {
   width: 60px;
   height: 60px;
-  margin: 0 auto 8px;
+  margin: 0 auto var(--space-2);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -422,82 +431,87 @@ function downloadSize(item: any) {
 .avatar-name {
   display: block;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--text-base);
+  color: var(--color-text);
 }
 
 .avatar-lang {
   display: block;
-  font-size: 12px;
-  color: #909399;
-  margin-top: 2px;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
 }
 
 .progress-section {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .progress-text {
-  color: #909399;
-  font-size: 13px;
-  margin-top: 8px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
 }
 
 .result-section {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .result-section h4 {
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--space-3) 0;
 }
 
 .result-video {
   width: 400px;
   max-height: 300px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .save-btn {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .platform-checkbox {
-  margin-right: 24px;
-  margin-bottom: 8px;
+  margin-right: var(--space-6);
+  margin-bottom: var(--space-2);
 }
 
 .platform-label {
-  font-size: 15px;
+  font-size: var(--text-lg);
   font-weight: 500;
 }
 
 .upload-preview {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .size-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .size-card {
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   text-align: center;
+  background: var(--color-bg-card);
 }
 
 .size-card-header {
+  font-family: var(--font-heading);
   font-weight: 600;
-  color: #409EFF;
-  margin-bottom: 8px;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
 }
 
 .size-card-body {
-  font-size: 13px;
-  color: #606266;
-  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
 }
 </style>

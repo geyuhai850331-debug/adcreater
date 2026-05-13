@@ -2,12 +2,24 @@
   <div class="ad-create-page">
     <h2 class="page-title">广告制作</h2>
 
-    <el-steps :active="activeStep" align-center finish-status="success" class="steps-bar">
-      <el-step title="Step 1" description="文案翻译" />
-      <el-step title="Step 2" description="图片生成" />
-      <el-step title="Step 3" description="视频生成" />
-      <el-step title="Step 4" description="预览" />
-    </el-steps>
+    <nav class="steps-bar">
+      <button
+        v-for="(step, idx) in steps"
+        :key="idx"
+        class="step-item"
+        :class="{
+          active: activeStep === idx,
+          done: activeStep > idx
+        }"
+        @click="activeStep = idx"
+      >
+        <span class="step-num">{{ idx + 1 }}</span>
+        <span class="step-info">
+          <span class="step-title">{{ step.title }}</span>
+          <span class="step-desc">{{ step.desc }}</span>
+        </span>
+      </button>
+    </nav>
 
     <div class="step-content">
       <!-- Step 1: 文案翻译 -->
@@ -27,7 +39,6 @@
       <!-- Step 3: 视频生成 -->
       <div v-if="activeStep === 2" class="step-panel">
         <AdVideoPanel
-          :ad-image="adImage"
           @next="(data) => { adVideo = data; activeStep = 3 }"
           @prev="activeStep = 1"
         />
@@ -59,6 +70,13 @@ const adCopy = ref<any>(null)
 const adImage = ref<any>(null)
 const adVideo = ref<any>(null)
 
+const steps = [
+  { title: '文案', desc: '翻译 & 本地化' },
+  { title: '图片', desc: '多尺寸生成' },
+  { title: '视频', desc: '动态素材' },
+  { title: '完成', desc: '预览导出' }
+]
+
 function handleReset() {
   activeStep.value = 0
   adCopy.value = null
@@ -69,23 +87,115 @@ function handleReset() {
 
 <style scoped>
 .ad-create-page {
-  max-width: 1100px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
 .page-title {
-  margin: 0 0 24px 0;
-  color: #303133;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .steps-bar {
-  margin-bottom: 32px;
+  display: flex;
+  gap: 0;
+  margin-bottom: var(--space-8);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  font-family: inherit;
+  text-align: left;
+  position: relative;
+}
+
+.step-item:last-child {
+  border-right: none;
+}
+
+.step-item:hover {
+  background: var(--color-bg);
+}
+
+.step-item.active {
+  background: var(--color-primary-light);
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.step-item.active .step-num {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.step-item.done .step-num {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.step-item.active .step-title {
+  color: var(--color-primary);
+}
+
+.step-item.done .step-title {
+  color: var(--color-text);
+}
+
+.step-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.3;
 }
 
 .step-panel {
-  background: #fff;
-  border-radius: 8px;
-  padding: 24px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
   min-height: 420px;
 }
 </style>

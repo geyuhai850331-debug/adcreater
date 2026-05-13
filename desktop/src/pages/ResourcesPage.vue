@@ -40,7 +40,7 @@
             loading="lazy"
           />
           <div v-else class="thumb-video">
-            <el-icon :size="48" color="#909399"><VideoCameraFilled /></el-icon>
+            <el-icon :size="48" color="var(--color-text-muted)"><VideoCameraFilled /></el-icon>
             <span class="video-ext">{{ fileExt(file.name) }}</span>
           </div>
         </div>
@@ -195,49 +195,55 @@ onMounted(() => {
 
 <style scoped>
 .resources-page {
-  max-width: 1200px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
 .page-title {
-  margin: 0 0 16px 0;
-  color: #303133;
+  font-family: var(--font-heading);
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .filter-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
 .file-count {
-  color: #909399;
-  font-size: 13px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
 
 .file-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .file-card {
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: box-shadow 0.2s;
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+  background: var(--color-bg-card);
 }
 
 .file-card:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .file-thumb {
   cursor: pointer;
   height: 150px;
   overflow: hidden;
-  background: #f5f7fa;
+  background: var(--color-bg);
 }
 
 .thumb-img {
@@ -252,24 +258,24 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .video-ext {
-  font-size: 12px;
-  color: #909399;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .file-info {
-  padding: 10px 12px;
+  padding: var(--space-2) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .file-name {
-  font-size: 13px;
-  color: #303133;
+  font-size: var(--text-sm);
+  color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -277,12 +283,12 @@ onMounted(() => {
 
 .file-date,
 .file-size {
-  font-size: 12px;
-  color: #909399;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .file-actions {
-  padding: 0 12px 10px;
+  padding: 0 var(--space-3) var(--space-2);
   display: flex;
   justify-content: space-between;
 }
@@ -291,15 +297,10 @@ onMounted(() => {
   text-align: center;
 }
 
-.preview-image-full {
-  max-width: 100%;
-  max-height: 60vh;
-  border-radius: 8px;
-}
-
+.preview-image-full,
 .preview-video-full {
   max-width: 100%;
   max-height: 60vh;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 </style>

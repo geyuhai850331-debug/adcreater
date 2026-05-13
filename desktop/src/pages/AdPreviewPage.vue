@@ -125,7 +125,7 @@ async function downloadAll() {
 
 <style scoped>
 .ad-preview-page {
-  max-width: 1100px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
@@ -133,52 +133,58 @@ async function downloadAll() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .page-header h2 {
+  font-family: var(--font-heading);
   margin: 0;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .empty-state {
-  padding: 60px 0;
+  padding: 80px 0;
 }
 
 .preview-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
+  border-top: 1px solid var(--color-border);
 }
 
 .copy-display {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .copy-item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .lang-tag {
-  margin-top: 2px;
   flex-shrink: 0;
 }
 
 .copy-item p {
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
 }
 
 .image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: var(--space-5);
 }
 
 .image-item {
@@ -188,15 +194,16 @@ async function downloadAll() {
 .preview-image {
   width: 100%;
   height: 180px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid #ebeef5;
+  border: 1px solid var(--color-border);
 }
 
 .image-label {
-  margin: 8px 0 4px;
-  font-size: 13px;
-  color: #606266;
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
 .video-display {
@@ -206,12 +213,13 @@ async function downloadAll() {
 .preview-video {
   max-width: 100%;
   max-height: 400px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }
 
 .video-label {
-  margin: 8px 0 4px;
-  font-size: 13px;
-  color: #606266;
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 </style>

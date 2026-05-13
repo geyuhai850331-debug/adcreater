@@ -9,9 +9,9 @@
       <el-menu
         :default-active="activeMenu"
         router
-        background-color="#304156"
-        text-color="#bfcbd9"
-        active-text-color="#409EFF"
+        background-color="transparent"
+        text-color="var(--color-text-sidebar)"
+        active-text-color="#fff"
       >
         <el-menu-item index="/home">
           <el-icon><HomeFilled /></el-icon>
@@ -109,47 +109,85 @@ onMounted(() => {
 }
 
 .sidebar {
-  background-color: #304156;
+  background: var(--color-bg-sidebar);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 220px !important;
+  transition: width var(--transition-normal);
 }
 
 .logo {
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .logo h2 {
+  font-family: var(--font-heading);
   color: #fff;
   margin: 0;
-  font-size: 20px;
+  font-size: 1.125rem;
+  font-weight: 700;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .el-menu {
   border-right: none;
   flex: 1;
   overflow-y: auto;
+  background: transparent;
+  padding: var(--space-2) 0;
+}
+
+.el-menu :deep(.el-menu-item) {
+  margin: 1px var(--space-2);
+  border-radius: var(--radius-md);
+  height: 40px;
+  line-height: 40px;
+  font-size: var(--text-base);
+  color: var(--color-text-sidebar);
+  transition: all var(--transition-fast);
+}
+
+.el-menu :deep(.el-menu-item:hover) {
+  background: var(--color-bg-sidebar-hover);
+  color: var(--color-text-sidebar-active);
+}
+
+.el-menu :deep(.el-menu-item.is-active) {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 500;
+}
+
+.el-menu :deep(.el-menu-item .el-icon) {
+  font-size: 18px;
 }
 
 .sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #bfcbd9;
+  gap: var(--space-2);
+  color: var(--color-text-sidebar);
+}
+
+.user-info :deep(.el-avatar) {
+  background: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .username {
-  font-size: 14px;
+  font-size: var(--text-sm);
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -159,27 +197,38 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
 }
 
 .balance-label {
-  color: #999;
-  font-size: 12px;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
 }
 
 .balance-value {
-  color: #67c23a;
-  font-weight: bold;
-  font-size: 16px;
+  color: var(--color-success);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  font-family: var(--font-mono);
 }
 
 .logout-btn {
   width: 100%;
-  color: #f56c6c !important;
+  justify-content: flex-start;
+  color: var(--color-text-sidebar) !important;
+  font-size: var(--text-sm);
+  transition: color var(--transition-fast);
+}
+
+.logout-btn:hover {
+  color: var(--color-error) !important;
 }
 
 .el-main {
-  background-color: #f0f2f5;
-  padding: 20px;
+  background: var(--color-bg);
+  padding: var(--space-6);
   overflow-y: auto;
 }
 </style>
