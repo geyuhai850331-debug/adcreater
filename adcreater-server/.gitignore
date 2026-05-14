@@ -8,6 +8,7 @@ target/
 *.swp
 *.swo
 *~
+*.flattened-pom.xml
 
 # OS
 .DS_Store

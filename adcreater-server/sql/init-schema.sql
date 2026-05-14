@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `ad_task` (
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_user_id` (`user_id`),
     INDEX `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='广告制作任务';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='广告制作任务';
 
 -- ── 投放任务 ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_delivery_task` (
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `ad_delivery_task` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='投放任务';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='投放任务';
 
 -- ── 广告模板 ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_template` (
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `ad_template` (
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0=未删除, 1=已删除',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='广告模板';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci  COMMENT='广告模板';
 
 -- ── 模板版本 ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_template_version` (
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `ad_template_version` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_template_id` (`template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='模板版本';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='模板版本';
 
 -- ── AI 模型配置 ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_model_config` (
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `ad_model_config` (
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0=未删除, 1=已删除',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='AI 模型配置';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='AI 模型配置';
 
 -- ── Prompt 模板 ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_prompt_template` (
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `ad_prompt_template` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_category` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='Prompt 模板';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='Prompt 模板';
 
 -- ── 用户点数账户 ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_user_points_account` (
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `ad_user_points_account` (
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),
     UNIQUE INDEX `uk_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='用户点数账户';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='用户点数账户';
 
 -- ── 点数流水 ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_points_transaction` (
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `ad_points_transaction` (
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_user_id_type` (`user_id`, `type`),
     INDEX `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='点数流水 (不可变, 只 INSERT)';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='点数流水 (不可变, 只 INSERT)';
 
 -- ── 用量记录 ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `ad_usage_record` (
@@ -188,4 +188,4 @@ CREATE TABLE IF NOT EXISTS `ad_usage_record` (
     INDEX `idx_tenant_id` (`tenant_id`),
     INDEX `idx_user_id_create_time` (`user_id`, `create_time`),
     INDEX `idx_model_used` (`model_used`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='用量记录';
+) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='用量记录';
