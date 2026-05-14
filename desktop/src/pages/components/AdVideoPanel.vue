@@ -46,7 +46,7 @@
                 </el-button>
               </template>
               <template v-else>
-                <el-icon :size="24" color="#94A3B8"><Upload /></el-icon>
+                <el-icon :size="24" color="var(--color-text-muted)"><Upload /></el-icon>
                 <p class="upload-hint">点击或拖拽上传商品图</p>
               </template>
             </div>
@@ -122,10 +122,10 @@
                 @click="selectedTemplate = selectedTemplate === tpl.id ? null : tpl.id"
               >
                 <div class="template-thumb">
-                  <el-icon :size="32" color="#94A3B8"><VideoCameraFilled /></el-icon>
+                  <el-icon :size="32" color="var(--color-text-muted)"><VideoCameraFilled /></el-icon>
                 </div>
                 <span class="template-name">{{ tpl.name }}</span>
-                <el-icon v-if="selectedTemplate === tpl.id" class="template-check" :size="14" color="#6366F1">
+                <el-icon v-if="selectedTemplate === tpl.id" class="template-check" :size="14" color="var(--color-primary)">
                   <CircleCheckFilled />
                 </el-icon>
               </button>
@@ -152,7 +152,7 @@
         <!-- Error State -->
         <el-card v-if="sbStatus === 'error'" class="error-card">
           <div class="error-content">
-            <el-icon :size="20" color="#EF4444"><WarningFilled /></el-icon>
+            <el-icon :size="20" color="var(--color-error)"><WarningFilled /></el-icon>
             <div class="error-info">
               <p class="error-title">生成失败</p>
               <p class="error-msg">{{ sbError }}</p>
@@ -234,7 +234,7 @@
                     :key="j"
                     class="kf-cell"
                   >
-                    <el-icon :size="20" color="#CBD5E1"><PictureFilled /></el-icon>
+                    <el-icon :size="20" color="var(--color-text-muted)"><PictureFilled /></el-icon>
                     <span class="kf-label">帧 {{ j + 1 }}</span>
                   </div>
                 </div>
@@ -246,7 +246,7 @@
         <!-- Idle Empty State -->
         <el-card v-if="sbStatus === 'idle'" class="empty-card">
           <div class="empty-content">
-            <el-icon :size="40" color="#CBD5E1"><Film /></el-icon>
+            <el-icon :size="40" color="var(--color-text-muted)"><Film /></el-icon>
             <p class="empty-title">输入商品描述后点击「生成分镜方案」</p>
             <p class="empty-desc">AI 将自动生成视频分镜框架</p>
           </div>
@@ -302,7 +302,7 @@
             <template #label>
               <span class="tab-label">
                 <el-icon v-if="gridStatus[i] === 'generating'" class="is-loading" :size="14"><Loading /></el-icon>
-                <el-icon v-else-if="gridStatus[i] === 'done'" :size="14" color="#22C55E"><CircleCheckFilled /></el-icon>
+                <el-icon v-else-if="gridStatus[i] === 'done'" :size="14" color="var(--color-success)"><CircleCheckFilled /></el-icon>
                 分镜 {{ i + 1 }}
               </span>
             </template>
@@ -367,7 +367,7 @@
                         <el-tag :type="frameImages[`${i}-${j}`] ? 'success' : 'info'" size="small">
                           帧 {{ j + 1 }}
                         </el-tag>
-                        <el-icon v-if="frameImages[`${i}-${j}`]" :size="14" color="#22C55E"><CircleCheckFilled /></el-icon>
+                        <el-icon v-if="frameImages[`${i}-${j}`]" :size="14" color="var(--color-success)"><CircleCheckFilled /></el-icon>
                       </div>
                       <p class="kf-prompt-text">{{ kf.prompt || '(空 prompt)' }}</p>
                     </button>
@@ -389,7 +389,7 @@
                 <div class="frame-grid-preview">
                   <template v-if="gridStatus[i] === 'generating'">
                     <div class="grid-loading">
-                      <el-icon :size="40" class="is-loading" color="#6366F1"><Loading /></el-icon>
+                      <el-icon :size="40" class="is-loading" color="var(--color-primary)"><Loading /></el-icon>
                       <p>服务端正在生成 4 帧并合成宫格...</p>
                     </div>
                   </template>
@@ -408,7 +408,7 @@
                   </template>
                   <template v-else>
                     <div class="grid-empty">
-                      <el-icon :size="40" color="#CBD5E1"><Grid /></el-icon>
+                      <el-icon :size="40" color="var(--color-text-muted)"><Grid /></el-icon>
                       <p>点击下方按钮，服务端生成 4 帧并合成宫格</p>
                     </div>
                   </template>
@@ -486,7 +486,7 @@
         <el-card v-if="generatedVideo" class="result-card">
           <template #header>
             <div class="result-header">
-              <el-icon :size="16" color="#22C55E"><CircleCheckFilled /></el-icon>
+              <el-icon :size="16" color="var(--color-success)"><CircleCheckFilled /></el-icon>
               <span>视频生成完成</span>
             </div>
           </template>
@@ -1124,10 +1124,10 @@ function handleNext() {
 .hint-text { font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; margin: var(--space-2) 0 0; }
 
 /* ── Error card ─────────────────────────────────────────────────────── */
-.error-card { border-color: #EF4444; margin-top: var(--space-4); }
+.error-card { border-color: var(--color-error); margin-top: var(--space-4); }
 .error-content { display: flex; align-items: flex-start; gap: var(--space-3); }
 .error-info { flex: 1; }
-.error-title { margin: 0; font-weight: 600; color: #EF4444; font-size: var(--text-sm); }
+.error-title { margin: 0; font-weight: 600; color: var(--color-error); font-size: var(--text-sm); }
 .error-msg { margin: var(--space-1) 0 0; font-size: var(--text-xs); color: var(--color-text-secondary); }
 
 /* ── Skeleton ───────────────────────────────────────────────────────── */
@@ -1178,7 +1178,7 @@ function handleNext() {
 
 /* ── Frame card ──────────────────────────────────────────────────────── */
 .frame-card { border: 1px solid var(--color-border); }
-.frame-card.border-success { border-color: #22C55E; }
+.frame-card.border-success { border-color: var(--color-success); }
 .frame-card :deep(.el-card__header) { padding: var(--space-2) var(--space-3); background: var(--color-bg); }
 .frame-card :deep(.el-card__body) { padding: var(--space-3); }
 .frame-card-header { display: flex; align-items: center; justify-content: space-between; }

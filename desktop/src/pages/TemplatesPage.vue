@@ -32,7 +32,7 @@
             class="thumb-img"
           />
           <div v-else class="thumb-placeholder">
-            <el-icon :size="48" color="#c0c4cc">
+            <el-icon :size="48" color="var(--color-text-muted)">
               <PictureFilled v-if="tpl.type === 'image'" />
               <VideoCameraFilled v-else />
             </el-icon>
@@ -72,7 +72,7 @@
           class="preview-full-image"
         />
         <div v-else class="preview-placeholder">
-          <el-icon :size="80" color="#c0c4cc"><PictureFilled /></el-icon>
+          <el-icon :size="80" color="var(--color-text-muted)"><PictureFilled /></el-icon>
           <p>暂无预览图</p>
         </div>
         <div class="preview-meta">

@@ -1,53 +1,35 @@
 /*
  * AdCreater Design Tokens
- * Generated from UI/UX Pro Max — Flat Design system
- * Style: Minimalist, typography-focused, no unnecessary shadows/gradients
+ * Dark + Light theme support via [data-theme] attribute
+ * Style: Minimal, high-contrast, typography-focused
+ * Reference: Wery AI wireframe design system
  */
 
 /* ── Fira typeface (dashboard/technical aesthetic) ──────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@400;500;600;700&display=swap');
 
+/* ═══════════════════════════════════════════════════════════════════
+   SHARED TOKENS — theme-independent
+   ═══════════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Color tokens ─────────────────────────────────────────────── */
-  --color-primary:        #6366F1;
-  --color-primary-hover:  #5457E0;
-  --color-primary-light:  #E0E7FF;
-  --color-secondary:      #818CF8;
-  --color-cta:            #22C55E;
-  --color-cta-hover:      #16A34A;
-  --color-bg:             #F8FAFC;
-  --color-bg-card:        #FFFFFF;
-  --color-bg-sidebar:     #1E1B4B;
-  --color-bg-sidebar-hover: #312E81;
-  --color-text:           #1E1B4B;
-  --color-text-secondary: #64748B;
-  --color-text-muted:     #94A3B8;
-  --color-text-sidebar:   #C7D2FE;
-  --color-text-sidebar-active: #FFFFFF;
-  --color-border:         #E2E8F0;
-  --color-border-light:   #F1F5F9;
-  --color-error:          #EF4444;
-  --color-warning:        #F59E0B;
-  --color-success:        #22C55E;
-
-  /* ── Typography ───────────────────────────────────────────────── */
+  /* Typography */
   --font-heading: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body:    'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono:    'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
 
-  --text-xs:   0.75rem;    /* 12px */
-  --text-sm:   0.8125rem;  /* 13px */
-  --text-base: 0.875rem;   /* 14px */
-  --text-lg:   1rem;       /* 16px */
-  --text-xl:   1.25rem;    /* 20px */
-  --text-2xl:  1.5rem;     /* 24px */
-  --text-3xl:  1.875rem;   /* 30px */
+  --text-xs:   0.75rem;
+  --text-sm:   0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg:   1rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
 
   --leading-tight:  1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
 
-  /* ── Spacing (4px scale) ──────────────────────────────────────── */
+  /* Spacing (4px scale) */
   --space-1:  4px;
   --space-2:  8px;
   --space-3:  12px;
@@ -58,56 +40,201 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  /* ── Borders & Radius ─────────────────────────────────────────── */
+  /* Borders & Radius */
   --radius-sm:  4px;
   --radius-md:  6px;
   --radius-lg:  8px;
   --radius-xl:  12px;
 
-  /* ── Motion ───────────────────────────────────────────────────── */
+  /* Motion */
   --transition-fast:   150ms ease;
   --transition-normal: 200ms ease;
   --transition-slow:   300ms ease;
 
-  /* ── Shadows (minimal — flat design principle) ────────────────── */
-  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-lg:  0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-
-  /* ── Z-index scale ────────────────────────────────────────────── */
+  /* Z-index scale */
   --z-sidebar: 40;
   --z-overlay: 50;
   --z-modal:   60;
   --z-toast:   70;
 
-  /* ── Layout ───────────────────────────────────────────────────── */
+  /* Layout */
   --content-max-width: 1120px;
+}
 
-  /* ═══ Element Plus theme overrides ═══
-   * Map Element Plus internal vars to our design tokens so
-   * el-button/el-tag/el-progress/el-slider render in our palette. */
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME (default)
+   ═══════════════════════════════════════════════════════════════════ */
+:root,
+[data-theme="dark"] {
+  /* Brand */
+  --color-primary:        #6c5ce7;
+  --color-primary-hover:  #7d6ff0;
+  --color-primary-light:  rgba(108, 92, 231, 0.12);
+  --color-secondary:      #a78bfa;
+  --color-cta:            #00d68f;
+  --color-cta-hover:      #00b87a;
+
+  /* Background hierarchy */
+  --color-bg:             #000000;
+  --color-bg-card:        #1a1a1a;
+  --color-bg-elevated:    #242424;
+  --color-bg-hover:       #2a2a2a;
+  --color-bg-sidebar:     #0a0a0a;
+  --color-bg-sidebar-hover: #242424;
+
+  /* Text hierarchy */
+  --color-text:           #ffffff;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted:     #6b7280;
+  --color-text-disabled:  #5c5c5c;
+  --color-text-sidebar:   #9ca3af;
+  --color-text-sidebar-active: #ffffff;
+
+  /* Borders */
+  --color-border:         #27272a;
+  --color-border-light:   #1f1f1f;
+  --color-border-hover:   #3a3a3d;
+
+  /* Semantic */
+  --color-error:          #ff3d71;
+  --color-warning:        #ffaa00;
+  --color-success:        #00d68f;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md:  0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-lg:  0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* ═══ Element Plus dark overrides ═══ */
   --el-color-primary:              var(--color-primary);
-  --el-color-primary-light-3:      #A5B4FC;
-  --el-color-primary-light-5:      #C7D2FE;
-  --el-color-primary-light-7:      #DDD6FE;
-  --el-color-primary-light-8:      #EDE9FE;
-  --el-color-primary-light-9:      var(--color-primary-light);
+  --el-color-primary-light-3:      #8b7cf0;
+  --el-color-primary-light-5:      #a99df5;
+  --el-color-primary-light-7:      #c7bff9;
+  --el-color-primary-light-8:      #ddd7fb;
+  --el-color-primary-light-9:      rgba(108, 92, 231, 0.15);
   --el-color-primary-dark-2:       var(--color-primary-hover);
 
   --el-color-success:              var(--color-success);
-  --el-color-success-light-3:      #86EFAC;
-  --el-color-success-light-5:      #BBF7D0;
-  --el-color-success-light-9:      #F0FDF4;
+  --el-color-success-light-3:      #33e0a5;
+  --el-color-success-light-5:      #66e8bf;
+  --el-color-success-light-9:      rgba(0, 214, 143, 0.10);
 
   --el-color-warning:              var(--color-warning);
-  --el-color-warning-light-3:      #FCD34D;
-  --el-color-warning-light-5:      #FDE68A;
-  --el-color-warning-light-9:      #FFFBEB;
+  --el-color-warning-light-3:      #ffbb33;
+  --el-color-warning-light-5:      #ffcc66;
+  --el-color-warning-light-9:      rgba(255, 170, 0, 0.10);
 
   --el-color-danger:               var(--color-error);
-  --el-color-danger-light-3:       #FCA5A5;
-  --el-color-danger-light-5:       #FECACA;
-  --el-color-danger-light-9:       #FEF2F2;
+  --el-color-danger-light-3:       #ff6b8a;
+  --el-color-danger-light-5:       #ff8da3;
+  --el-color-danger-light-9:       rgba(255, 61, 113, 0.10);
+
+  --el-color-info:                 var(--color-text-secondary);
+
+  --el-border-color:               var(--color-border);
+  --el-border-color-light:         var(--color-border-light);
+  --el-border-radius-base:         var(--radius-md);
+  --el-border-radius-small:        var(--radius-sm);
+
+  --el-bg-color:                   var(--color-bg-card);
+  --el-bg-color-page:              var(--color-bg);
+  --el-bg-color-overlay:           var(--color-bg-elevated);
+
+  --el-text-color-primary:         var(--color-text);
+  --el-text-color-regular:         var(--color-text-secondary);
+  --el-text-color-secondary:       var(--color-text-muted);
+  --el-text-color-placeholder:     var(--color-text-muted);
+
+  --el-font-family:                var(--font-body);
+  --el-font-size-base:             var(--text-base);
+  --el-font-size-small:            var(--text-xs);
+  --el-font-size-large:            var(--text-lg);
+
+  --el-card-border-color:          var(--color-border);
+  --el-card-border-radius:         var(--radius-xl);
+
+  --el-menu-bg-color:              var(--color-bg-sidebar);
+  --el-menu-hover-bg-color:        var(--color-bg-sidebar-hover);
+  --el-menu-text-color:            var(--color-text-sidebar);
+  --el-menu-active-color:          var(--color-text-sidebar-active);
+
+  --el-fill-color-blank:           var(--color-bg-card);
+  --el-fill-color-light:           var(--color-bg-elevated);
+  --el-fill-color-lighter:         #202020;
+
+  /* Table */
+  --el-table-row-hover-bg-color:   var(--color-bg-hover);
+
+  /* Transition for smooth theme switch */
+  --theme-transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME
+   ═══════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* Brand (accent stays consistent) */
+  --color-primary:        #6c5ce7;
+  --color-primary-hover:  #5a4bd1;
+  --color-primary-light:  rgba(108, 92, 231, 0.08);
+  --color-secondary:      #8b7cf0;
+  --color-cta:            #00b87a;
+  --color-cta-hover:      #009a66;
+
+  /* Background hierarchy (light) */
+  --color-bg:             #f8f9fc;
+  --color-bg-card:        #ffffff;
+  --color-bg-elevated:    #f0f2f5;
+  --color-bg-hover:       #e9ecef;
+  --color-bg-sidebar:     #1e1e2f;
+  --color-bg-sidebar-hover: #2a2a3d;
+
+  /* Text hierarchy (light) */
+  --color-text:           #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-text-muted:     #9ca3af;
+  --color-text-disabled:  #c0c4cc;
+  --color-text-sidebar:   #9ca3af;
+  --color-text-sidebar-active: #ffffff;
+
+  /* Borders (light) */
+  --color-border:         #e5e7eb;
+  --color-border-light:   #f3f4f6;
+  --color-border-hover:   #d1d5db;
+
+  /* Semantic (light-adjusted) */
+  --color-error:          #e83b5f;
+  --color-warning:        #e69900;
+  --color-success:        #00b87a;
+
+  /* Shadows (light) */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md:  0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg:  0 4px 12px rgba(0, 0, 0, 0.10);
+
+  /* ═══ Element Plus light overrides ═══ */
+  --el-color-primary:              var(--color-primary);
+  --el-color-primary-light-3:      #a99df5;
+  --el-color-primary-light-5:      #c7bff9;
+  --el-color-primary-light-7:      #e0dbfb;
+  --el-color-primary-light-8:      #edebfc;
+  --el-color-primary-light-9:      rgba(108, 92, 231, 0.06);
+  --el-color-primary-dark-2:       var(--color-primary-hover);
+
+  --el-color-success:              var(--color-success);
+  --el-color-success-light-3:      #33d494;
+  --el-color-success-light-5:      #66e0b5;
+  --el-color-success-light-9:      rgba(0, 184, 122, 0.08);
+
+  --el-color-warning:              var(--color-warning);
+  --el-color-warning-light-3:      #f0b83d;
+  --el-color-warning-light-5:      #f5cc6d;
+  --el-color-warning-light-9:      rgba(230, 153, 0, 0.08);
+
+  --el-color-danger:               var(--color-error);
+  --el-color-danger-light-3:       #f06b85;
+  --el-color-danger-light-5:       #f593a5;
+  --el-color-danger-light-9:       rgba(232, 59, 95, 0.08);
 
   --el-color-info:                 var(--color-text-secondary);
 
@@ -130,18 +257,28 @@
   --el-font-size-small:            var(--text-xs);
   --el-font-size-large:            var(--text-lg);
 
-  /* Card overrides */
   --el-card-border-color:          var(--color-border);
   --el-card-border-radius:         var(--radius-xl);
 
-  /* Menu (sidebar) overrides */
   --el-menu-bg-color:              var(--color-bg-sidebar);
   --el-menu-hover-bg-color:        var(--color-bg-sidebar-hover);
   --el-menu-text-color:            var(--color-text-sidebar);
   --el-menu-active-color:          var(--color-text-sidebar-active);
+
+  --el-fill-color-blank:           var(--color-bg-card);
+  --el-fill-color-light:           var(--color-bg-elevated);
+  --el-fill-color-lighter:         #f5f7fa;
+
+  /* Table */
+  --el-table-row-hover-bg-color:   var(--color-bg-hover);
+
+  /* Smooth theme switch */
+  --theme-transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* ── Global base ────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL BASE
+   ═══════════════════════════════════════════════════════════════════ */
 html, body, #app {
   margin: 0;
   padding: 0;
@@ -153,9 +290,10 @@ html, body, #app {
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: var(--theme-transition);
 }
 
-/* ── Scrollbar ──────────────────────────────────────────────────── */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -164,21 +302,21 @@ html, body, #app {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-text-muted);
+  background: var(--color-border-hover);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
+  background: var(--color-text-muted);
 }
 
-/* ── Focus ring ─────────────────────────────────────────────────── */
+/* Focus ring */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* ── Reduced motion ─────────────────────────────────────────────── */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -186,7 +324,7 @@ html, body, #app {
   }
 }
 
-/* ── Cursor normalization for interactive elements ──────────────── */
+/* Cursor normalization */
 button, a, [role="button"], .clickable,
 .el-menu-item, .el-radio-button, .el-checkbox,
 .el-card[shadow="hover"], .el-table__row {
