@@ -1,0 +1,3 @@
+com.djb.framework.datapermission.config.DjbDataPermissionAutoConfiguration
+com.djb.framework.datapermission.config.DjbDeptDataPermissionAutoConfiguration
+com.djb.framework.datapermission.config.DjbDataPermissionRpcAutoConfiguration

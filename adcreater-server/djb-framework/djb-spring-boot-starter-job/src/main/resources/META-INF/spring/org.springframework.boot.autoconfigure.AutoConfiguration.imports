@@ -1,0 +1,2 @@
+com.djb.framework.quartz.config.DjbXxlJobAutoConfiguration
+com.djb.framework.quartz.config.DjbAsyncAutoConfiguration

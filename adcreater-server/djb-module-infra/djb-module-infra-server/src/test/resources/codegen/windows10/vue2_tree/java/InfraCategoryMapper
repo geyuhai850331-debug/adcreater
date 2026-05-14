@@ -1,0 +1,34 @@
+package com.djb.module.infra.dal.mysql.demo;
+
+import java.util.*;
+
+import pojo.com.djb.framework.common.PageResult;
+import com.djb.framework.mybatis.core.query.LambdaQueryWrapperX;
+import com.djb.framework.mybatis.core.mapper.BaseMapperX;
+import com.djb.module.infra.dal.dataobject.demo.InfraCategoryDO;
+import org.apache.ibatis.annotations.Mapper;
+import com.djb.module.infra.controller.admin.demo.vo.*;
+
+/**
+ * 分类 Mapper
+ *
+ * @author djbadmin
+ */
+@Mapper
+public interface InfraCategoryMapper extends BaseMapperX<InfraCategoryDO> {
+
+    default List<InfraCategoryDO> selectList(InfraCategoryListReqVO reqVO) {
+        return selectList(new LambdaQueryWrapperX<InfraCategoryDO>()
+                .likeIfPresent(InfraCategoryDO::getName, reqVO.getName())
+                .orderByDesc(InfraCategoryDO::getId));
+    }
+
+	default InfraCategoryDO selectByParentIdAndName(Long parentId, String name) {
+	    return selectOne(InfraCategoryDO::getParentId, parentId, InfraCategoryDO::getName, name);
+	}
+
+    default Long selectCountByParentId(Long parentId) {
+        return selectCount(InfraCategoryDO::getParentId, parentId);
+    }
+
+}

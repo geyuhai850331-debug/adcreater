@@ -1,0 +1,5 @@
+com.djb.framework.security.config.DjbSecurityRpcAutoConfiguration
+com.djb.framework.security.config.DjbSecurityAutoConfiguration
+com.djb.framework.security.config.DjbWebSecurityConfigurerAdapter
+com.djb.framework.operatelog.config.DjbOperateLogConfiguration
+com.djb.framework.operatelog.config.DjbOperateLogRpcAutoConfiguration

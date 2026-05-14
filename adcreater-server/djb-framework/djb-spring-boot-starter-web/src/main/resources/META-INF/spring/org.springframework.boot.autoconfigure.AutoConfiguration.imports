@@ -1,0 +1,8 @@
+com.djb.framework.apilog.config.DjbApiLogAutoConfiguration
+com.djb.framework.jackson.config.DjbJacksonAutoConfiguration
+com.djb.framework.swagger.config.DjbSwaggerAutoConfiguration
+com.djb.framework.web.config.DjbWebAutoConfiguration
+com.djb.framework.apilog.config.DjbApiLogRpcAutoConfiguration
+com.djb.framework.xss.config.DjbXssAutoConfiguration
+com.djb.framework.banner.config.DjbBannerAutoConfiguration
+com.djb.framework.encrypt.config.DjbApiEncryptAutoConfiguration

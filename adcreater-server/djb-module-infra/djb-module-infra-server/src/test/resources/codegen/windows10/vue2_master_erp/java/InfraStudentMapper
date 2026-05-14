@@ -1,0 +1,30 @@
+package com.djb.module.infra.dal.mysql.demo;
+
+import java.util.*;
+
+import pojo.com.djb.framework.common.PageResult;
+import com.djb.framework.mybatis.core.query.LambdaQueryWrapperX;
+import com.djb.framework.mybatis.core.mapper.BaseMapperX;
+import com.djb.module.infra.dal.dataobject.demo.InfraStudentDO;
+import org.apache.ibatis.annotations.Mapper;
+import com.djb.module.infra.controller.admin.demo.vo.*;
+
+/**
+ * 学生 Mapper
+ *
+ * @author djbadmin
+ */
+@Mapper
+public interface InfraStudentMapper extends BaseMapperX<InfraStudentDO> {
+
+    default PageResult<InfraStudentDO> selectPage(InfraStudentPageReqVO reqVO) {
+        return selectPage(reqVO, new LambdaQueryWrapperX<InfraStudentDO>()
+                .likeIfPresent(InfraStudentDO::getName, reqVO.getName())
+                .eqIfPresent(InfraStudentDO::getBirthday, reqVO.getBirthday())
+                .eqIfPresent(InfraStudentDO::getSex, reqVO.getSex())
+                .eqIfPresent(InfraStudentDO::getEnabled, reqVO.getEnabled())
+                .betweenIfPresent(InfraStudentDO::getCreateTime, reqVO.getCreateTime())
+                .orderByDesc(InfraStudentDO::getId));
+    }
+
+}

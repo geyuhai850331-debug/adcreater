@@ -1,0 +1,2 @@
+com.djb.framework.tenant.config.DjbTenantRpcAutoConfiguration
+com.djb.framework.tenant.config.DjbTenantAutoConfiguration
