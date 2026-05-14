@@ -61,9 +61,6 @@
       <template #header>
         <div class="card-header">
           <span>最近项目</span>
-          <el-button type="primary" size="small" @click="$router.push('/ad/create')">
-            新建项目
-          </el-button>
         </div>
       </template>
 

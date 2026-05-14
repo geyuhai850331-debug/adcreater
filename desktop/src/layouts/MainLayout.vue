@@ -1,13 +1,15 @@
 <template>
   <el-container class="main-layout">
     <!-- Sidebar -->
-    <el-aside width="220px" class="sidebar">
+    <el-aside :width="isCollapsed ? '64px' : '220px'" class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="logo">
-        <h2>AdCreater</h2>
+        <h2 v-if="!isCollapsed">AdCreater</h2>
+        <span v-else class="logo-icon">◆</span>
       </div>
 
       <el-menu
         :default-active="activeMenu"
+        :collapse="isCollapsed"
         router
         background-color="transparent"
         text-color="var(--color-text-sidebar)"
@@ -15,40 +17,45 @@
       >
         <el-menu-item index="/home">
           <el-icon><HomeFilled /></el-icon>
-          <span>工作台</span>
+          <template #title>工作台</template>
         </el-menu-item>
         <el-menu-item index="/ad/create">
           <el-icon><Edit /></el-icon>
-          <span>广告制作</span>
+          <template #title>广告制作</template>
         </el-menu-item>
         <el-menu-item index="/delivery">
           <el-icon><Promotion /></el-icon>
-          <span>广告投放</span>
+          <template #title>广告投放</template>
         </el-menu-item>
         <el-menu-item index="/templates">
           <el-icon><Files /></el-icon>
-          <span>模板管理</span>
+          <template #title>模板管理</template>
         </el-menu-item>
         <el-menu-item index="/resources">
           <el-icon><FolderOpened /></el-icon>
-          <span>资源管理</span>
+          <template #title>资源管理</template>
         </el-menu-item>
         <el-menu-item index="/billing">
           <el-icon><Wallet /></el-icon>
-          <span>点数充值</span>
+          <template #title>点数充值</template>
         </el-menu-item>
       </el-menu>
 
       <div class="sidebar-footer">
         <div class="user-info">
           <el-avatar :size="32" :icon="UserFilled" />
-          <span class="username">{{ username }}</span>
+          <span v-if="!isCollapsed" class="username">{{ username }}</span>
         </div>
-        <div class="balance-info">
+        <div v-if="!isCollapsed" class="balance-info">
           <span class="balance-label">剩余点数</span>
           <span class="balance-value">{{ balance }}</span>
         </div>
+        <div class="theme-toggle-row">
+          <ThemeToggle />
+          <span v-if="!isCollapsed" class="theme-label">{{ themeLabel }}</span>
+        </div>
         <el-button
+          v-if="!isCollapsed"
           type="danger"
           size="small"
           text
@@ -57,6 +64,25 @@
         >
           退出登录
         </el-button>
+        <el-button
+          v-else
+          type="danger"
+          size="small"
+          text
+          class="logout-btn-icon"
+          @click="handleLogout"
+          title="退出登录"
+        >
+          <el-icon :size="16"><SwitchButton /></el-icon>
+        </el-button>
+      </div>
+
+      <!-- Collapse toggle -->
+      <div class="collapse-toggle" @click="toggleCollapse">
+        <el-icon :size="18">
+          <DArrowLeft v-if="!isCollapsed" />
+          <DArrowRight v-else />
+        </el-icon>
       </div>
     </el-aside>
 
@@ -72,16 +98,23 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { UserFilled } from '@element-plus/icons-vue'
+import { UserFilled, DArrowLeft, DArrowRight, SwitchButton } from '@element-plus/icons-vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import { useThemeStore } from '@/stores/theme'
 import client from '@/api/client'
+
+const COLLAPSE_KEY = 'adcreater-sidebar-collapsed'
 
 const router = useRouter()
 const route = useRoute()
 
 const username = ref(localStorage.getItem('username') || '用户')
+const themeStore = useThemeStore()
 const balance = ref(0)
+const isCollapsed = ref(localStorage.getItem(COLLAPSE_KEY) === 'true')
 
 const activeMenu = computed(() => route.path)
+const themeLabel = computed(() => themeStore.theme === 'dark' ? '深色模式' : '浅色模式')
 
 async function fetchBalance() {
   try {
@@ -90,6 +123,11 @@ async function fetchBalance() {
   } catch {
     // balance fetch can fail silently
   }
+}
+
+function toggleCollapse() {
+  isCollapsed.value = !isCollapsed.value
+  localStorage.setItem(COLLAPSE_KEY, String(isCollapsed.value))
 }
 
 function handleLogout() {
@@ -113,8 +151,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: 220px !important;
   transition: width var(--transition-normal);
+}
+
+.sidebar.collapsed {
+  width: 64px !important;
 }
 
 .logo {
@@ -130,6 +171,14 @@ onMounted(() => {
   font-weight: 700;
   text-align: center;
   letter-spacing: -0.01em;
+}
+
+.logo-icon {
+  display: block;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--color-primary);
 }
 
 .el-menu {
@@ -214,6 +263,17 @@ onMounted(() => {
   font-family: var(--font-mono);
 }
 
+.theme-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.theme-label {
+  color: var(--color-text-sidebar);
+  font-size: var(--text-xs);
+}
+
 .logout-btn {
   width: 100%;
   justify-content: flex-start;
@@ -224,6 +284,36 @@ onMounted(() => {
 
 .logout-btn:hover {
   color: var(--color-error) !important;
+}
+
+.logout-btn-icon {
+  width: 100%;
+  justify-content: center !important;
+  color: var(--color-text-sidebar) !important;
+  font-size: var(--text-sm);
+  transition: color var(--transition-fast);
+}
+
+.logout-btn-icon:hover {
+  color: var(--color-error) !important;
+}
+
+/* Collapse toggle */
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.collapse-toggle:hover {
+  color: var(--color-text-sidebar-active);
+  background: var(--color-bg-sidebar-hover);
 }
 
 .el-main {

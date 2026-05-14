@@ -3,7 +3,10 @@
 </template>
 
 <script setup lang="ts">
-// App root — design tokens imported globally via main.ts
+import { useThemeStore } from '@/stores/theme'
+
+// Initialize theme store early — applies data-theme attribute on boot
+useThemeStore()
 </script>
 
 <style>

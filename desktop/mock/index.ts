@@ -66,7 +66,7 @@ const transactions = Array.from({ length: 23 }, (_, i) => ({
 function placeholderImage(width: number, height: number, label: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
     <defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea"/><stop offset="100%" style="stop-color:#764ba2"/>
+      <stop offset="0%" style="stop-color:#6c5ce7"/><stop offset="100%" style="stop-color:#7d6ff0"/>
     </linearGradient></defs>
     <rect width="${width}" height="${height}" fill="url(#bg)"/>
     <text x="50%" y="45%" text-anchor="middle" fill="white" font-size="${Math.min(width, height) * 0.06}" font-family="sans-serif" font-weight="bold">AdCreater</text>
