@@ -4,12 +4,21 @@ import cn.iocoder.yudao.adcreater.module.billing.dal.dataobject.*;
 import cn.iocoder.yudao.adcreater.module.billing.dal.mapper.*;
 import cn.iocoder.yudao.adcreater.common.exception.InsufficientPointsException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
+import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.Resource;
+
+/**
+ * 点数计费服务实现
+ *
+ * @author adcreater
+ */
 @Service
+@Validated
+@Slf4j
 public class BillingServiceImpl implements BillingService {
 
     @Resource
@@ -34,7 +43,7 @@ public class BillingServiceImpl implements BillingService {
         tx.setBalanceAfter(account.getBalance());
         tx.setStatus("confirmed");
         tx.setRemark(remark);
-        tx.setCreatedAt(LocalDateTime.now());
+        // createTime auto-filled by DefaultDBFieldHandler
         transactionMapper.insert(tx);
     }
 
@@ -57,7 +66,7 @@ public class BillingServiceImpl implements BillingService {
         tx.setBalanceAfter(account.getBalance() - amount);
         tx.setStatus("pending");
         tx.setBizId(bizId);
-        tx.setCreatedAt(LocalDateTime.now());
+        // createTime auto-filled by DefaultDBFieldHandler
         transactionMapper.insert(tx);
         return tx;
     }

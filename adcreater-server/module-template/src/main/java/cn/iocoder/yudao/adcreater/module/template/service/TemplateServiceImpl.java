@@ -7,13 +7,23 @@ import cn.iocoder.yudao.adcreater.module.template.dal.mapper.*;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 模板服务实现
+ *
+ * @author adcreater
+ */
 @Service
+@Validated
+@Slf4j
 public class TemplateServiceImpl implements TemplateService {
 
     @Resource
@@ -26,8 +36,7 @@ public class TemplateServiceImpl implements TemplateService {
     public Long createTemplate(TemplateSaveReqVO reqVO) {
         TemplateDO entity = BeanUtils.toBean(reqVO, TemplateDO.class);
         entity.setStatus("draft");
-        entity.setCreatedAt(java.time.LocalDateTime.now());
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        // createTime/updateTime auto-filled by DefaultDBFieldHandler
         templateMapper.insert(entity);
         return entity.getId();
     }
@@ -35,7 +44,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public void updateTemplate(TemplateSaveReqVO reqVO) {
         TemplateDO entity = BeanUtils.toBean(reqVO, TemplateDO.class);
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        // updateTime auto-filled by DefaultDBFieldHandler
         templateMapper.updateById(entity);
     }
 
@@ -69,14 +78,14 @@ public class TemplateServiceImpl implements TemplateService {
         versionDO.setVersion(nextVersion);
         versionDO.setFileUrl(fileUrl);
         versionDO.setChangelog(changelog);
-        versionDO.setCreatedAt(java.time.LocalDateTime.now());
+        // createTime auto-filled by DefaultDBFieldHandler
         versionMapper.insert(versionDO);
 
-        // Update template status to published with correct timestamp
+        // Update template status to published
         TemplateDO template = templateMapper.selectById(templateId);
         if (template != null) {
             template.setStatus("published");
-            template.setUpdatedAt(java.time.LocalDateTime.now());
+            // updateTime auto-filled by DefaultDBFieldHandler on update
             templateMapper.updateById(template);
         }
 

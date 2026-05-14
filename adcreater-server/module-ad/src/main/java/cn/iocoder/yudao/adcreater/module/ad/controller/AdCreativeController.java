@@ -10,6 +10,9 @@ import cn.iocoder.yudao.adcreater.module.billing.service.BillingService;
 import cn.iocoder.yudao.adcreater.module.billing.service.UsageService;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -19,8 +22,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+
+/**
+ * 用户端 - 广告创意生成 (图片/视频)
+ *
+ * @author adcreater
+ */
+@Tag(name = "用户端 - 广告创意生成")
 @RestController
 @RequestMapping("/api/ad/creative")
+@Validated
+@Slf4j
 public class AdCreativeController {
 
     @Resource
@@ -38,6 +51,7 @@ public class AdCreativeController {
     @Resource
     private ExecutorService executorService;
 
+    @Operation(summary = "文生图 (SSE 流式)")
     @PostMapping(value = "/image/text-to-image", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter textToImage(@Valid @RequestBody ImageGenReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
@@ -94,6 +108,7 @@ public class AdCreativeController {
         return emitter;
     }
 
+    @Operation(summary = "批量生成多尺寸图片")
     @PostMapping("/image/batch")
     public CommonResult<List<Map<String, Object>>> batchGenerate(@Valid @RequestBody BatchImageGenReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
@@ -137,9 +152,10 @@ public class AdCreativeController {
             }
         }
 
-        return CommonResult.success(results);
+        return success(results);
     }
 
+    @Operation(summary = "生成广告视频 (SSE 流式)")
     @PostMapping(value = "/video", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter generateVideo(@Valid @RequestBody VideoGenReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();

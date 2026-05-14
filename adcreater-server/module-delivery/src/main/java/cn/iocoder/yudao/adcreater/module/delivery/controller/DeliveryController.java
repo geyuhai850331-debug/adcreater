@@ -9,7 +9,11 @@ import cn.iocoder.yudao.adcreater.module.billing.dal.dataobject.PointsTransactio
 import cn.iocoder.yudao.adcreater.module.billing.service.BillingService;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.annotation.Resource;
@@ -18,8 +22,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+
+/**
+ * 用户端 - 广告投放
+ *
+ * @author adcreater
+ */
+@Tag(name = "用户端 - 广告投放")
 @RestController
 @RequestMapping("/api/delivery")
+@Validated
+@Slf4j
 public class DeliveryController {
 
     @Resource
@@ -42,6 +56,7 @@ public class DeliveryController {
         "google", new int[][]{{1200, 628}, {1200, 1200}, {970, 250}}
     );
 
+    @Operation(summary = "生成数字人视频 (SSE 流式)")
     @PostMapping(value = "/digital-human", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter generateDigitalHuman(@Valid @RequestBody DigitalHumanReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
@@ -87,6 +102,7 @@ public class DeliveryController {
         return emitter;
     }
 
+    @Operation(summary = "多平台批量导出")
     @PostMapping("/platform/export")
     public CommonResult<List<Map<String, Object>>> platformExport(
             @Valid @RequestBody PlatformExportReqVO reqVO) {
@@ -112,7 +128,7 @@ public class DeliveryController {
             results.add(platformResult);
         }
 
-        return CommonResult.success(results);
+        return success(results);
     }
 
     private void sendSse(SseEmitter emitter, String event, Object data) {

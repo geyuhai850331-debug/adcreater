@@ -2,11 +2,20 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a full-stack cross-border e-commerce ad creation platform with Electron+Vue3 desktop client, Vue3 admin web, and yudao-cloud Spring Boot backend.
+**Goal:** Build a full-stack cross-border e-commerce ad creation platform with Electron+Vue3 desktop client, Vue3 admin web, and DJB Backend (Spring Boot).
 
-**Architecture:** Monorepo with yudao-cloud backend (5 new Maven modules: module-ad, module-delivery, module-template, module-ai, module-billing), Electron+Vue3 desktop client, and Vue3 admin web. AI models via third-party APIs through Adapter pattern. Assets stored locally on client.
+**Architecture:** Monorepo with DJB backend (5 new modules: module-ad, module-delivery, module-template, module-ai, module-billing running on djb-framework), Electron+Vue3 desktop client, and Vue3 admin web. AI models via third-party APIs through Adapter pattern. Assets stored locally on client.
 
-**Tech Stack:** Spring Boot (yudao-cloud), MyBatis-Plus, MySQL, Redis, Vue3+Element Plus+Vite, Electron
+**Tech Stack:** Spring Boot (DJB Backend / djb-framework), MyBatis-Plus, MySQL, Redis, Vue3+Element Plus+Vite, Electron
+
+> **2026-05-14 DJB Compliance Update**: Backend code has been adapted from yudao-cloud to DJB framework conventions:
+> - DO classes extend `TenantBaseDO` (multi-tenancy + audit fields)
+> - Services annotated with `@Validated` + `@Slf4j`
+> - Controllers annotated with `@Tag` + `@Operation` + `@Validated` + `@Slf4j`, use `success()` static import
+> - SQL tables use `ad_` prefix, `utf8mb4_unicode_ci`, all columns have Chinese COMMENT
+> - Every table has `tenant_id`, `creator`, `create_time`, `updater`, `update_time`, `deleted` columns
+> - VOs add `@Size(max=N)` on string fields
+> - See design spec Section 15 for full migration details
 
 ---
 
@@ -2142,6 +2151,140 @@ Expected: BUILD SUCCESS
 
 ---
 
+### Task 12.5: AdVideoController (3 步视频流程 API)
+
+**Files:**
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/AdVideoController.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/StoryboardGenReqVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/StoryboardRegenReqVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/StoryboardRespVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/StoryboardRegenRespVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/KeyframeGenReqVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/KeyframeGridReqVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/VideoComposeReqVO.java`
+- Create: `adcreater-server/module-ad/src/main/java/cn/iocoder/yudao/adcreater/module/ad/controller/vo/MediaRespVO.java`
+
+**Purpose:** 为桌面端 AdVideoPanel 的 3 步子步骤视频制作流程提供后端 API 支持。
+
+#### 3 步视频制作流程
+
+```
+Step 3-0: 分镜策划
+  输入: 商品描述 + 类目 + 目标平台 + 语言 + 模板 ID
+  API: POST /api/ad/video/storyboard/generate
+  输出: Storyboard[] (每个场景含 4 个 KeyFrame)
+
+  API: POST /api/ad/video/storyboard/regenerate
+  输入: 场景描述 + 序号
+  输出: KeyFrame[] (重新生成的 4 个关键帧描述)
+
+Step 3-1: 关键帧生成
+  API: POST /api/ad/video/keyframe/generate (SSE)
+  输入: prompt + sceneIndex + frameIndex
+  输出: { url, imageUrl }
+
+  API: POST /api/ad/video/keyframe/grid (SSE)
+  输入: prompts[] + sceneIndex
+  输出: { url, imageUrl } (4 宫格网格图)
+
+Step 3-2: 视频合成
+  API: POST /api/ad/video/generate (SSE)
+  输入: storyboards[] + gridImages{} + duration + settings (TTS/BGM)
+  输出: { url, videoUrl }
+```
+
+#### 计费规则
+
+| 操作 | 消耗点数 |
+|---|---|
+| 分镜策划 (storyboard/generate) | 5 |
+| 分镜重新生成 (storyboard/regenerate) | 3 |
+| 关键帧生成 (keyframe/generate) | 10 |
+| 关键帧网格 (keyframe/grid) | 15 |
+| 视频合成 (video/generate) | 50 |
+
+#### Controller 核心实现
+
+- [ ] **Step 1: Write AdVideoController with all 5 endpoints**
+
+```java
+@RestController
+@RequestMapping("/api/ad/video")
+public class AdVideoController {
+
+    @Resource private ModelOrchestrationService orchestrationService;
+    @Resource private PromptService promptService;
+    @Resource private BillingService billingService;
+    @Resource private UsageService usageService;
+    @Resource private ExecutorService executorService;
+
+    // POST /storyboard/generate — AI 文本生成，无需 SSE
+    @PostMapping("/storyboard/generate")
+    public CommonResult<StoryboardRespVO> generateStoryboard(
+            @Valid @RequestBody StoryboardGenReqVO reqVO) {
+        // 1. resolvePrompt("video_storyboard", vars)
+        // 2. orchestrationService.translate(...)
+        // 3. parseStoryboardResponse() → StoryboardRespVO
+        // 4. billingService preConsume / confirmConsume
+    }
+
+    // POST /storyboard/regenerate — 重新生成单个分镜
+    @PostMapping("/storyboard/regenerate")
+    public CommonResult<StoryboardRegenRespVO> regenerateStoryboard(
+            @Valid @RequestBody StoryboardRegenReqVO reqVO) {
+        // 产品描述 → AI 生成 4 个关键帧描述
+    }
+
+    // POST /keyframe/generate — SSE 流式返回单帧图片
+    @PostMapping(value = "/keyframe/generate",
+                 produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter generateKeyframe(
+            @Valid @RequestBody KeyframeGenReqVO reqVO) {
+        // prompt → resolvePrompt("video_keyframe_image")
+        // → orchestrationService.generateImage(640x360)
+    }
+
+    // POST /keyframe/grid — SSE 流式返回 4 宫格网格图
+    @PostMapping(value = "/keyframe/grid",
+                 produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter generateKeyframeGrid(
+            @Valid @RequestBody KeyframeGridReqVO reqVO) {
+        // 4 个 prompt 合并 → resolvePrompt("video_keyframe_grid")
+        // → orchestrationService.generateImage(1280x960)
+    }
+
+    // POST /generate — SSE 流式合成最终视频
+    @PostMapping(value = "/generate",
+                 produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter composeVideo(
+            @Valid @RequestBody VideoComposeReqVO reqVO) {
+        // storyboards + gridImages + duration + settings
+        // → resolvePrompt("video", vars)
+        // → orchestrationService.generateVideo(...)
+    }
+}
+```
+
+- [ ] **Step 2: Write VO classes**
+
+StoryboardGenReqVO: productDescription, category, targetPlatform, targetLang, templateId
+StoryboardRegenReqVO: description, index
+KeyframeGenReqVO: prompt, sceneIndex, frameIndex
+KeyframeGridReqVO: prompts[], sceneIndex
+VideoComposeReqVO: storyboards[], gridImages{}, duration, settings (TTS+BGM)
+
+Response VOs:
+- StoryboardRespVO: storyboards[{order, description, keyFrames[{order, prompt}]}]
+- StoryboardRegenRespVO: keyFrames[{order, prompt}]
+- MediaRespVO: url, imageUrl (通用图片/视频响应)
+
+- [ ] **Step 3: Verify Maven compiles**
+
+Run: `cd adcreater-server && mvn compile -DskipTests`
+Expected: BUILD SUCCESS
+
+---
+
 ## Phase 6: Delivery Module
 
 ### Task 13: DeliveryController (数字人 + 平台投放)
@@ -2680,7 +2823,7 @@ Phase 2: Task 3-6   (module-ai)
 Phase 3: Task 7-9   (module-billing)    ← can parallel with Phase 4
 Phase 4: Task 10     (module-template)   ← can parallel with Phase 3
    ↓
-Phase 5: Task 11-12  (module-ad)        ← depends on Phase 2+3
+Phase 5: Task 11-12.5 (module-ad)        ← depends on Phase 2+3
 Phase 6: Task 13     (module-delivery)   ← depends on Phase 2+3
    ↓
 Phase 7: Task 14-19  (Admin Frontend)   ← depends on all backend APIs

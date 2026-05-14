@@ -7,13 +7,26 @@ import cn.iocoder.yudao.adcreater.module.ai.service.PromptService;
 import cn.iocoder.yudao.adcreater.module.billing.service.BillingService;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.Map;
 
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+
+/**
+ * 用户端 - 广告文案翻译
+ *
+ * @author adcreater
+ */
+@Tag(name = "用户端 - 广告文案翻译")
 @RestController
 @RequestMapping("/api/ad/copy")
+@Validated
+@Slf4j
 public class AdCopyController {
 
     @Resource
@@ -25,6 +38,7 @@ public class AdCopyController {
     @Resource
     private BillingService billingService;
 
+    @Operation(summary = "翻译广告文案")
     @PostMapping("/translate")
     public CommonResult<TranslateRespVO> translate(@Valid @RequestBody TranslateReqVO reqVO) {
         Long userId = WebFrameworkUtils.getLoginUserId();
@@ -50,7 +64,7 @@ public class AdCopyController {
             TranslateRespVO resp = new TranslateRespVO();
             resp.setTranslatedTitle(reqVO.getProductTitle()); // placeholder translation
             resp.setLocalizedCopy(prompt);
-            return CommonResult.success(resp);
+            return success(resp);
         } catch (Exception e) {
             throw new RuntimeException("Translation failed: " + e.getMessage(), e);
         }

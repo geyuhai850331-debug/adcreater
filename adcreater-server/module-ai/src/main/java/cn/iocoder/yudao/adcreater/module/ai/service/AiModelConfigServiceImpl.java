@@ -6,13 +6,23 @@ import cn.iocoder.yudao.adcreater.module.ai.dal.dataobject.AiModelConfigDO;
 import cn.iocoder.yudao.adcreater.module.ai.dal.mapper.AiModelConfigMapper;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 import javax.annotation.Resource;
 import java.util.Base64;
 import java.util.Map;
 
+/**
+ * AI 模型配置服务实现
+ *
+ * @author adcreater
+ */
 @Service
+@Validated
+@Slf4j
 public class AiModelConfigServiceImpl implements AiModelConfigService {
 
     @Resource

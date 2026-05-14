@@ -6,14 +6,24 @@ import cn.iocoder.yudao.adcreater.module.ai.dal.mapper.PromptTemplateMapper;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Prompt 模板服务实现
+ *
+ * @author adcreater
+ */
 @Service
+@Validated
+@Slf4j
 public class PromptServiceImpl implements PromptService {
 
     @Resource
