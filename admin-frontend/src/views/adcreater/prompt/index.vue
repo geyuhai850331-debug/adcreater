@@ -19,13 +19,17 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="modelName" label="模型" width="160" />
       <el-table-column label="启用" width="80">
         <template #default="{ row }">
           <el-switch
             :model-value="row.isEnabled"
             @change="(val: boolean) => toggleEnabled(row, val)"
           />
+        </template>
+      </el-table-column>
+      <el-table-column prop="systemPrompt" label="系统提示" min-width="260" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span class="text-13px text-gray-600">{{ row.systemPrompt }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="templateContent" label="模板内容" min-width="300" show-overflow-tooltip>
@@ -67,15 +71,8 @@ const tableData = ref<any[]>([])
 const total = ref(0)
 const queryParams = reactive({ page: 1, pageSize: 20 })
 
-const categoryMap: Record<string, string> = {
-  copy: '文案生成',
-  image: '图片生成',
-  video: '视频生成',
-  digital_human: '数字人'
-}
-
 function categoryLabel(cat: string): string {
-  return categoryMap[cat] || cat || '-'
+  return cat || '-'
 }
 
 type TagType = 'primary' | 'success' | 'warning' | 'danger' | 'info'

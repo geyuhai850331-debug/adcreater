@@ -10,7 +10,7 @@ export interface PromptVO {
   id?: number
   name: string
   category: string
-  modelName: string
+  modelName?: string
   systemPrompt: string
   templateContent: string
   variables?: string

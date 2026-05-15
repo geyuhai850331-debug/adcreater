@@ -11,6 +11,13 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="tableData" stripe border>
       <el-table-column prop="modelName" label="模型名称" width="160" />
+      <el-table-column label="类别" width="120">
+        <template #default="{ row }">
+          <el-tag :type="(categoryColor(row.category) as any)" size="small">
+            {{ categoryLabel(row.category) }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="adapterClass" label="适配器类" width="200" show-overflow-tooltip />
       <el-table-column label="启用" width="80">
         <template #default="{ row }">
@@ -58,6 +65,29 @@ const loading = ref(false)
 const tableData = ref<any[]>([])
 const total = ref(0)
 const queryParams = reactive({ page: 1, pageSize: 20 })
+
+const categoryMap: Record<string, string> = {
+  copy: '文案生成',
+  image: '图片生成',
+  video: '视频生成',
+  digital_human: '数字人'
+}
+
+function categoryLabel(cat: string): string {
+  return categoryMap[cat] || cat || '-'
+}
+
+type TagType = 'primary' | 'success' | 'warning' | 'danger' | 'info'
+
+function categoryColor(cat: string): TagType {
+  const map: Record<string, TagType> = {
+    copy: 'success',
+    image: 'info',
+    video: 'warning',
+    digital_human: 'danger'
+  }
+  return (map[cat] || 'info') as TagType
+}
 
 async function fetchModels() {
   loading.value = true

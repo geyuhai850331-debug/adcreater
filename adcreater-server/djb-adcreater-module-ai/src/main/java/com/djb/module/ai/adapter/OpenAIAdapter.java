@@ -1,10 +1,10 @@
 package com.djb.module.ai.adapter;
 
 import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
+import com.djb.module.ai.util.AiApiKeyCodec;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Base64;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class OpenAIAdapter implements AiModelAdapter {
 
     @Override
     public AiResult call(AiRequest request, AiModelConfigDO config) {
-        String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
+        String apiKey = AiApiKeyCodec.normalizeForAuthorization(AiApiKeyCodec.decode(config.getApiKey()));
         String endpoint = buildApiPath(config.getEndpointUrl(), "/images/generations");
 
         String size = (request.getWidth() != null && request.getHeight() != null)
@@ -79,7 +79,7 @@ public class OpenAIAdapter implements AiModelAdapter {
     }
 
     private List<Map<String, Object>> fetchModels(AiModelConfigDO config) {
-        String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
+        String apiKey = AiApiKeyCodec.normalizeForAuthorization(AiApiKeyCodec.decode(config.getApiKey()));
         RuntimeException lastException = null;
         for (String modelsEndpoint : buildModelListEndpoints(config.getEndpointUrl())) {
             try {

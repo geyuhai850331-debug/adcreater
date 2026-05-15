@@ -4,22 +4,13 @@
     :title="isEdit ? '编辑 Prompt' : '新增 Prompt'"
     width="700px"
     :close-on-click-modal="false"
-    @open="onOpen"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
       <el-form-item label="名称" prop="name">
         <el-input v-model="form.name" placeholder="如 video-generation-v1" />
       </el-form-item>
       <el-form-item label="类别" prop="category">
-        <el-select v-model="form.category" placeholder="请选择类别" class="w-1/1">
-          <el-option label="文案生成" value="copy" />
-          <el-option label="图片生成" value="image" />
-          <el-option label="视频生成" value="video" />
-          <el-option label="数字人" value="digital_human" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="模型" prop="modelName">
-        <el-input v-model="form.modelName" placeholder="请输入模型" />
+        <el-input v-model="form.category" placeholder="请输入类别，如 video-storyboard" />
       </el-form-item>
       <el-form-item label="系统提示" prop="systemPrompt">
         <el-input
@@ -80,7 +71,6 @@ const form = reactive({
   id: null as number | null,
   name: '',
   category: '',
-  modelName: '',
   systemPrompt: '',
   templateContent: '',
   isEnabled: true
@@ -88,8 +78,7 @@ const form = reactive({
 
 const rules: FormRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-  category: [{ required: true, message: '请选择类别', trigger: 'change' }],
-  modelName: [{ required: true, message: '请输入模型', trigger: 'blur' }],
+  category: [{ required: true, message: '请输入类别', trigger: 'blur' }],
   systemPrompt: [{ required: true, message: '请输入系统提示', trigger: 'blur' }]
 }
 
@@ -103,17 +92,13 @@ function wrapVariable(name: string): string {
   return `{{${name}}}`
 }
 
-function onOpen() {
-  formRef.value?.resetFields()
-}
-
 function open(row?: any) {
+  formRef.value?.clearValidate()
   if (row) {
     isEdit.value = true
     form.id = row.id
     form.name = row.name || ''
     form.category = row.category || ''
-    form.modelName = row.modelName || ''
     form.systemPrompt = row.systemPrompt || ''
     form.templateContent = row.templateContent || ''
     form.isEnabled = row.isEnabled ?? true
@@ -122,7 +107,6 @@ function open(row?: any) {
     form.id = null
     form.name = ''
     form.category = ''
-    form.modelName = ''
     form.systemPrompt = ''
     form.templateContent = ''
     form.isEnabled = true
@@ -139,7 +123,6 @@ async function handleSubmit() {
       const payload = {
         name: form.name,
         category: form.category,
-        modelName: form.modelName,
         systemPrompt: form.systemPrompt,
         templateContent: form.templateContent,
         isEnabled: form.isEnabled

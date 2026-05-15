@@ -12,7 +12,6 @@ public class PromptTemplateSaveReqVO {
     @Size(max = 64, message = "模板名称最长 64 字符")
     private String name;
 
-    @NotBlank(message = "模型不能为空")
     @Size(max = 128, message = "模型最长 128 字符")
     private String modelName;
 

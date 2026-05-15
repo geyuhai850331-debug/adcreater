@@ -22,6 +22,9 @@ public class AiModelConfigDO extends TenantBaseDO {
     /** 模型名称 */
     private String modelName;
 
+    /** 类别 */
+    private String category;
+
     /** 适配器全限定类名 */
     private String adapterClass;
 

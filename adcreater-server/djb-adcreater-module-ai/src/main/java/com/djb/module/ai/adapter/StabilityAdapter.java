@@ -1,9 +1,9 @@
 package com.djb.module.ai.adapter;
 
 import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
+import com.djb.module.ai.util.AiApiKeyCodec;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.util.Base64;
 import java.util.Map;
 
 @Component
@@ -13,7 +13,7 @@ public class StabilityAdapter implements AiModelAdapter {
 
     @Override
     public AiResult call(AiRequest request, AiModelConfigDO config) {
-        String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
+        String apiKey = AiApiKeyCodec.normalizeForAuthorization(AiApiKeyCodec.decode(config.getApiKey()));
 
         Map<String, Object> body = Map.of(
             "prompt", request.getPrompt(),
@@ -41,7 +41,7 @@ public class StabilityAdapter implements AiModelAdapter {
     @Override
     public boolean validateConfig(AiModelConfigDO config) {
         try {
-            String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
+            String apiKey = AiApiKeyCodec.normalizeForAuthorization(AiApiKeyCodec.decode(config.getApiKey()));
             Map<String, Object> response = webClient.get()
                 .uri("https://api.stability.ai/v1/user/account")
                 .header("Authorization", "Bearer " + apiKey)

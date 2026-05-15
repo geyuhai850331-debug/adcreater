@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `ad_model_config` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
     `model_name` VARCHAR(64) NOT NULL COMMENT '模型名称',
+    `category` VARCHAR(32) NOT NULL COMMENT '分类: copy/image/video/digital_human',
     `adapter_class` VARCHAR(255) NOT NULL COMMENT '适配器全限定类名',
     `api_key` VARCHAR(512) NOT NULL COMMENT 'API Key (AES 加密存储)',
     `endpoint_url` VARCHAR(255) COMMENT 'API 端点 URL',
@@ -199,3 +200,7 @@ CREATE TABLE IF NOT EXISTS `ad_usage_record` (
     INDEX `idx_user_id_create_time` (`user_id`, `create_time`),
     INDEX `idx_model_used` (`model_used`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='用量记录';
+ALTER TABLE `ad_prompt_template`
+    ADD COLUMN `model_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '模型名称' AFTER `name`;
+ALTER TABLE `ad_model_config`
+    ADD COLUMN `category` VARCHAR(32) NOT NULL DEFAULT 'copy' COMMENT '分类: copy/image/video/digital_human' AFTER `model_name`;

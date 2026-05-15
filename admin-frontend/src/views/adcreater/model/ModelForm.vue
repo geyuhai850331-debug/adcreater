@@ -4,11 +4,18 @@
     :title="isEdit ? '编辑模型' : '新增模型'"
     width="620px"
     :close-on-click-modal="false"
-    @open="onOpen"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
       <el-form-item label="模型名称" prop="modelName">
         <el-input v-model="form.modelName" placeholder="如 gpt-4o, glm-4-flash" />
+      </el-form-item>
+      <el-form-item label="类别" prop="category">
+        <el-select v-model="form.category" placeholder="请选择类别" class="w-1/1">
+          <el-option label="文案生成" value="copy" />
+          <el-option label="图片生成" value="image" />
+          <el-option label="视频生成" value="video" />
+          <el-option label="数字人" value="digital_human" />
+        </el-select>
       </el-form-item>
       <el-form-item label="适配器类" prop="adapterClass">
         <el-input
@@ -57,7 +64,13 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createModel, testModelConnection, updateModel } from '@/api/adcreater/model'
+import {
+  createModel,
+  getModelDetail,
+  testModelConnection,
+  updateModel,
+  type AiModelVO
+} from '@/api/adcreater/model'
 
 defineOptions({ name: 'AdCreaterModelForm' })
 
@@ -74,6 +87,7 @@ const formRef = ref<FormInstance>()
 const form = reactive({
   id: null as number | null,
   modelName: '',
+  category: 'copy',
   adapterClass: '',
   apiKey: '',
   endpointUrl: '',
@@ -84,50 +98,37 @@ const form = reactive({
 
 const rules: FormRules = {
   modelName: [{ required: true, message: '请输入模型名称', trigger: 'blur' }],
+  category: [{ required: true, message: '请选择类别', trigger: 'change' }],
   adapterClass: [{ required: true, message: '请输入适配器类', trigger: 'blur' }],
-  apiKey: [
-    {
-      validator: (_rule, value, callback) => {
-        if (isEdit.value || value) {
-          callback()
-          return
-        }
-        callback(new Error('请输入 API Key'))
-      },
-      trigger: 'blur'
-    }
-  ]
+  apiKey: [{ required: true, message: '请输入 API Key', trigger: 'blur' }]
 }
 
-function onOpen() {
-  formRef.value?.resetFields()
+function fillForm(row?: Partial<AiModelVO>) {
+  form.id = row?.id ?? null
+  form.modelName = row?.modelName || ''
+  form.category = row?.category || 'copy'
+  form.adapterClass = row?.adapterClass || ''
+  form.apiKey = row?.apiKey || ''
+  form.endpointUrl = row?.endpointUrl || ''
+  form.isEnabled = row?.isEnabled ?? true
+  form.priority = row?.priority ?? 1
+  form.extraConfig = row?.extraConfig
+    ? typeof row.extraConfig === 'string'
+      ? row.extraConfig
+      : JSON.stringify(row.extraConfig, null, 2)
+    : ''
+  showApiKey.value = false
 }
 
-function open(row?: any) {
-  if (row) {
+async function open(row?: AiModelVO) {
+  formRef.value?.clearValidate()
+  if (row?.id) {
     isEdit.value = true
-    form.id = row.id
-    form.modelName = row.modelName || ''
-    form.adapterClass = row.adapterClass || ''
-    form.apiKey = ''
-    form.endpointUrl = row.endpointUrl || ''
-    form.isEnabled = row.isEnabled ?? true
-    form.priority = row.priority ?? 1
-    form.extraConfig = row.extraConfig
-      ? typeof row.extraConfig === 'string' ? row.extraConfig : JSON.stringify(row.extraConfig, null, 2)
-      : ''
-    showApiKey.value = false
+    const detail = await getModelDetail(row.id)
+    fillForm(detail)
   } else {
     isEdit.value = false
-    form.id = null
-    form.modelName = ''
-    form.adapterClass = ''
-    form.apiKey = ''
-    form.endpointUrl = ''
-    form.isEnabled = true
-    form.priority = 1
-    form.extraConfig = ''
-    showApiKey.value = false
+    fillForm()
   }
   visible.value = true
 }
@@ -161,15 +162,13 @@ function buildPayload() {
   const payload: any = {
     id: form.id ?? undefined,
     modelName: form.modelName,
+    category: form.category,
     adapterClass: form.adapterClass,
-    apiKey: form.apiKey,
+    apiKey: form.apiKey.trim(),
     endpointUrl: form.endpointUrl,
     isEnabled: form.isEnabled,
     priority: form.priority,
     extraConfig: normalizedExtraConfig
-  }
-  if (isEdit.value && !form.apiKey) {
-    delete payload.apiKey
   }
   return payload
 }

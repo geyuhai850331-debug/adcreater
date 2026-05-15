@@ -14,6 +14,9 @@ public class AiModelConfigTestReqVO {
     @Size(max = 64, message = "模型名称最长 64 字符")
     private String modelName;
 
+    @Size(max = 32, message = "类别最长 32 字符")
+    private String category;
+
     @Size(max = 255, message = "适配器类名最长 255 字符")
     private String adapterClass;
 

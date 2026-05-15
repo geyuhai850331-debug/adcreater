@@ -5,6 +5,7 @@ import com.djb.module.ai.adapter.AiModelAdapterResolver;
 import com.djb.module.ai.controller.admin.vo.*;
 import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
 import com.djb.module.ai.dal.mapper.AiModelConfigMapper;
+import com.djb.module.ai.util.AiApiKeyCodec;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.djb.framework.common.exception.util.ServiceExceptionUtil;
 import com.djb.framework.common.pojo.PageResult;
@@ -15,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.annotation.Resource;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -42,7 +41,7 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
     @Override
     public Long create(AiModelConfigSaveReqVO reqVO) {
         AiModelConfigDO entity = BeanUtils.toBean(reqVO, AiModelConfigDO.class);
-        entity.setApiKey(Base64.getEncoder().encodeToString(reqVO.getApiKey().getBytes()));
+        entity.setApiKey(AiApiKeyCodec.encode(reqVO.getApiKey()));
         entity.setExtraConfig(normalizeExtraConfig(reqVO.getExtraConfig()));
         mapper.insert(entity);
         return entity.getId();
@@ -51,9 +50,7 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
     @Override
     public void update(AiModelConfigSaveReqVO reqVO) {
         AiModelConfigDO entity = BeanUtils.toBean(reqVO, AiModelConfigDO.class);
-        if (reqVO.getApiKey() != null && !reqVO.getApiKey().contains("****")) {
-            entity.setApiKey(Base64.getEncoder().encodeToString(reqVO.getApiKey().getBytes()));
-        }
+        entity.setApiKey(resolveApiKeyForSave(reqVO.getId(), reqVO.getApiKey()));
         entity.setExtraConfig(normalizeExtraConfig(reqVO.getExtraConfig()));
         mapper.updateById(entity);
     }
@@ -84,11 +81,14 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
         LambdaQueryWrapper<AiModelConfigDO> wrapper = new LambdaQueryWrapper<AiModelConfigDO>()
                 .like(pageReqVO.getModelName() != null && !pageReqVO.getModelName().isEmpty(),
                         AiModelConfigDO::getModelName, pageReqVO.getModelName())
+                .eq(pageReqVO.getCategory() != null && !pageReqVO.getCategory().isEmpty(),
+                        AiModelConfigDO::getCategory, pageReqVO.getCategory())
                 .eq(pageReqVO.getIsEnabled() != null, AiModelConfigDO::getIsEnabled, pageReqVO.getIsEnabled())
                 .orderByDesc(AiModelConfigDO::getId);
         PageResult<AiModelConfigDO> pageResult = mapper.selectPage(pageReqVO, wrapper);
         PageResult<AiModelConfigRespVO> result = new PageResult<>();
         result.setList(BeanUtils.toBean(pageResult.getList(), AiModelConfigRespVO.class));
+        result.getList().forEach(item -> item.setApiKey(maskApiKey(item.getApiKey())));
         result.setTotal(pageResult.getTotal());
         return result;
     }
@@ -124,12 +124,27 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
 
     private String maskApiKey(String encodedKey) {
         try {
-            String decoded = new String(Base64.getDecoder().decode(encodedKey));
+            String decoded = decodeApiKey(encodedKey);
             if (decoded.length() <= 8) return "****";
             return decoded.substring(0, 3) + "****" + decoded.substring(decoded.length() - 4);
         } catch (Exception e) {
             return "****";
         }
+    }
+
+    private String decodeApiKey(String encodedKey) {
+        return AiApiKeyCodec.decode(encodedKey);
+    }
+
+    private String resolveApiKeyForSave(Long id, String rawApiKey) {
+        if (rawApiKey == null || rawApiKey.isBlank() || rawApiKey.contains("****")) {
+            if (id == null) {
+                return null;
+            }
+            AiModelConfigDO existing = mapper.selectById(id);
+            return existing != null ? existing.getApiKey() : null;
+        }
+        return AiApiKeyCodec.encode(rawApiKey);
     }
 
     private String normalizeExtraConfig(String extraConfig) {
@@ -143,6 +158,7 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
         AiModelConfigDO config = new AiModelConfigDO();
         config.setId(source.getId());
         config.setModelName(source.getModelName());
+        config.setCategory(source.getCategory());
         config.setAdapterClass(source.getAdapterClass());
         config.setApiKey(source.getApiKey());
         config.setEndpointUrl(source.getEndpointUrl());
@@ -164,6 +180,10 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
         if (normalizedModelName != null && !normalizedModelName.isBlank()) {
             config.setModelName(normalizedModelName);
         }
+        String normalizedCategory = normalizeInput(reqVO.getCategory());
+        if (normalizedCategory != null && !normalizedCategory.isBlank()) {
+            config.setCategory(normalizedCategory);
+        }
         String normalizedAdapterClass = normalizeInput(reqVO.getAdapterClass());
         if (normalizedAdapterClass != null && !normalizedAdapterClass.isBlank()) {
             config.setAdapterClass(normalizedAdapterClass);
@@ -180,8 +200,8 @@ public class AiModelConfigServiceImpl implements AiModelConfigService {
         if (reqVO.getSortOrder() != null) {
             config.setSortOrder(reqVO.getSortOrder());
         }
-        if (reqVO.getApiKey() != null && !reqVO.getApiKey().isBlank()) {
-            config.setApiKey(Base64.getEncoder().encodeToString(reqVO.getApiKey().getBytes(StandardCharsets.UTF_8)));
+        if (reqVO.getApiKey() != null && !reqVO.getApiKey().isBlank() && !reqVO.getApiKey().contains("****")) {
+            config.setApiKey(AiApiKeyCodec.encode(reqVO.getApiKey()));
         }
         if (config.getApiKey() == null || config.getApiKey().isBlank()) {
             throw ServiceExceptionUtil.invalidParamException("API Key 不能为空");

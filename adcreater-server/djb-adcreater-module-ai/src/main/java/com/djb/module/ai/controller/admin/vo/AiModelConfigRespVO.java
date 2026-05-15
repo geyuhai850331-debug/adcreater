@@ -6,6 +6,7 @@ import lombok.Data;
 public class AiModelConfigRespVO {
     private Long id;
     private String modelName;
+    private String category;
     private String adapterClass;
     private String apiKey;
     private String endpointUrl;

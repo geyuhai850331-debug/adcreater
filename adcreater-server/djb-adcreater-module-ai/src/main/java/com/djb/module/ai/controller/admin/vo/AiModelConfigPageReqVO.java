@@ -8,5 +8,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class AiModelConfigPageReqVO extends PageParam {
     private String modelName;
+    private String category;
     private Boolean isEnabled;
 }
