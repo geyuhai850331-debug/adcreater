@@ -22,15 +22,15 @@
     </nav>
 
     <div class="step-content">
-      <!-- Step 1: 文案翻译 -->
+      <!-- Step 1: 营销策划 -->
       <div v-if="activeStep === 0" class="step-panel">
-        <AdCopyPanel @next="(data) => { adCopy = data; activeStep = 1 }" />
+        <MarketingPanel @next="(data) => { marketingData = data; activeStep = 1 }" />
       </div>
 
       <!-- Step 2: 图片生成 -->
       <div v-if="activeStep === 1" class="step-panel">
         <AdImagePanel
-          :ad-copy="adCopy"
+          :ad-copy="marketingData"
           @next="(data) => { adImage = data; activeStep = 2 }"
           @prev="activeStep = 0"
         />
@@ -47,7 +47,7 @@
       <!-- Step 4: 预览 -->
       <div v-if="activeStep === 3" class="step-panel">
         <AdPreviewPanel
-          :ad-copy="adCopy"
+          :ad-copy="marketingData"
           :ad-image="adImage"
           :ad-video="adVideo"
           @prev="activeStep = 2"
@@ -60,18 +60,18 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import AdCopyPanel from './components/AdCopyPanel.vue'
+import MarketingPanel from './components/MarketingPanel.vue'
 import AdImagePanel from './components/AdImagePanel.vue'
 import AdVideoPanel from './components/AdVideoPanel.vue'
 import AdPreviewPanel from './components/AdPreviewPanel.vue'
 
 const activeStep = ref(0)
-const adCopy = ref<any>(null)
+const marketingData = ref<any>(null)
 const adImage = ref<any>(null)
 const adVideo = ref<any>(null)
 
 const steps = [
-  { title: '文案', desc: '翻译 & 本地化' },
+  { title: '策划', desc: '营销分析 & 文案生成' },
   { title: '图片', desc: '多尺寸生成' },
   { title: '视频', desc: '动态素材' },
   { title: '完成', desc: '预览导出' }
@@ -79,7 +79,7 @@ const steps = [
 
 function handleReset() {
   activeStep.value = 0
-  adCopy.value = null
+  marketingData.value = null
   adImage.value = null
   adVideo.value = null
 }
