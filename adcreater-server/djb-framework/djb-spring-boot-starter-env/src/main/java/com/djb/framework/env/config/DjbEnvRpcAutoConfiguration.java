@@ -4,7 +4,6 @@ import com.djb.framework.env.core.fegin.EnvLoadBalancerClientFactory;
 import com.djb.framework.env.core.fegin.EnvRequestInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
@@ -21,7 +20,6 @@ import java.util.List;
  * @author djbadmin
  */
 @AutoConfiguration
-@ConditionalOnClass(name = "feign.RequestInterceptor")
 @EnableConfigurationProperties(EnvProperties.class)
 public class DjbEnvRpcAutoConfiguration {
 

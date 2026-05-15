@@ -2,11 +2,13 @@ package com.djb.module.infra.api.file.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import jakarta.validation.constraints.NotEmpty;
 
 @Schema(description = "RPC 服务 - 文件创建 Request DTO")
 @Data
+@Accessors(chain = true)
 public class FileCreateReqDTO {
 
     @Schema(description = "原文件名称", example = "xxx.png")

@@ -61,12 +61,8 @@ public interface CodegenConvert {
     }
 
     default List<CodegenPreviewRespVO> convert(Map<String, String> codes) {
-        return CollectionUtils.convertList(codes.entrySet(), entry -> {
-            CodegenPreviewRespVO respVO = new CodegenPreviewRespVO();
-            respVO.setFilePath(entry.getKey());
-            respVO.setCode(entry.getValue());
-            return respVO;
-        });
+        return CollectionUtils.convertList(codes.entrySet(),
+                entry -> new CodegenPreviewRespVO().setFilePath(entry.getKey()).setCode(entry.getValue()));
     }
 
 }

@@ -2,6 +2,7 @@ package com.djb.framework.common.biz.infra.logger.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
  * @author djbadmin
  */
 @Data
+@Accessors(chain = true)
 public class ApiAccessLogCreateReqDTO {
 
     /**

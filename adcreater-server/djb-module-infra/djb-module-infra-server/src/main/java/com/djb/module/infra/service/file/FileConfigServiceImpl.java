@@ -76,9 +76,9 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public Long createFileConfig(FileConfigSaveReqVO createReqVO) {
-        FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO);
-        fileConfig.setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()));
-        fileConfig.setMaster(false); // 默认非 master
+        FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
+                .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
+                .setMaster(false); // 默认非 master
         fileConfigMapper.insert(fileConfig);
         return fileConfig.getId();
     }
@@ -88,8 +88,8 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 校验存在
         FileConfigDO config = validateFileConfigExists(updateReqVO.getId());
         // 更新
-        FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO);
-        updateObj.setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
+        FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO)
+                .setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
         fileConfigMapper.updateById(updateObj);
 
         // 清空缓存
@@ -102,14 +102,9 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 校验存在
         validateFileConfigExists(id);
         // 更新其它为非 master
-        FileConfigDO updateAllObj = new FileConfigDO();
-        updateAllObj.setMaster(false);
-        fileConfigMapper.updateBatch(updateAllObj);
+        fileConfigMapper.updateBatch(new FileConfigDO().setMaster(false));
         // 更新
-        FileConfigDO updateObj = new FileConfigDO();
-        updateObj.setId(id);
-        updateObj.setMaster(true);
-        fileConfigMapper.updateById(updateObj);
+        fileConfigMapper.updateById(new FileConfigDO().setId(id).setMaster(true));
 
         // 清空缓存
         clearCache(null, true);

@@ -86,14 +86,9 @@ public class FileServiceImpl implements FileService {
         String url = client.upload(content, path, type);
 
         // 3. 保存到数据库
-        FileDO file = new FileDO();
-        file.setConfigId(client.getId());
-        file.setName(name);
-        file.setPath(path);
-        file.setUrl(url);
-        file.setType(type);
-        file.setSize((long) content.length);
-        fileMapper.insert(file);
+        fileMapper.insert(new FileDO().setConfigId(client.getId())
+                .setName(name).setPath(path).setUrl(url)
+                .setType(type).setSize((long) content.length));
         return url;
     }
 
@@ -139,12 +134,8 @@ public class FileServiceImpl implements FileService {
         FileClient fileClient = fileConfigService.getMasterFileClient();
         String uploadUrl = fileClient.presignPutUrl(path);
         String visitUrl = fileClient.presignGetUrl(path, null);
-        FilePresignedUrlRespVO respVO = new FilePresignedUrlRespVO();
-        respVO.setConfigId(fileClient.getId());
-        respVO.setPath(path);
-        respVO.setUploadUrl(uploadUrl);
-        respVO.setUrl(visitUrl);
-        return respVO;
+        return new FilePresignedUrlRespVO().setConfigId(fileClient.getId())
+                .setPath(path).setUploadUrl(uploadUrl).setUrl(visitUrl);
     }
 
     @Override

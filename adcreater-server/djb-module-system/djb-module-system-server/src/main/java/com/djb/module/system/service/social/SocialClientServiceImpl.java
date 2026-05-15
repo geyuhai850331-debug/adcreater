@@ -345,12 +345,8 @@ public class SocialClientServiceImpl implements SocialClientService {
     private WxMaSubscribeMessage buildMessageSendReqDTO(SocialWxaSubscribeMessageSendReqDTO reqDTO,
                                                         String templateId, String openId) {
         // 设置订阅消息基本参数
-        WxMaSubscribeMessage subscribeMessage = new WxMaSubscribeMessage();
-        subscribeMessage.setLang(WxMaConstants.MiniProgramLang.ZH_CN);
-        subscribeMessage.setMiniprogramState(miniprogramState);
-        subscribeMessage.setTemplateId(templateId);
-        subscribeMessage.setToUser(openId);
-        subscribeMessage.setPage(reqDTO.getPage());
+        WxMaSubscribeMessage subscribeMessage = new WxMaSubscribeMessage().setLang(WxMaConstants.MiniProgramLang.ZH_CN)
+                .setMiniprogramState(miniprogramState).setTemplateId(templateId).setToUser(openId).setPage(reqDTO.getPage());
         // 设置具体消息参数
         Map<String, String> messages = reqDTO.getMessages();
         if (CollUtil.isNotEmpty(messages)) {

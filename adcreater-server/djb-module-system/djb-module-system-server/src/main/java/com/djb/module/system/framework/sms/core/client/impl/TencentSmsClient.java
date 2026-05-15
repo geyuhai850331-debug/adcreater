@@ -98,20 +98,16 @@ public class TencentSmsClient extends AbstractSmsClient {
         JSONObject responseResult = response.getJSONObject("Response");
         JSONObject error = responseResult.getJSONObject("Error");
         if (error != null) {
-            SmsSendRespDTO respDTO = new SmsSendRespDTO();
-            respDTO.setSuccess(false);
-            respDTO.setApiRequestId(responseResult.getStr("RequestId"));
-            respDTO.setApiCode(error.getStr("Code"));
-            respDTO.setApiMsg(error.getStr("Message"));
-            return respDTO;
+            return new SmsSendRespDTO().setSuccess(false)
+                    .setApiRequestId(responseResult.getStr("RequestId"))
+                    .setApiCode(error.getStr("Code"))
+                    .setApiMsg(error.getStr("Message"));
         }
         JSONObject sendResult = responseResult.getJSONArray("SendStatusSet").getJSONObject(0);
-        SmsSendRespDTO respDTO = new SmsSendRespDTO();
-        respDTO.setSuccess(Objects.equals(API_CODE_SUCCESS, sendResult.getStr("Code")));
-        respDTO.setApiRequestId(responseResult.getStr("RequestId"));
-        respDTO.setSerialNo(sendResult.getStr("SerialNo"));
-        respDTO.setApiMsg(sendResult.getStr("Message"));
-        return respDTO;
+        return new SmsSendRespDTO().setSuccess(Objects.equals(API_CODE_SUCCESS, sendResult.getStr("Code")))
+                .setApiRequestId(responseResult.getStr("RequestId"))
+                .setSerialNo(sendResult.getStr("SerialNo"))
+                .setApiMsg(sendResult.getStr("Message"));
     }
 
     @Override
@@ -120,14 +116,13 @@ public class TencentSmsClient extends AbstractSmsClient {
         // 字段参考
         return convertList(statuses, status -> {
             JSONObject statusObj = (JSONObject) status;
-            SmsReceiveRespDTO respDTO = new SmsReceiveRespDTO();
-            respDTO.setSuccess("SUCCESS".equals(statusObj.getStr("report_status"))); // 是否接收成功
-            respDTO.setErrorCode(statusObj.getStr("errmsg")); // 状态报告编码
-            respDTO.setErrorMsg(statusObj.getStr("description")); // 状态报告描述
-            respDTO.setMobile(statusObj.getStr("mobile")); // 手机号
-            respDTO.setReceiveTime(statusObj.getLocalDateTime("user_receive_time", null)); // 状态报告时间
-            respDTO.setSerialNo(statusObj.getStr("sid")); // 发送序列号
-            return respDTO;
+            return new SmsReceiveRespDTO()
+                    .setSuccess("SUCCESS".equals(statusObj.getStr("report_status"))) // 是否接收成功
+                    .setErrorCode(statusObj.getStr("errmsg")) // 状态报告编码
+                    .setErrorMsg(statusObj.getStr("description")) // 状态报告描述
+                    .setMobile(statusObj.getStr("mobile")) // 手机号
+                    .setReceiveTime(statusObj.getLocalDateTime("user_receive_time", null)) // 状态报告时间
+                    .setSerialNo(statusObj.getStr("sid")); // 发送序列号
         });
     }
 
@@ -143,12 +138,10 @@ public class TencentSmsClient extends AbstractSmsClient {
         // 2. 解析请求
         JSONObject statusResult = response.getJSONObject("Response")
                 .getJSONArray("DescribeTemplateStatusSet").getJSONObject(0);
-        SmsTemplateRespDTO respDTO = new SmsTemplateRespDTO();
-        respDTO.setId(apiTemplateId);
-        respDTO.setContent(statusResult.get("TemplateContent").toString());
-        respDTO.setAuditStatus(convertSmsTemplateAuditStatus(statusResult.getInt("StatusCode")));
-        respDTO.setAuditReason(statusResult.get("ReviewReply").toString());
-        return respDTO;
+        return new SmsTemplateRespDTO().setId(apiTemplateId)
+                .setContent(statusResult.get("TemplateContent").toString())
+                .setAuditStatus(convertSmsTemplateAuditStatus(statusResult.getInt("StatusCode")))
+                .setAuditReason(statusResult.get("ReviewReply").toString());
     }
 
     @VisibleForTesting

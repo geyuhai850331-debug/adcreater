@@ -35,11 +35,7 @@ public class OAuth2AccessTokenRedisDAO {
     public void set(OAuth2AccessTokenDO accessTokenDO) {
         String redisKey = formatKey(accessTokenDO.getAccessToken());
         // 清理多余字段，避免缓存
-        accessTokenDO.setUpdater(null);
-        accessTokenDO.setUpdateTime(null);
-        accessTokenDO.setCreateTime(null);
-        accessTokenDO.setCreator(null);
-        accessTokenDO.setDeleted(null);
+        accessTokenDO.setUpdater(null).setUpdateTime(null).setCreateTime(null).setCreator(null).setDeleted(null);
         long time = LocalDateTimeUtil.between(LocalDateTime.now(), accessTokenDO.getExpiresTime(), ChronoUnit.SECONDS);
         if (time > 0) {
             stringRedisTemplate.opsForValue().set(redisKey, JsonUtils.toJsonString(accessTokenDO), time, TimeUnit.SECONDS);

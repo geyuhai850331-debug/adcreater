@@ -51,12 +51,7 @@ public interface FileApi {
      */
     default String createFile(@NotEmpty(message = "文件内容不能为空") byte[] content,
                               String name, String directory, String type) {
-        FileCreateReqDTO createReqDTO = new FileCreateReqDTO();
-        createReqDTO.setName(name);
-        createReqDTO.setDirectory(directory);
-        createReqDTO.setType(type);
-        createReqDTO.setContent(content);
-        return createFile(createReqDTO).getCheckedData();
+        return createFile(new FileCreateReqDTO().setName(name).setDirectory(directory).setType(type).setContent(content)).getCheckedData();
     }
 
     @PostMapping(PREFIX + "/create")

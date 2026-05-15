@@ -102,13 +102,10 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
     private DataSourceConfigDO buildMasterDataSourceConfig() {
         String primary = dynamicDataSourceProperties.getPrimary();
         DataSourceProperty dataSourceProperty = dynamicDataSourceProperties.getDatasource().get(primary);
-        DataSourceConfigDO configDO = new DataSourceConfigDO();
-        configDO.setId(DataSourceConfigDO.ID_MASTER);
-        configDO.setName(primary);
-        configDO.setUrl(dataSourceProperty.getUrl());
-        configDO.setUsername(dataSourceProperty.getUsername());
-        configDO.setPassword(dataSourceProperty.getPassword());
-        return configDO;
+        return new DataSourceConfigDO().setId(DataSourceConfigDO.ID_MASTER).setName(primary)
+                .setUrl(dataSourceProperty.getUrl())
+                .setUsername(dataSourceProperty.getUsername())
+                .setPassword(dataSourceProperty.getPassword());
     }
 
 }

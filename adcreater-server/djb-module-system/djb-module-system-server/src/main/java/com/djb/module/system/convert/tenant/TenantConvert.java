@@ -19,8 +19,7 @@ public interface TenantConvert {
         UserSaveReqVO reqVO = new UserSaveReqVO();
         reqVO.setUsername(bean.getUsername());
         reqVO.setPassword(bean.getPassword());
-        reqVO.setNickname(bean.getContactName());
-        reqVO.setMobile(bean.getContactMobile());
+        reqVO.setNickname(bean.getContactName()).setMobile(bean.getContactMobile());
         return reqVO;
     }
 

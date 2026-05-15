@@ -51,12 +51,8 @@ public class DebugDingTalkSmsClient extends AbstractSmsClient {
         // 解析结果
         Map<?, ?> responseObj = JsonUtils.parseObject(responseText, Map.class);
         String errorCode = MapUtil.getStr(responseObj, "errcode");
-        SmsSendRespDTO response = new SmsSendRespDTO();
-        response.setSuccess(Objects.equals(errorCode, "0"));
-        response.setSerialNo(StrUtil.uuid());
-        response.setApiCode(errorCode);
-        response.setApiMsg(MapUtil.getStr(responseObj, "errorMsg"));
-        return response;
+        return new SmsSendRespDTO().setSuccess(Objects.equals(errorCode, "0")).setSerialNo(StrUtil.uuid())
+                .setApiCode(errorCode).setApiMsg(MapUtil.getStr(responseObj, "errorMsg"));
     }
 
     /**
@@ -88,12 +84,8 @@ public class DebugDingTalkSmsClient extends AbstractSmsClient {
 
     @Override
     public SmsTemplateRespDTO getSmsTemplate(String apiTemplateId) {
-        SmsTemplateRespDTO response = new SmsTemplateRespDTO();
-        response.setId(apiTemplateId);
-        response.setContent("");
-        response.setAuditStatus(SmsTemplateAuditStatusEnum.SUCCESS.getStatus());
-        response.setAuditReason("");
-        return response;
+        return new SmsTemplateRespDTO().setId(apiTemplateId).setContent("")
+                .setAuditStatus(SmsTemplateAuditStatusEnum.SUCCESS.getStatus()).setAuditReason("");
     }
 
 }

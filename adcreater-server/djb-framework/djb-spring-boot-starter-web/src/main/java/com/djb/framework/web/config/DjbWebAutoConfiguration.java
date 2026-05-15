@@ -32,6 +32,10 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 @AutoConfiguration(beforeName = {
@@ -39,6 +43,10 @@ import java.util.function.Predicate;
 })
 @EnableConfigurationProperties(WebProperties.class)
 public class DjbWebAutoConfiguration {
+
+    private static final int EXECUTOR_CORE_POOL_SIZE = 4;
+    private static final int EXECUTOR_MAX_POOL_SIZE = 16;
+    private static final int EXECUTOR_QUEUE_CAPACITY = 200;
 
     /**
      * 应用名
@@ -93,6 +101,15 @@ public class DjbWebAutoConfiguration {
     @Bean
     public GlobalResponseBodyHandler globalResponseBodyHandler() {
         return new GlobalResponseBodyHandler();
+    }
+
+    @Bean(name = "executorService", destroyMethod = "shutdown")
+    @ConditionalOnMissingBean(ExecutorService.class)
+    public ExecutorService executorService() {
+        return new ThreadPoolExecutor(EXECUTOR_CORE_POOL_SIZE, EXECUTOR_MAX_POOL_SIZE,
+                60L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(EXECUTOR_QUEUE_CAPACITY),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Bean

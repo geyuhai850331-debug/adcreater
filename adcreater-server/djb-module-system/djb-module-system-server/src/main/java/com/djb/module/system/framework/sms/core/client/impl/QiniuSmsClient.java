@@ -55,17 +55,13 @@ public class QiniuSmsClient extends AbstractSmsClient {
         // 2. 解析请求
         if (ObjectUtil.isNotEmpty(response.getStr("error"))) {
             // 短信请求失败
-            SmsSendRespDTO respDTO = new SmsSendRespDTO();
-            respDTO.setSuccess(false);
-            respDTO.setApiCode(response.getStr("error"));
-            respDTO.setApiRequestId(response.getStr("request_id"));
-            respDTO.setApiMsg(response.getStr("message"));
-            return respDTO;
+            return new SmsSendRespDTO().setSuccess(false)
+                    .setApiCode(response.getStr("error"))
+                    .setApiRequestId(response.getStr("request_id"))
+                    .setApiMsg(response.getStr("message"));
         }
-        SmsSendRespDTO respDTO = new SmsSendRespDTO();
-        respDTO.setSuccess(response.containsKey("message_id"));
-        respDTO.setSerialNo(response.getStr("message_id"));
-        return respDTO;
+        return new SmsSendRespDTO().setSuccess(response.containsKey("message_id"))
+                .setSerialNo(response.getStr("message_id"));
     }
 
     /**
@@ -120,14 +116,13 @@ public class QiniuSmsClient extends AbstractSmsClient {
             @Override
             public SmsReceiveRespDTO apply(Object item) {
                 JSONObject statusObj = (JSONObject) item;
-                SmsReceiveRespDTO respDTO = new SmsReceiveRespDTO();
-                respDTO.setSuccess("DELIVRD".equals(statusObj.getStr("status"))); // 是否接收成功
-                respDTO.setErrorMsg(statusObj.getStr("status")); // 状态报告编码
-                respDTO.setMobile(statusObj.getStr("mobile")); // 手机号
-                respDTO.setReceiveTime(LocalDateTimeUtil.of(statusObj.getLong("delivrd_at") * 1000L)); // 状态报告时间
-                respDTO.setSerialNo(statusObj.getStr("message_id")); // 发送序列号
-                respDTO.setLogId(statusObj.getLong("seq")); // 用户序列号
-                return respDTO;
+                return new SmsReceiveRespDTO()
+                        .setSuccess("DELIVRD".equals(statusObj.getStr("status"))) // 是否接收成功
+                        .setErrorMsg(statusObj.getStr("status")) // 状态报告编码
+                        .setMobile(statusObj.getStr("mobile")) // 手机号
+                        .setReceiveTime(LocalDateTimeUtil.of(statusObj.getLong("delivrd_at") * 1000L)) // 状态报告时间
+                        .setSerialNo(statusObj.getStr("message_id")) // 发送序列号
+                        .setLogId(statusObj.getLong("seq")); // 用户序列号
             }
 
         });
@@ -140,12 +135,11 @@ public class QiniuSmsClient extends AbstractSmsClient {
         JSONObject response = request("GET", null, "/v1/template/" + apiTemplateId);
 
         // 2.2 解析请求
-        SmsTemplateRespDTO respDTO = new SmsTemplateRespDTO();
-        respDTO.setId(response.getStr("id"));
-        respDTO.setContent(response.getStr("template"));
-        respDTO.setAuditStatus(convertSmsTemplateAuditStatus(response.getStr("audit_status")));
-        respDTO.setAuditReason(response.getStr("reject_reason"));
-        return respDTO;
+        return new SmsTemplateRespDTO()
+                .setId(response.getStr("id"))
+                .setContent(response.getStr("template"))
+                .setAuditStatus(convertSmsTemplateAuditStatus(response.getStr("audit_status")))
+                .setAuditReason(response.getStr("reject_reason"));
     }
 
     @VisibleForTesting

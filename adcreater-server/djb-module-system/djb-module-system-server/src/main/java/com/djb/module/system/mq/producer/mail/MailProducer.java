@@ -39,16 +39,11 @@ public class MailProducer {
                                     Collection<String> toMails, Collection<String> ccMails, Collection<String> bccMails,
                                     Long accountId, String nickname, String title, String content,
                                     File[] attachments) {
-        MailSendMessage message = new MailSendMessage();
-        message.setLogId(sendLogId);
-        message.setToMails(toMails);
-        message.setCcMails(ccMails);
-        message.setBccMails(bccMails);
-        message.setAccountId(accountId);
-        message.setNickname(nickname);
-        message.setTitle(title);
-        message.setContent(content);
-        message.setAttachments(attachments);
+        MailSendMessage message = new MailSendMessage()
+                .setLogId(sendLogId)
+                .setToMails(toMails).setCcMails(ccMails).setBccMails(bccMails)
+                .setAccountId(accountId).setNickname(nickname)
+                .setTitle(title).setContent(content).setAttachments(attachments);
         applicationContext.publishEvent(message);
     }
 

@@ -88,18 +88,13 @@ public class HuaweiSmsClient extends AbstractSmsClient {
 
         // 2. 解析请求
         if (!response.containsKey("result")) { // 例如说：密钥不正确
-            SmsSendRespDTO respDTO = new SmsSendRespDTO();
-            respDTO.setSuccess(false);
-            respDTO.setApiCode(response.getStr("code"));
-            respDTO.setApiMsg(response.getStr("description"));
-            return respDTO;
+            return new SmsSendRespDTO().setSuccess(false)
+                    .setApiCode(response.getStr("code"))
+                    .setApiMsg(response.getStr("description"));
         }
         JSONObject sendResult = response.getJSONArray("result").getJSONObject(0);
-        SmsSendRespDTO respDTO = new SmsSendRespDTO();
-        respDTO.setSuccess(RESPONSE_CODE_SUCCESS.equals(response.getStr("code")));
-        respDTO.setSerialNo(sendResult.getStr("smsMsgId"));
-        respDTO.setApiCode(sendResult.getStr("status"));
-        return respDTO;
+        return new SmsSendRespDTO().setSuccess(RESPONSE_CODE_SUCCESS.equals(response.getStr("code")))
+                .setSerialNo(sendResult.getStr("smsMsgId")).setApiCode(sendResult.getStr("status"));
     }
 
     /**
@@ -139,15 +134,14 @@ public class HuaweiSmsClient extends AbstractSmsClient {
     public List<SmsReceiveRespDTO> parseSmsReceiveStatus(String requestBody) {
         Map<String, String> params = HttpUtil.decodeParamMap(requestBody, StandardCharsets.UTF_8);
         // 字段参考 https://support.huaweicloud.com/api-msgsms/sms_05_0003.html
-        SmsReceiveRespDTO respDTO = new SmsReceiveRespDTO();
-        respDTO.setSuccess("DELIVRD".equals(params.get("status"))); // 是否接收成功
-        respDTO.setErrorCode(params.get("status")); // 状态报告编码
-        respDTO.setErrorMsg(params.get("statusDesc"));
-        respDTO.setMobile(params.get("to")); // 手机号
-        respDTO.setReceiveTime(LocalDateTime.ofInstant(Instant.parse(params.get("updateTime")), ZoneId.of("UTC"))); // 状态报告时间
-        respDTO.setSerialNo(params.get("smsMsgId")); // 发送序列号
-        respDTO.setLogId(Long.valueOf(params.get("extend"))); // 用户序列号
-        return ListUtil.of(respDTO);
+        return ListUtil.of(new SmsReceiveRespDTO()
+                .setSuccess("DELIVRD".equals(params.get("status"))) // 是否接收成功
+                .setErrorCode(params.get("status")) // 状态报告编码
+                .setErrorMsg(params.get("statusDesc"))
+                .setMobile(params.get("to")) // 手机号
+                .setReceiveTime(LocalDateTime.ofInstant(Instant.parse(params.get("updateTime")), ZoneId.of("UTC"))) // 状态报告时间
+                .setSerialNo(params.get("smsMsgId")) // 发送序列号
+                .setLogId(Long.valueOf(params.get("extend")))); // 用户序列号
     }
 
     @Override
@@ -155,12 +149,8 @@ public class HuaweiSmsClient extends AbstractSmsClient {
         // 华为短信模板查询和发送短信，是不同的两套 key 和 secret，与阿里、腾讯的区别较大，这里模板查询校验暂不实现
         String[] strs = apiTemplateId.split(" ");
         Assert.isTrue(strs.length == 2, "格式不正确，需要满足：apiTemplateId sender");
-        SmsTemplateRespDTO respDTO = new SmsTemplateRespDTO();
-        respDTO.setId(apiTemplateId);
-        respDTO.setContent(null);
-        respDTO.setAuditStatus(SmsTemplateAuditStatusEnum.SUCCESS.getStatus());
-        respDTO.setAuditReason(null);
-        return respDTO;
+        return new SmsTemplateRespDTO().setId(apiTemplateId).setContent(null)
+                .setAuditStatus(SmsTemplateAuditStatusEnum.SUCCESS.getStatus()).setAuditReason(null);
     }
 
     private static void appendToBody(StringBuilder body, String key, String value) {

@@ -111,12 +111,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 2.2 插入关联岗位
         if (CollectionUtil.isNotEmpty(user.getPostIds())) {
             userPostMapper.insertBatch(convertList(user.getPostIds(),
-                    postId -> {
-                        UserPostDO userPost = new UserPostDO();
-                        userPost.setUserId(user.getId());
-                        userPost.setPostId(postId);
-                        return userPost;
-                    }));
+                    postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
         // 3. 记录操作日志上下文
@@ -179,12 +174,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
         if (!CollectionUtil.isEmpty(createPostIds)) {
             userPostMapper.insertBatch(convertList(createPostIds,
-                    postId -> {
-                        UserPostDO userPost = new UserPostDO();
-                        userPost.setUserId(userId);
-                        userPost.setPostId(postId);
-                        return userPost;
-                    }));
+                    postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
         if (!CollectionUtil.isEmpty(deletePostIds)) {
             userPostMapper.deleteByUserIdAndPostId(userId, deletePostIds);
@@ -193,11 +183,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public void updateUserLogin(Long id, String loginIp) {
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
-        updateObj.setLoginIp(loginIp);
-        updateObj.setLoginDate(LocalDateTime.now());
-        userMapper.updateById(updateObj);
+        userMapper.updateById(new AdminUserDO().setId(id).setLoginIp(loginIp).setLoginDate(LocalDateTime.now()));
     }
 
     @Override
@@ -207,9 +193,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         validateEmailUnique(id, reqVO.getEmail());
         validateMobileUnique(id, reqVO.getMobile());
         // 执行更新
-        AdminUserDO updateObj = BeanUtils.toBean(reqVO, AdminUserDO.class);
-        updateObj.setId(id);
-        userMapper.updateById(updateObj);
+        userMapper.updateById(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
     }
 
     @Override
@@ -217,8 +201,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 校验旧密码密码
         validateOldPassword(id, reqVO.getOldPassword());
         // 执行更新
-        AdminUserDO updateObj = new AdminUserDO();
-        updateObj.setId(id);
+        AdminUserDO updateObj = new AdminUserDO().setId(id);
         updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
         userMapper.updateById(updateObj);
     }
@@ -510,9 +493,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             int currentIndex = index.getAndIncrement();
             // 2.1.1 校验字段是否符合要求
             try {
-                UserSaveReqVO userSaveReqVO = BeanUtils.toBean(importUser, UserSaveReqVO.class);
-                userSaveReqVO.setPassword(initPassword);
-                ValidationUtils.validate(userSaveReqVO);
+                ValidationUtils.validate(BeanUtils.toBean(importUser, UserSaveReqVO.class).setPassword(initPassword));
             } catch (ConstraintViolationException ex) {
                 String key = StrUtil.blankToDefault(importUser.getUsername(), "第 " + currentIndex + " 行");
                 respVO.getFailureUsernames().put(key, ex.getMessage());
@@ -530,10 +511,8 @@ public class AdminUserServiceImpl implements AdminUserService {
             // 2.2.1 判断如果不存在，在进行插入
             AdminUserDO existUser = userMapper.selectByUsername(importUser.getUsername());
             if (existUser == null) {
-                AdminUserDO createUser = BeanUtils.toBean(importUser, AdminUserDO.class);
-                createUser.setPassword(encodePassword(initPassword));
-                createUser.setPostIds(new HashSet<>()); // 设置默认密码及空岗位编号数组
-                userMapper.insert(createUser);
+                userMapper.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
+                        .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>())); // 设置默认密码及空岗位编号数组
                 respVO.getCreateUsernames().add(importUser.getUsername());
                 return;
             }

@@ -125,18 +125,12 @@ public class Demo03StudentInnerServiceImpl implements Demo03StudentInnerService 
     }
 
     private void createDemo03CourseList(Long studentId, List<Demo03CourseDO> list) {
-        list.forEach(o -> {
-            o.setStudentId(studentId);
-            o.clean();
-        });
+        list.forEach(o -> o.setStudentId(studentId).clean());
         demo03CourseInnerMapper.insertBatch(list);
     }
 
     private void updateDemo03CourseList(Long studentId, List<Demo03CourseDO> list) {
-        list.forEach(o -> {
-            o.setStudentId(studentId);
-            o.clean();
-        });
+        list.forEach(o -> o.setStudentId(studentId).clean());
         List<Demo03CourseDO> oldList = demo03CourseInnerMapper.selectListByStudentId(studentId);
         List<List<Demo03CourseDO>> diffList = diffList(oldList, list, (oldVal, newVal) -> {
             boolean same = ObjectUtil.equal(oldVal.getId(), newVal.getId());
@@ -185,8 +179,7 @@ public class Demo03StudentInnerServiceImpl implements Demo03StudentInnerService 
         if (demo03Grade == null) {
             return;
         }
-        demo03Grade.setStudentId(studentId);
-        demo03Grade.clean();
+        demo03Grade.setStudentId(studentId).clean();
         demo03GradeInnerMapper.insertOrUpdate(demo03Grade);
     }
 

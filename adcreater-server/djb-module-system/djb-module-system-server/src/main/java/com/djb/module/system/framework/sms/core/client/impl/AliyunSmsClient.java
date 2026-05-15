@@ -63,13 +63,12 @@ public class AliyunSmsClient extends AbstractSmsClient {
         JSONObject response = request("SendSms", queryParam);
 
         // 2. 解析请求
-        SmsSendRespDTO respDTO = new SmsSendRespDTO();
-        respDTO.setSuccess(Objects.equals(response.getStr("Code"), RESPONSE_CODE_SUCCESS));
-        respDTO.setSerialNo(response.getStr("BizId"));
-        respDTO.setApiRequestId(response.getStr("RequestId"));
-        respDTO.setApiCode(response.getStr("Code"));
-        respDTO.setApiMsg(response.getStr("Message"));
-        return respDTO;
+        return new SmsSendRespDTO()
+                .setSuccess(Objects.equals(response.getStr("Code"), RESPONSE_CODE_SUCCESS))
+                .setSerialNo(response.getStr("BizId"))
+                .setApiRequestId(response.getStr("RequestId"))
+                .setApiCode(response.getStr("Code"))
+                .setApiMsg(response.getStr("Message"));
     }
 
     @Override
@@ -78,15 +77,14 @@ public class AliyunSmsClient extends AbstractSmsClient {
         // 字段参考 https://help.aliyun.com/zh/sms/developer-reference/smsreport-2
         return convertList(statuses, status -> {
             JSONObject statusObj = (JSONObject) status;
-            SmsReceiveRespDTO respDTO = new SmsReceiveRespDTO();
-            respDTO.setSuccess(statusObj.getBool("success")); // 是否接收成功
-            respDTO.setErrorCode(statusObj.getStr("err_code")); // 状态报告编码
-            respDTO.setErrorMsg(statusObj.getStr("err_msg")); // 状态报告说明
-            respDTO.setMobile(statusObj.getStr("phone_number")); // 手机号
-            respDTO.setReceiveTime(statusObj.getLocalDateTime("report_time", null)); // 状态报告时间
-            respDTO.setSerialNo(statusObj.getStr("biz_id")); // 发送序列号
-            respDTO.setLogId(statusObj.getLong("out_id")); // 用户序列号
-            return respDTO;
+            return new SmsReceiveRespDTO()
+                    .setSuccess(statusObj.getBool("success")) // 是否接收成功
+                    .setErrorCode(statusObj.getStr("err_code")) // 状态报告编码
+                    .setErrorMsg(statusObj.getStr("err_msg")) // 状态报告说明
+                    .setMobile(statusObj.getStr("phone_number")) // 手机号
+                    .setReceiveTime(statusObj.getLocalDateTime("report_time", null)) // 状态报告时间
+                    .setSerialNo(statusObj.getStr("biz_id")) // 发送序列号
+                    .setLogId(statusObj.getLong("out_id")); // 用户序列号
         });
     }
 
@@ -105,12 +103,11 @@ public class AliyunSmsClient extends AbstractSmsClient {
             return null;
         }
         // 2.2 请求成功
-        SmsTemplateRespDTO respDTO = new SmsTemplateRespDTO();
-        respDTO.setId(response.getStr("TemplateCode"));
-        respDTO.setContent(response.getStr("TemplateContent"));
-        respDTO.setAuditStatus(convertSmsTemplateAuditStatus(response.getInt("TemplateStatus")));
-        respDTO.setAuditReason(response.getStr("Reason"));
-        return respDTO;
+        return new SmsTemplateRespDTO()
+                .setId(response.getStr("TemplateCode"))
+                .setContent(response.getStr("TemplateContent"))
+                .setAuditStatus(convertSmsTemplateAuditStatus(response.getInt("TemplateStatus")))
+                .setAuditReason(response.getStr("Reason"));
     }
 
     @VisibleForTesting

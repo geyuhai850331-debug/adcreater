@@ -175,15 +175,12 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     }
 
     private OAuth2AccessTokenDO createOAuth2AccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
-        OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO();
-        accessTokenDO.setAccessToken(generateAccessToken());
-        accessTokenDO.setUserId(refreshTokenDO.getUserId());
-        accessTokenDO.setUserType(refreshTokenDO.getUserType());
-        accessTokenDO.setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType()));
-        accessTokenDO.setClientId(clientDO.getClientId());
-        accessTokenDO.setScopes(refreshTokenDO.getScopes());
-        accessTokenDO.setRefreshToken(refreshTokenDO.getRefreshToken());
-        accessTokenDO.setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()));
+        OAuth2AccessTokenDO accessTokenDO = new OAuth2AccessTokenDO().setAccessToken(generateAccessToken())
+                .setUserId(refreshTokenDO.getUserId()).setUserType(refreshTokenDO.getUserType())
+                .setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType()))
+                .setClientId(clientDO.getClientId()).setScopes(refreshTokenDO.getScopes())
+                .setRefreshToken(refreshTokenDO.getRefreshToken())
+                .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()));
         // 优先从 refreshToken 获取租户编号，避免 ThreadLocal 被污染时导致 tenantId 为 null
         // 可能关联的 issue：https://t.zsxq.com/JIi5G
         Long tenantId = refreshTokenDO.getTenantId();
@@ -198,20 +195,17 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     }
 
     private OAuth2RefreshTokenDO createOAuth2RefreshToken(Long userId, Integer userType, OAuth2ClientDO clientDO, List<String> scopes) {
-        OAuth2RefreshTokenDO refreshToken = new OAuth2RefreshTokenDO();
-        refreshToken.setRefreshToken(generateRefreshToken());
-        refreshToken.setUserId(userId);
-        refreshToken.setUserType(userType);
-        refreshToken.setClientId(clientDO.getClientId());
-        refreshToken.setScopes(scopes);
-        refreshToken.setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
+        OAuth2RefreshTokenDO refreshToken = new OAuth2RefreshTokenDO().setRefreshToken(generateRefreshToken())
+                .setUserId(userId).setUserType(userType)
+                .setClientId(clientDO.getClientId()).setScopes(scopes)
+                .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
         oauth2RefreshTokenMapper.insert(refreshToken);
         return refreshToken;
     }
 
     private OAuth2AccessTokenDO convertToAccessToken(OAuth2RefreshTokenDO refreshTokenDO) {
-        OAuth2AccessTokenDO accessTokenDO = BeanUtils.toBean(refreshTokenDO, OAuth2AccessTokenDO.class);
-        accessTokenDO.setAccessToken(refreshTokenDO.getRefreshToken());
+        OAuth2AccessTokenDO accessTokenDO = BeanUtils.toBean(refreshTokenDO, OAuth2AccessTokenDO.class)
+                .setAccessToken(refreshTokenDO.getRefreshToken());
         TenantUtils.execute(refreshTokenDO.getTenantId(),
                         () -> accessTokenDO.setUserInfo(buildUserInfo(refreshTokenDO.getUserId(), refreshTokenDO.getUserType())));
         return accessTokenDO;

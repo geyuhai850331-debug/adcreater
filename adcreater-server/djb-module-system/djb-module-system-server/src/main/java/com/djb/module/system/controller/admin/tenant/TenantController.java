@@ -57,12 +57,8 @@ public class TenantController {
     @Operation(summary = "获取租户精简信息列表", description = "只包含被开启的租户，用于【首页】功能的选择租户选项")
     public CommonResult<List<TenantRespVO>> getTenantSimpleList() {
         List<TenantDO> list = tenantService.getTenantListByStatus(CommonStatusEnum.ENABLE.getStatus());
-        return success(convertList(list, tenantDO -> {
-            TenantRespVO respVO = new TenantRespVO();
-            respVO.setId(tenantDO.getId());
-            respVO.setName(tenantDO.getName());
-            return respVO;
-        }));
+        return success(convertList(list, tenantDO ->
+                new TenantRespVO().setId(tenantDO.getId()).setName(tenantDO.getName())));
     }
 
     @GetMapping("/get-by-website")
@@ -76,10 +72,7 @@ public class TenantController {
         if (tenant == null || CommonStatusEnum.isDisable(tenant.getStatus())) {
             return success(null);
         }
-        TenantRespVO respVO = new TenantRespVO();
-        respVO.setId(tenant.getId());
-        respVO.setName(tenant.getName());
-        return success(respVO);
+        return success(new TenantRespVO().setId(tenant.getId()).setName(tenant.getName()));
     }
 
     @PostMapping("/create")

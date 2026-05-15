@@ -36,10 +36,7 @@ public interface NotifyMessageMapper extends BaseMapperX<NotifyMessageDO> {
     }
 
     default int updateListRead(Collection<Long> ids, Long userId, Integer userType) {
-        NotifyMessageDO updateObj = new NotifyMessageDO();
-        updateObj.setReadStatus(true);
-        updateObj.setReadTime(LocalDateTime.now());
-        return update(updateObj,
+        return update(new NotifyMessageDO().setReadStatus(true).setReadTime(LocalDateTime.now()),
                 new LambdaQueryWrapperX<NotifyMessageDO>()
                         .in(NotifyMessageDO::getId, ids)
                         .eq(NotifyMessageDO::getUserId, userId)
@@ -48,10 +45,7 @@ public interface NotifyMessageMapper extends BaseMapperX<NotifyMessageDO> {
     }
 
     default int updateListRead(Long userId, Integer userType) {
-        NotifyMessageDO updateObj = new NotifyMessageDO();
-        updateObj.setReadStatus(true);
-        updateObj.setReadTime(LocalDateTime.now());
-        return update(updateObj,
+        return update(new NotifyMessageDO().setReadStatus(true).setReadTime(LocalDateTime.now()),
                 new LambdaQueryWrapperX<NotifyMessageDO>()
                         .eq(NotifyMessageDO::getUserId, userId)
                         .eq(NotifyMessageDO::getUserType, userType)

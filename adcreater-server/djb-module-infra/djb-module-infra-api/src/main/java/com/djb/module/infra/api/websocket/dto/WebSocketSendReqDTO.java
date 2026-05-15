@@ -2,11 +2,13 @@ package com.djb.module.infra.api.websocket.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import jakarta.validation.constraints.NotEmpty;
 
 @Schema(description = "RPC 服务 - WebSocket 消息发送 Request DTO")
 @Data
+@Accessors(chain = true)
 public class WebSocketSendReqDTO {
 
     @Schema(description = "Session 编号", example = "abc")

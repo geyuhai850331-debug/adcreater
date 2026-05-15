@@ -38,13 +38,9 @@ public class SocialUserController {
     @PostMapping("/bind")
     @Operation(summary = "社交绑定，使用 code 授权码")
     public CommonResult<Boolean> socialBind(@RequestBody @Valid SocialUserBindReqVO reqVO) {
-        SocialUserBindReqDTO reqDTO = new SocialUserBindReqDTO();
-        reqDTO.setSocialType(reqVO.getType());
-        reqDTO.setCode(reqVO.getCode());
-        reqDTO.setState(reqVO.getState());
-        reqDTO.setUserId(getLoginUserId());
-        reqDTO.setUserType(UserTypeEnum.ADMIN.getValue());
-        socialUserService.bindSocialUser(reqDTO);
+        socialUserService.bindSocialUser(new SocialUserBindReqDTO().setSocialType(reqVO.getType())
+                        .setCode(reqVO.getCode()).setState(reqVO.getState())
+                        .setUserId(getLoginUserId()).setUserType(UserTypeEnum.ADMIN.getValue()));
         return CommonResult.success(true);
     }
 
@@ -59,15 +55,9 @@ public class SocialUserController {
     @Operation(summary = "获得绑定社交用户列表")
     public CommonResult<List<SocialUserRespVO>> getBindSocialUserList() {
         List<SocialUserDO> list = socialUserService.getSocialUserList(getLoginUserId(), UserTypeEnum.ADMIN.getValue());
-        return success(convertList(list, socialUser -> { // 返回精简信息
-            SocialUserRespVO respVO = new SocialUserRespVO();
-            respVO.setId(socialUser.getId());
-            respVO.setType(socialUser.getType());
-            respVO.setOpenid(socialUser.getOpenid());
-            respVO.setNickname(socialUser.getNickname());
-            respVO.setAvatar(socialUser.getNickname());
-            return respVO;
-        }));
+        return success(convertList(list, socialUser -> new SocialUserRespVO() // 返回精简信息
+                .setId(socialUser.getId()).setType(socialUser.getType()).setOpenid(socialUser.getOpenid())
+                .setNickname(socialUser.getNickname()).setAvatar(socialUser.getNickname())));
     }
 
     // ==================== 社交用户 CRUD ====================
