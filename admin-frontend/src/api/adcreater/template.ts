@@ -1,15 +1,20 @@
 import request from '@/config/axios/adminService'
 
+interface CommonResult<T> {
+  code: number
+  msg: string
+  data: T
+}
+
 export interface TemplateVO {
   id?: number
   name: string
   category: string
   description: string
   thumbnailUrl?: string
-  configData?: string
-  currentVersion?: string
   status?: string
-  createdAt?: string
+  createTime?: string
+  updateTime?: string
 }
 
 export interface TemplatePageParams {
@@ -24,35 +29,55 @@ export interface TemplatePageResult {
 }
 
 export interface TemplateVersionVO {
-  version: string
-  url: string
+  id: number
+  templateId: number
+  version: number
+  fileUrl: string
   changelog: string
-  createdAt: string
+  createTime: string
 }
 
-export const getTemplatePage = (params: TemplatePageParams) => {
-  return request.get<TemplatePageResult>('/templates', params)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const unwrap = async <T>(requestPromise: Promise<any>): Promise<T> => {
+  const res = await requestPromise
+  return res.data
 }
 
-export const createTemplate = (data: FormData) => {
-  return request.post('/templates', data)
+export const getTemplatePage = (params: TemplatePageParams): Promise<TemplatePageResult> => {
+  return unwrap(
+    request.get('/template/page', {
+      pageNo: params.page,
+      pageSize: params.pageSize
+    })
+  )
 }
 
-export const updateTemplate = (id: number, data: FormData) => {
-  return request.put(`/templates/${id}`, data)
+export const createTemplate = (data: TemplateVO): Promise<number> => {
+  return unwrap(request.post('/template/create', data))
 }
 
-export const deleteTemplate = (id: number) => {
-  return request.delete(`/templates/${id}`)
+export const updateTemplate = (id: number, data: TemplateVO): Promise<boolean> => {
+  return unwrap(request.put('/template/update', { ...data, id }))
+}
+
+export const deleteTemplate = (id: number): Promise<boolean> => {
+  return unwrap(request.delete(`/template/delete?id=${id}`))
 }
 
 export const publishTemplateVersion = (
   templateId: number,
-  data: { version: string; url: string; changelog: string }
-) => {
-  return request.post(`/templates/${templateId}/versions`, data)
+  data: { version: string; fileUrl: string; changelog: string }
+): Promise<number> => {
+  const params = new URLSearchParams({
+    templateId: String(templateId),
+    fileUrl: data.fileUrl,
+    changelog: data.changelog
+  })
+  return unwrap(request.post(`/template/publish-version?${params.toString()}`))
 }
 
-export const getTemplateVersions = (templateId: number) => {
-  return request.get<TemplateVersionVO[]>(`/templates/${templateId}/versions`)
+export const getTemplateVersions = (templateId: number): Promise<TemplateVersionVO[]> => {
+  return unwrap(
+    request.get('/template/versions', { templateId })
+  )
 }

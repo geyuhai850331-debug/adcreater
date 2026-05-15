@@ -22,7 +22,7 @@ import static com.djb.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "管理后台 - Prompt 模板")
 @RestController
-@RequestMapping("/admin-api/ai/prompt-template")
+@RequestMapping("/ai/prompt-template")
 @Validated
 @Slf4j
 public class PromptTemplateController {
@@ -42,6 +42,14 @@ public class PromptTemplateController {
     @PreAuthorize("@ss.hasPermission('ai:prompt:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody PromptTemplateSaveReqVO reqVO) {
         service.update(reqVO);
+        return success(true);
+    }
+
+    @PutMapping("/update-status")
+    @Operation(summary = "更新 Prompt 模板启用状态")
+    @PreAuthorize("@ss.hasPermission('ai:prompt:update')")
+    public CommonResult<Boolean> updateStatus(@Valid @RequestBody PromptTemplateStatusReqVO reqVO) {
+        service.updateStatus(reqVO.getId(), reqVO.getIsEnabled());
         return success(true);
     }
 

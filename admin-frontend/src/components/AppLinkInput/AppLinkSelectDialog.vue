@@ -48,27 +48,11 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <Dialog v-model="detailSelectDialog.visible" title="" width="50%">
-    <el-form class="min-h-200px">
-      <el-form-item
-        label="选择分类"
-        v-if="detailSelectDialog.type === APP_LINK_TYPE_ENUM.PRODUCT_CATEGORY_LIST"
-      >
-        <ProductCategorySelect
-          v-model="detailSelectDialog.id"
-          :parent-id="0"
-          @update:model-value="handleProductCategorySelected"
-        />
-      </el-form-item>
-    </el-form>
-  </Dialog>
 </template>
 <script lang="ts" setup>
-import { APP_LINK_GROUP_LIST, APP_LINK_TYPE_ENUM, AppLink } from './data'
+import { APP_LINK_GROUP_LIST, AppLink } from './data'
 import { ButtonInstance, ScrollbarInstance } from 'element-plus'
 import { split } from 'lodash-es'
-import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
-import { getUrlNumberValue } from '@/utils'
 
 // APP 链接选择弹框
 defineOptions({ name: 'AppLinkSelectDialog' })
@@ -108,17 +92,6 @@ const handleAppLinkSelected = (appLink: AppLink) => {
     // 如果新链接的 path 为空，则沿用当前 activeAppLink 的 path
     const path = appLink.path || activeAppLink.value.path
     activeAppLink.value = { ...appLink, path: path }
-  }
-  switch (appLink.type) {
-    case APP_LINK_TYPE_ENUM.PRODUCT_CATEGORY_LIST:
-      detailSelectDialog.value.visible = true
-      detailSelectDialog.value.type = appLink.type
-      // 返显
-      detailSelectDialog.value.id =
-        getUrlNumberValue('id', 'http://127.0.0.1' + activeAppLink.value.path) || undefined
-      break
-    default:
-      break
   }
 }
 
@@ -185,27 +158,5 @@ const isSameLink = (link1: string, link2: string) => {
   return split(link1, '?', 1)[0] === split(link2, '?', 1)[0]
 }
 
-// 详情选择对话框
-const detailSelectDialog = ref<{
-  visible: boolean
-  id?: number
-  type?: APP_LINK_TYPE_ENUM
-}>({
-  visible: false,
-  id: undefined,
-  type: undefined
-})
-// 处理详情选择
-const handleProductCategorySelected = (id: number) => {
-  const url = new URL(activeAppLink.value.path, 'http://127.0.0.1')
-  // 修改 id 参数
-  url.searchParams.set('id', `${id}`)
-  // 排除域名
-  activeAppLink.value.path = `${url.pathname}${url.search}`
-  // 关闭对话框
-  detailSelectDialog.value.visible = false
-  // 重置 id
-  detailSelectDialog.value.id = undefined
-}
 </script>
 <style lang="scss" scoped></style>

@@ -70,12 +70,6 @@ public class DefaultController {
                 "[AI 大模型 djb-module-ai - 已禁用]");
     }
 
-    @RequestMapping(value = { "/admin-api/iot/**"})
-    public CommonResult<Boolean> iot404() {
-        return CommonResult.error(NOT_IMPLEMENTED.getCode(),
-                "[IoT 物联网 djb-module-iot - 已禁用]");
-    }
-
     /**
      * 测试接口：打印 query、header、body
      */

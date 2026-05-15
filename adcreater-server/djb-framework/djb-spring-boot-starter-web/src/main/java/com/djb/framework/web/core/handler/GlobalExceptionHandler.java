@@ -441,12 +441,6 @@ public class GlobalExceptionHandler {
             return CommonResult.error(NOT_IMPLEMENTED.getCode(),
                     "[AI 大模型 djb-module-ai - 表结构未导入]");
         }
-        // 9. IoT 物联网
-        if (message.contains("iot_")) {
-            log.error("[IoT 物联网 djb-module-iot - 表结构未导入]");
-            return CommonResult.error(NOT_IMPLEMENTED.getCode(),
-                    "[IoT 物联网 djb-module-iot - 表结构未导入]");
-        }
         return null;
     }
 

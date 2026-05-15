@@ -31,34 +31,19 @@
         </template>
         <el-tabs>
           <el-tab-pane label="积分">
-            <UserPointList :user-id="id" />
+            <UserPointList :user-id="userId" />
           </el-tab-pane>
           <el-tab-pane label="签到" lazy>
-            <UserSignList :user-id="id" />
+            <UserSignList :user-id="userId" />
           </el-tab-pane>
           <el-tab-pane label="成长值" lazy>
-            <UserExperienceRecordList :user-id="id" />
+            <UserExperienceRecordList :user-id="userId" />
           </el-tab-pane>
           <el-tab-pane label="余额" lazy>
             <UserBalanceList :wallet-id="wallet.id" />
           </el-tab-pane>
           <el-tab-pane label="收货地址" lazy>
-            <UserAddressList :user-id="id" />
-          </el-tab-pane>
-          <el-tab-pane label="订单管理" lazy>
-            <UserOrderList :user-id="id" />
-          </el-tab-pane>
-          <el-tab-pane label="售后管理" lazy>
-            <UserAfterSaleList :user-id="id" />
-          </el-tab-pane>
-          <el-tab-pane label="收藏记录" lazy>
-            <UserFavoriteList :user-id="id" />
-          </el-tab-pane>
-          <el-tab-pane label="优惠劵" lazy>
-            <UserCouponList :user-id="id" />
-          </el-tab-pane>
-          <el-tab-pane label="推广用户" lazy>
-            <UserBrokerageList :bind-user-id="id" />
+            <UserAddressList :user-id="userId" />
           </el-tab-pane>
         </el-tabs>
       </el-card>
@@ -66,7 +51,7 @@
   </div>
 
   <!-- 表单弹窗：添加/修改 -->
-  <UserForm ref="formRef" @success="getUserData(id)" />
+  <UserForm ref="formRef" @success="getUserData(userId)" />
 </template>
 <script lang="ts" setup>
 import * as WalletApi from '@/api/pay/wallet/balance'
@@ -76,14 +61,9 @@ import UserForm from '@/views/member/user/UserForm.vue'
 import UserAccountInfo from './UserAccountInfo.vue'
 import UserAddressList from './UserAddressList.vue'
 import UserBasicInfo from './UserBasicInfo.vue'
-import UserBrokerageList from './UserBrokerageList.vue'
-import UserCouponList from './UserCouponList.vue'
 import UserExperienceRecordList from './UserExperienceRecordList.vue'
-import UserOrderList from './UserOrderList.vue'
 import UserPointList from './UserPointList.vue'
 import UserSignList from './UserSignList.vue'
-import UserFavoriteList from './UserFavoriteList.vue'
-import UserAfterSaleList from './UserAftersaleList.vue'
 import UserBalanceList from './UserBalanceList.vue'
 import { CardTitle } from '@/components/Card/index'
 import { ElMessage } from 'element-plus'
@@ -96,7 +76,7 @@ const user = ref<UserApi.UserVO>({} as UserApi.UserVO)
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string) => {
-  formRef.value.open(type, id)
+  formRef.value.open(type, userId)
 }
 
 /** 获得用户 */
@@ -113,7 +93,7 @@ const getUserData = async (id: number) => {
 const { currentRoute } = useRouter() // 路由
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
-const id = route.params.id
+const userId = Number(route.params.id)
 /* 用户钱包相关信息 */
 const WALLET_INIT_DATA = {
   balance: 0,
@@ -124,21 +104,21 @@ const wallet = ref<WalletApi.WalletVO>(WALLET_INIT_DATA) // 钱包信息
 
 /** 查询用户钱包信息 */
 const getUserWallet = async () => {
-  if (!id) {
+  if (!userId || Number.isNaN(userId)) {
     wallet.value = WALLET_INIT_DATA
     return
   }
-  const params = { userId: id }
+  const params = { userId }
   wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
 }
 
 onMounted(() => {
-  if (!id) {
+  if (!userId || Number.isNaN(userId)) {
     ElMessage.warning('参数错误，会员编号不能为空！')
     delView(unref(currentRoute))
     return
   }
-  getUserData(id)
+  getUserData(userId)
   getUserWallet()
 })
 </script>

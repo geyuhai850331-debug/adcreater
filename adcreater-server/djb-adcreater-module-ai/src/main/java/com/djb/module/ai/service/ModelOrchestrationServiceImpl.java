@@ -1,6 +1,7 @@
 package com.djb.module.ai.service;
 
 import com.djb.module.ai.adapter.AiModelAdapter;
+import com.djb.module.ai.adapter.AiModelAdapterResolver;
 import com.djb.module.ai.adapter.AiRequest;
 import com.djb.module.ai.adapter.AiResult;
 import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
@@ -84,9 +85,7 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
 
     private AiModelAdapter getAdapter(String adapterClassName) {
         Map<String, AiModelAdapter> adapters = applicationContext.getBeansOfType(AiModelAdapter.class);
-        return adapters.values().stream()
-            .filter(a -> a.getClass().getName().equals(adapterClassName))
-            .findFirst()
+        return AiModelAdapterResolver.resolve(adapters, adapterClassName)
             .orElseThrow(() -> AiCallException.of("unknown",
                 "Adapter not found: " + adapterClassName));
     }

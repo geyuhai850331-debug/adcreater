@@ -5,6 +5,36 @@ import { cloneDeep, omit } from 'lodash-es'
 import qs from 'qs'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
+const REMOVED_FRONTEND_MODULE_PREFIXES = ['/bpm', '/mall', '/erp', '/crm', '/report']
+const REMOVED_FRONTEND_COMPONENT_PREFIXES = ['bpm/', 'mall/', 'erp/', 'crm/', 'report/']
+
+const isRemovedFrontendModulePath = (path?: string) => {
+  if (!path) {
+    return false
+  }
+  return REMOVED_FRONTEND_MODULE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+}
+
+const isRemovedFrontendComponentPath = (component?: string) => {
+  if (!component) {
+    return false
+  }
+  return REMOVED_FRONTEND_COMPONENT_PREFIXES.some(
+    (prefix) => component === prefix.slice(0, -1) || component.startsWith(prefix)
+  )
+}
+
+const createNotFoundRoute = (route: AppCustomRouteRecordRaw, meta: Recordable) => {
+  return {
+    path: route.path.indexOf('?') > -1 && !isUrl(route.path) ? route.path.split('?')[0] : route.path,
+    name:
+      route.componentName && route.componentName.length > 0
+        ? route.componentName
+        : toCamelCase(route.path, true),
+    meta,
+    component: () => import('@/views/Error/404.vue')
+  } as AppRouteRecordRaw
+}
 /**
  * 注册一个异步组件
  * @param componentPath 例:/bpm/oa/leave/detail
@@ -86,6 +116,10 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       meta.query = qs.parse(query)
     }
 
+    if (isRemovedFrontendModulePath(route.path) || isRemovedFrontendComponentPath(route.component)) {
+      continue
+    }
+
     // 2. 生成 data（AppRouteRecordRaw）
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
@@ -116,11 +150,11 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         redirect: route.redirect,
         meta: meta
       }
-      const index = route?.component
-        ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-        : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-      childrenData.component = modules[modulesRoutesKeys[index]]
-      data.children = [childrenData]
+        const index = route?.component
+          ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
+          : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
+        childrenData.component = index > -1 ? modules[modulesRoutesKeys[index]] : createNotFoundRoute(route, meta).component
+        data.children = [childrenData]
     } else {
       // 目录
       if (route.children?.length) {
@@ -142,7 +176,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         const index = route?.component
           ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
           : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-        data.component = modules[modulesRoutesKeys[index]]
+        data.component = index > -1 ? modules[modulesRoutesKeys[index]] : createNotFoundRoute(route, meta).component
       }
       if (route.children) {
         data.children = generateRoute(route.children)

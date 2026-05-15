@@ -6,7 +6,8 @@ import lombok.Data;
 public class PromptTemplateRespVO {
     private Long id;
     private String name;
-    private Long modelConfigId;
+    private String modelName;
+    private String systemPrompt;
     private String templateContent;
     private String variables;
     private String category;

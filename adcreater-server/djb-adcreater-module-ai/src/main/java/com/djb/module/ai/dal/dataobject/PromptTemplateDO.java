@@ -22,11 +22,14 @@ public class PromptTemplateDO extends TenantBaseDO {
     /** 模板名称 */
     private String name;
 
-    /** 关联模型配置 ID */
-    private Long modelConfigId;
+    /** 模型名称 */
+    private String modelName;
 
     /** 模板内容 (含 {{variable}} 占位符) */
     private String templateContent;
+
+    /** 系统提示 */
+    private String systemPrompt;
 
     /** 占位符变量列表 JSON */
     private String variables;

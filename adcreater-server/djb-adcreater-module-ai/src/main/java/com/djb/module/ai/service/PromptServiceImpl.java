@@ -47,6 +47,14 @@ public class PromptServiceImpl implements PromptService {
     }
 
     @Override
+    public void updateStatus(Long id, Boolean isEnabled) {
+        PromptTemplateDO entity = new PromptTemplateDO();
+        entity.setId(id);
+        entity.setIsEnabled(isEnabled);
+        mapper.updateById(entity);
+    }
+
+    @Override
     public void delete(Long id) {
         mapper.deleteById(id);
     }
@@ -58,7 +66,9 @@ public class PromptServiceImpl implements PromptService {
 
     @Override
     public PageResult<PromptTemplateRespVO> getPage(PromptTemplatePageReqVO pageReqVO) {
-        LambdaQueryWrapper<PromptTemplateDO> wrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<PromptTemplateDO> wrapper = new LambdaQueryWrapper<PromptTemplateDO>()
+                .eq(pageReqVO.getIsEnabled() != null, PromptTemplateDO::getIsEnabled, pageReqVO.getIsEnabled())
+                .orderByDesc(PromptTemplateDO::getId);
         if (pageReqVO.getCategory() != null) {
             wrapper.eq(PromptTemplateDO::getCategory, pageReqVO.getCategory());
         }
@@ -92,6 +102,9 @@ public class PromptServiceImpl implements PromptService {
     }
 
     private String extractVariables(String templateContent) {
+        if (templateContent == null || templateContent.isBlank()) {
+            return "[]";
+        }
         Matcher matcher = VARIABLE_PATTERN.matcher(templateContent);
         Set<String> vars = new LinkedHashSet<>();
         while (matcher.find()) {
@@ -121,4 +134,5 @@ public class PromptServiceImpl implements PromptService {
             productName,
             variables.getOrDefault("style", "professional"));
     }
+
 }

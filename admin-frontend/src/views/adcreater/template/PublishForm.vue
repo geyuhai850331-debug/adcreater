@@ -12,8 +12,8 @@
       <el-form-item label="版本号" prop="version">
         <el-input v-model="form.version" placeholder="如 1.0.0" />
       </el-form-item>
-      <el-form-item label="URL" prop="url">
-        <el-input v-model="form.url" placeholder="如 https://cdn.example.com/tpl/v1.0.0.json" />
+      <el-form-item label="文件 URL" prop="fileUrl">
+        <el-input v-model="form.fileUrl" placeholder="如 https://cdn.example.com/tpl/v1.0.0.json" />
       </el-form-item>
       <el-form-item label="更新日志" prop="changelog">
         <el-input
@@ -49,13 +49,13 @@ const form = reactive({
   templateId: null as number | null,
   templateName: '',
   version: '',
-  url: '',
+  fileUrl: '',
   changelog: ''
 })
 
 const rules: FormRules = {
   version: [{ required: true, message: '请输入版本号', trigger: 'blur' }],
-  url: [{ required: true, message: '请输入 URL', trigger: 'blur' }],
+  fileUrl: [{ required: true, message: '请输入文件 URL', trigger: 'blur' }],
   changelog: [{ required: true, message: '请输入更新日志', trigger: 'blur' }]
 }
 
@@ -63,7 +63,7 @@ function open(row: any) {
   form.templateId = row.id
   form.templateName = row.name || ''
   form.version = ''
-  form.url = ''
+  form.fileUrl = ''
   form.changelog = ''
   visible.value = true
 }
@@ -76,7 +76,7 @@ async function handleSubmit() {
     try {
       await publishTemplateVersion(form.templateId!, {
         version: form.version,
-        url: form.url,
+        fileUrl: form.fileUrl,
         changelog: form.changelog
       })
       message.success('版本发布成功')

@@ -99,13 +99,6 @@
 <!--            <version>${revision}</version>-->
 <!--        </dependency>-->
 
-        <!-- IoT 物联网相关模块。默认注释，保证编译速度 -->
-<!--        <dependency>-->
-<!--            <groupId>com.djb.cloud</groupId>-->
-<!--            <artifactId>djb-module-iot-server</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
-
         <!-- spring boot 配置所需依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

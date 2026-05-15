@@ -11,7 +11,10 @@
         <el-input v-model="form.modelName" placeholder="如 gpt-4o, glm-4-flash" />
       </el-form-item>
       <el-form-item label="适配器类" prop="adapterClass">
-        <el-input v-model="form.adapterClass" placeholder="如 OpenAiAdapter" />
+        <el-input
+          v-model="form.adapterClass"
+          placeholder="如 OpenAIAdapter 或 com.djb.module.ai.adapter.OpenAIAdapter"
+        />
       </el-form-item>
       <el-form-item label="API Key" prop="apiKey">
         <el-input
@@ -44,6 +47,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
+      <el-button :loading="testing" @click="handleTestConnection">测试连接</el-button>
       <el-button @click="visible = false">取消</el-button>
       <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
     </template>
@@ -53,7 +57,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createModel, updateModel } from '@/api/adcreater/model'
+import { createModel, testModelConnection, updateModel } from '@/api/adcreater/model'
 
 defineOptions({ name: 'AdCreaterModelForm' })
 
@@ -63,6 +67,7 @@ const message = useMessage()
 const visible = ref(false)
 const isEdit = ref(false)
 const loading = ref(false)
+const testing = ref(false)
 const showApiKey = ref(false)
 const formRef = ref<FormInstance>()
 
@@ -80,7 +85,18 @@ const form = reactive({
 const rules: FormRules = {
   modelName: [{ required: true, message: '请输入模型名称', trigger: 'blur' }],
   adapterClass: [{ required: true, message: '请输入适配器类', trigger: 'blur' }],
-  apiKey: [{ required: true, message: '请输入 API Key', trigger: 'blur' }]
+  apiKey: [
+    {
+      validator: (_rule, value, callback) => {
+        if (isEdit.value || value) {
+          callback()
+          return
+        }
+        callback(new Error('请输入 API Key'))
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 function onOpen() {
@@ -121,21 +137,12 @@ async function handleSubmit() {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     loading.value = true
-    try {
-      const payload: any = {
-        modelName: form.modelName,
-        adapterClass: form.adapterClass,
-        apiKey: form.apiKey,
-        endpointUrl: form.endpointUrl,
-        isEnabled: form.isEnabled,
-        priority: form.priority,
-        extraConfig: form.extraConfig
-      }
-      if (isEdit.value && form.id) {
-        if (!form.apiKey) delete payload.apiKey
-        await updateModel(form.id, payload)
-        message.success('模型更新成功')
-      } else {
+      try {
+        const payload = buildPayload()
+        if (isEdit.value && form.id) {
+          await updateModel(form.id, payload)
+          message.success('模型更新成功')
+        } else {
         await createModel(payload)
         message.success('模型创建成功')
       }
@@ -147,6 +154,40 @@ async function handleSubmit() {
       loading.value = false
     }
   })
+}
+
+function buildPayload() {
+  const normalizedExtraConfig = form.extraConfig.trim() ? form.extraConfig.trim() : undefined
+  const payload: any = {
+    id: form.id ?? undefined,
+    modelName: form.modelName,
+    adapterClass: form.adapterClass,
+    apiKey: form.apiKey,
+    endpointUrl: form.endpointUrl,
+    isEnabled: form.isEnabled,
+    priority: form.priority,
+    extraConfig: normalizedExtraConfig
+  }
+  if (isEdit.value && !form.apiKey) {
+    delete payload.apiKey
+  }
+  return payload
+}
+
+async function handleTestConnection() {
+  if (!formRef.value) return
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+  testing.value = true
+  try {
+    const payload = buildPayload()
+    await testModelConnection(payload)
+    message.success('连接测试成功')
+  } catch {
+    // error handled by interceptor
+  } finally {
+    testing.value = false
+  }
 }
 
 defineExpose({ open })

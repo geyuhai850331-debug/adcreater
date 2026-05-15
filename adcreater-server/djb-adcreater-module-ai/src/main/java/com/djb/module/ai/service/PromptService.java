@@ -7,6 +7,7 @@ import java.util.Map;
 public interface PromptService {
     Long create(PromptTemplateSaveReqVO reqVO);
     void update(PromptTemplateSaveReqVO reqVO);
+    void updateStatus(Long id, Boolean isEnabled);
     void delete(Long id);
     PromptTemplateRespVO get(Long id);
     PageResult<PromptTemplateRespVO> getPage(PromptTemplatePageReqVO pageReqVO);

@@ -10,6 +10,7 @@
 -- ====================================================================
 
 -- ── 广告制作任务 ──────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_task`;
 CREATE TABLE IF NOT EXISTS `ad_task` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `ad_task` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='广告制作任务';
 
 -- ── 投放任务 ──────────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_delivery_task`;
 CREATE TABLE IF NOT EXISTS `ad_delivery_task` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -53,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `ad_delivery_task` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='投放任务';
 
 -- ── 广告模板 ──────────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_template`;
 CREATE TABLE IF NOT EXISTS `ad_template` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -71,6 +74,7 @@ CREATE TABLE IF NOT EXISTS `ad_template` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci  COMMENT='广告模板';
 
 -- ── 模板版本 ──────────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_template_version`;
 CREATE TABLE IF NOT EXISTS `ad_template_version` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -89,6 +93,7 @@ CREATE TABLE IF NOT EXISTS `ad_template_version` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='模板版本';
 
 -- ── AI 模型配置 ──────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_model_config`;
 CREATE TABLE IF NOT EXISTS `ad_model_config` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -110,12 +115,14 @@ CREATE TABLE IF NOT EXISTS `ad_model_config` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='AI 模型配置';
 
 -- ── Prompt 模板 ─────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_prompt_template`;
 CREATE TABLE IF NOT EXISTS `ad_prompt_template` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
     `name` VARCHAR(64) NOT NULL COMMENT '模板名称',
-    `model_config_id` BIGINT COMMENT '关联模型配置 ID',
-    `template_content` TEXT NOT NULL COMMENT '模板内容 (含 {{variable}} 占位符)',
+    `model_name` VARCHAR(128) NOT NULL COMMENT '模型名称',
+    `system_prompt` TEXT NOT NULL COMMENT '系统提示',
+    `template_content` TEXT COMMENT '模板内容 (含 {{variable}} 占位符)',
     `variables` JSON COMMENT '占位符列表及默认值',
     `category` VARCHAR(32) NOT NULL COMMENT '分类: copy/image/video/video_storyboard/video_keyframe/video_keyframe_image/video_keyframe_grid/digital_human',
     `is_enabled` TINYINT DEFAULT 1 COMMENT '是否启用: 0=禁用, 1=启用',
@@ -130,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `ad_prompt_template` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='Prompt 模板';
 
 -- ── 用户点数账户 ────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_user_points_account`;
 CREATE TABLE IF NOT EXISTS `ad_user_points_account` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -148,6 +156,7 @@ CREATE TABLE IF NOT EXISTS `ad_user_points_account` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='用户点数账户';
 
 -- ── 点数流水 ──────────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_points_transaction`;
 CREATE TABLE IF NOT EXISTS `ad_points_transaction` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -170,6 +179,7 @@ CREATE TABLE IF NOT EXISTS `ad_points_transaction` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='点数流水 (不可变, 只 INSERT)';
 
 -- ── 用量记录 ─────────────────────────────────────────────────────
+DROP TABLE IF EXISTS `ad_usage_record`;
 CREATE TABLE IF NOT EXISTS `ad_usage_record` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户 ID',
@@ -180,9 +190,9 @@ CREATE TABLE IF NOT EXISTS `ad_usage_record` (
     `input_tokens` INT DEFAULT 0 COMMENT '输入 Token 数',
     `output_tokens` INT DEFAULT 0 COMMENT '输出 Token 数',
     `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
-    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `create_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
-    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0=未删除, 1=已删除',
     PRIMARY KEY (`id`),
     INDEX `idx_tenant_id` (`tenant_id`),

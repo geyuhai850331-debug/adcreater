@@ -68,7 +68,6 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['promotion:coupon:send']" @click="openCoupon">发送优惠券</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -80,9 +79,7 @@
       :data="list"
       :show-overflow-tooltip="true"
       :stripe="true"
-      @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55" />
       <el-table-column align="center" label="用户编号" prop="id" width="120px" />
       <el-table-column align="center" label="头像" prop="avatar" width="80px">
         <template #default="scope">
@@ -198,8 +195,6 @@
   <UserPointUpdateForm ref="updatePointFormRef" @success="getList" />
   <!-- 修改用户余额弹窗 -->
   <UserBalanceUpdateForm ref="UpdateBalanceFormRef" @success="getList" />
-  <!-- 发送优惠券弹窗 -->
-  <CouponSendForm ref="couponSendFormRef" />
 </template>
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
@@ -212,12 +207,9 @@ import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect
 import UserLevelUpdateForm from './components/UserLevelUpdateForm.vue'
 import UserPointUpdateForm from './components/UserPointUpdateForm.vue'
 import UserBalanceUpdateForm from './components/UserBalanceUpdateForm.vue'
-import { CouponSendForm } from '@/views/mall/promotion/coupon/components'
 import { checkPermi } from '@/utils/permission'
 
 defineOptions({ name: 'MemberUser' })
-
-const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -230,14 +222,13 @@ const queryParams = reactive({
   loginDate: [],
   createTime: [],
   tagIds: [],
-  levelId: null,
-  groupId: null
+  levelId: undefined,
+  groupId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const updateLevelFormRef = ref() // 修改会员等级表单
 const updatePointFormRef = ref() // 修改会员积分表单
 const UpdateBalanceFormRef = ref() // 修改用户余额表单
-const selectedIds = ref<number[]>([]) // 表格的选中 ID 数组
 
 /** 查询列表 */
 const getList = async () => {
@@ -273,21 +264,6 @@ const openDetail = (id: number) => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 表格选中事件 */
-const handleSelectionChange = (rows: UserApi.UserVO[]) => {
-  selectedIds.value = rows.map((row) => row.id)
-}
-
-/** 发送优惠券 */
-const couponSendFormRef = ref()
-const openCoupon = () => {
-  if (selectedIds.value.length === 0) {
-    message.warning('请选择要发送优惠券的用户')
-    return
-  }
-  couponSendFormRef.value.open(selectedIds.value)
 }
 
 /** 操作分发 */

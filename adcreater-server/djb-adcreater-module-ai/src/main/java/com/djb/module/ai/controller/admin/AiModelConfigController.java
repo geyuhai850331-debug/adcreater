@@ -22,7 +22,7 @@ import static com.djb.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "管理后台 - AI 模型配置")
 @RestController
-@RequestMapping("/admin-api/ai/model-config")
+@RequestMapping("/ai/model-config")
 @Validated
 @Slf4j
 public class AiModelConfigController {
@@ -42,6 +42,14 @@ public class AiModelConfigController {
     @PreAuthorize("@ss.hasPermission('ai:model-config:update')")
     public CommonResult<Boolean> update(@Valid @RequestBody AiModelConfigSaveReqVO reqVO) {
         service.update(reqVO);
+        return success(true);
+    }
+
+    @PutMapping("/update-status")
+    @Operation(summary = "更新 AI 模型配置启用状态")
+    @PreAuthorize("@ss.hasPermission('ai:model-config:update')")
+    public CommonResult<Boolean> updateStatus(@Valid @RequestBody AiModelConfigStatusReqVO reqVO) {
+        service.updateStatus(reqVO.getId(), reqVO.getIsEnabled());
         return success(true);
     }
 
@@ -70,7 +78,7 @@ public class AiModelConfigController {
     @PostMapping("/test-connection")
     @Operation(summary = "测试 AI 模型连接")
     @PreAuthorize("@ss.hasPermission('ai:model-config:update')")
-    public CommonResult<Boolean> testConnection(@RequestParam("id") Long id) {
-        return success(service.testConnection(id));
+    public CommonResult<Boolean> testConnection(@Valid @RequestBody AiModelConfigTestReqVO reqVO) {
+        return success(service.testConnection(reqVO));
     }
 }

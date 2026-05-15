@@ -91,7 +91,8 @@ async function toggleEnabled(row: any, val: boolean) {
 
 async function testConnection(row: any) {
   try {
-    await testModelConnection(row.id)
+    const success = await testModelConnection({ id: row.id } as any)
+    if (!success) return
     message.success(`${row.modelName} 连接测试成功`)
   } catch {
     // error handled by interceptor
