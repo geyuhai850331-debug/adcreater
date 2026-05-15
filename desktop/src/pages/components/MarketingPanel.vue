@@ -16,15 +16,6 @@
         />
       </el-form-item>
 
-      <el-form-item label="中文广告词" required>
-        <el-input
-          v-model="form.chineseAdCopy"
-          type="textarea"
-          :rows="3"
-          placeholder="输入中文广告推广词，如：品质之选，限时优惠..."
-        />
-      </el-form-item>
-
       <el-form-item label="目标市场" required>
         <el-select v-model="form.targetMarket" placeholder="选择目标市场" style="width: 100%">
           <el-option label="美国 (US)" value="US" />
@@ -67,44 +58,64 @@
           </div>
         </div>
 
-        <!-- 2. Culture Notes -->
+        <!-- 2. Culture Notes (editable) -->
         <div class="analysis-card">
           <div class="card-header">
             <span class="card-title">文化本土化建议</span>
+            <el-tag size="small" type="info" effect="plain">可编辑</el-tag>
           </div>
-          <el-alert
-            :title="analysis.cultureNotes"
-            type="info"
-            :closable="false"
-            show-icon
+          <el-input
+            v-model="analysis.cultureNotes"
+            type="textarea"
+            :rows="3"
+            placeholder="文化本土化建议..."
           />
         </div>
 
-        <!-- 3. Core Strategy -->
+        <!-- 3. Core Strategy (editable) -->
         <div class="analysis-card strategy-card">
           <div class="card-header">
             <span class="card-title">核心营销策略</span>
+            <el-tag size="small" type="warning" effect="plain">可编辑</el-tag>
           </div>
-          <p class="strategy-text">{{ analysis.coreStrategy }}</p>
+          <el-input
+            v-model="analysis.coreStrategy"
+            type="textarea"
+            :rows="3"
+            placeholder="核心营销策略..."
+          />
         </div>
 
         <!-- 4. Example Ad Copy -->
         <div class="analysis-card copy-card">
           <div class="card-header">
-            <span class="card-title">示例广告词</span>
-            <el-button
-              size="small"
-              type="primary"
-              plain
-              @click="copyAdCopy"
-            >
-              <el-icon><DocumentCopy /></el-icon> 复制
-            </el-button>
+            <span class="card-title">示例文案</span>
+            <div class="card-header-actions">
+              <el-button
+                size="small"
+                type="primary"
+                plain
+                @click="copyAdCopy"
+              >
+                <el-icon><DocumentCopy /></el-icon> 复制
+              </el-button>
+            </div>
           </div>
           <div class="copy-content">
             <p>{{ analysis.exampleAdCopy }}</p>
           </div>
         </div>
+      </div>
+
+      <!-- Regenerate button -->
+      <div class="regenerate-row">
+        <el-button
+          type="warning"
+          :loading="regenerating"
+          @click="handleRegenerate"
+        >
+          {{ regenerating ? '重新生成中...' : '基于修改内容重新生成示例文案' }}
+        </el-button>
       </div>
 
       <div class="step-actions">
@@ -127,17 +138,16 @@ const emit = defineEmits<{
 const form = reactive({
   productName: '',
   productDescription: '',
-  chineseAdCopy: '',
   targetMarket: 'US'
 })
 
 const analyzing = ref(false)
+const regenerating = ref(false)
 const analysis = ref<any>(null)
 
 const canAnalyze = computed(() =>
   form.productName.trim() &&
   form.productDescription.trim() &&
-  form.chineseAdCopy.trim() &&
   form.targetMarket.trim()
 )
 
@@ -151,7 +161,7 @@ async function handleAnalyze() {
     const res = await client.post('/ad/marketing/analyze', {
       productName: form.productName,
       productDescription: form.productDescription,
-      chineseAdCopy: form.chineseAdCopy,
+      chineseAdCopy: '',
       targetMarket: form.targetMarket
     }) as any
     analysis.value = res?.data ?? res
@@ -160,6 +170,29 @@ async function handleAnalyze() {
     ElMessage.error('分析失败: ' + (err?.message || '未知错误'))
   } finally {
     analyzing.value = false
+  }
+}
+
+async function handleRegenerate() {
+  if (!analysis.value) return
+  regenerating.value = true
+  try {
+    const res = await client.post('/ad/marketing/regenerate-copy', {
+      productName: form.productName,
+      productDescription: form.productDescription,
+      chineseAdCopy: '',
+      targetMarket: form.targetMarket,
+      riskLevel: analysis.value.riskLevel,
+      cultureNotes: analysis.value.cultureNotes,
+      coreStrategy: analysis.value.coreStrategy
+    }) as any
+    const data = res?.data ?? res
+    analysis.value.exampleAdCopy = data.exampleAdCopy
+    ElMessage.success('示例文案已重新生成')
+  } catch (err: any) {
+    ElMessage.error('重新生成失败: ' + (err?.message || '未知错误'))
+  } finally {
+    regenerating.value = false
   }
 }
 
@@ -177,7 +210,6 @@ function handleNext() {
   emit('next', {
     productName: form.productName,
     productDescription: form.productDescription,
-    chineseAdCopy: form.chineseAdCopy,
     targetMarket: form.targetMarket,
     analysis: analysis.value
   })
@@ -226,6 +258,12 @@ function handleNext() {
   margin-bottom: var(--space-2);
 }
 
+.card-header-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
 .card-title {
   font-weight: 600;
   font-size: var(--text-base);
@@ -241,13 +279,6 @@ function handleNext() {
   background: var(--color-bg);
 }
 
-.strategy-text {
-  margin: 0;
-  line-height: var(--leading-relaxed);
-  color: var(--color-text);
-  font-weight: 500;
-}
-
 .copy-content {
   background: var(--color-bg);
   border-radius: var(--radius-sm);
@@ -259,6 +290,11 @@ function handleNext() {
   line-height: var(--leading-relaxed);
   color: var(--color-text);
   white-space: pre-wrap;
+}
+
+.regenerate-row {
+  margin-top: var(--space-4);
+  text-align: center;
 }
 
 .step-actions {

@@ -211,6 +211,34 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
+  // ── Ad Marketing - Regenerate Copy ───────────────────────────────
+  if (path === '/api/ad/marketing/regenerate-copy' && method === 'POST') {
+    const body = await parseBody(req)
+    const market = body.targetMarket as string || 'US'
+    const productName = body.productName as string || 'Product'
+    const cultureNotes = body.cultureNotes as string || ''
+    const coreStrategy = body.coreStrategy as string || ''
+
+    const regeneratedCopies: Record<string, string> = {
+      US: `Updated: ${productName} — redesigned with your refined strategy in mind. ${coreStrategy.slice(0, 40)}... Experience the difference with our premium quality and thoughtful design.`,
+      UK: `Updated: ${productName} — thoughtfully refined for the discerning UK customer. ${coreStrategy.slice(0, 40)}... Discover quality that speaks for itself.`,
+      DE: `Aktualisiert: ${productName} — nach Ihren Vorgaben optimiert. ${coreStrategy.slice(0, 40)}... Qualität, die überzeugt.`,
+      JP: `更新版：${productName} — ご要望に合わせて最適化。${coreStrategy.slice(0, 30)}…信頼の品質をお届けします。`,
+      SA: `Updated: ${productName} — refined according to your specifications. ${coreStrategy.slice(0, 40)}... Quality for your peace of mind.`,
+      BR: `Atualizado: ${productName} — otimizado conforme suas preferências. ${coreStrategy.slice(0, 40)}... Qualidade que faz a diferença.`
+    }
+
+    const exampleAdCopy = regeneratedCopies[market] || regeneratedCopies['US']
+    await new Promise(r => setTimeout(r, 300 + Math.random() * 400))
+    sendJson(res, 200, ok({
+      riskLevel: body.riskLevel || 'safe',
+      cultureNotes: cultureNotes,
+      coreStrategy: coreStrategy,
+      exampleAdCopy: exampleAdCopy
+    }))
+    return true
+  }
+
   if ((path === '/api/ad/image/generate' || path === '/app-api/ad/image/generate') && method === 'POST') {
     const body = await parseBody(req)
     const width = (body.width as number) || 1500

@@ -150,7 +150,6 @@
               <div class="desc-meta">
                 <span><strong>产品名称：</strong>{{ adCopy.productName }}</span>
                 <span><strong>目标市场：</strong>{{ marketNames[adCopy.targetMarket] || adCopy.targetMarket }}</span>
-                <span><strong>中文广告词：</strong>{{ adCopy.chineseAdCopy || '未设置' }}</span>
               </div>
             </div>
 
@@ -193,7 +192,7 @@
               <!-- Example Ad Copy -->
               <div class="analysis-card copy-card">
                 <div class="card-header">
-                  <span class="card-label">示例广告词</span>
+                  <span class="card-label">示例文案</span>
                   <el-button
                     size="small"
                     type="primary"
