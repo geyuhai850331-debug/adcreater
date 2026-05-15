@@ -137,41 +137,77 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  // ── Ad Creation ──────────────────────────────────────────────────
-  if ((path === '/api/ad/copy/translate' || path === '/app-api/ad/copy/translate') && method === 'POST') {
+  // ── Ad Marketing ──────────────────────────────────────────────────
+  if (path === '/api/ad/marketing/analyze' && method === 'POST') {
     const body = await parseBody(req)
-    const productName = body.productName as string || 'Product'
     const market = body.targetMarket as string || 'US'
-    const sellingPoints = body.sellingPoints as string[] || []
+    const productName = body.productName as string || 'Product'
 
-    const marketCopy: Record<string, { original: string; translated: string }> = {
+    const marketAnalysis: Record<string, {
+      riskLevel: string;
+      cultureNotes: string;
+      coreStrategy: string;
+      exampleAdCopy: string;
+    }> = {
       US: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join(', ')}. High quality, competitive price, fast shipping worldwide.`
+        riskLevel: 'safe',
+        cultureNotes: '美国消费者注重效率和产品品质。建议突出产品的实用价值和性价比，使用英制单位（inch/lb），避免过于夸张的营销语言。Amazon US 平台要求图片白底、无文字覆盖。',
+        coreStrategy: '痛点反差策略：先呈现目标用户日常遇到的问题场景，再展示产品如何高效解决，配合限时折扣制造紧迫感。',
+        exampleAdCopy: `Introducing ${productName} — the smarter way to solve your daily challenges. Designed with premium materials and engineered for reliability. Whether you're at home or on the go, experience unmatched performance that fits seamlessly into your lifestyle. Limited stock available — order today.`
       },
       UK: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join(', ')}. Premium quality with free delivery across the UK.`
+        riskLevel: 'safe',
+        cultureNotes: '英国消费者偏好低调、幽默的营销风格。避免过于激进的促销语言（如"buy now"），改用更礼貌的邀请式表达。注意英式拼写差异（colour, centre），并符合ASA广告标准。',
+        coreStrategy: '权威背书策略：通过产品认证、评测数据和用户评价建立信任，结合英式幽默传达产品价值。',
+        exampleAdCopy: `${productName} — thoughtfully crafted for those who appreciate quality. Trusted by thousands across the UK, our product combines innovation with everyday practicality. Free delivery on all orders.`
       },
       DE: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join(', ')}. Hochwertige Qualität zu wettbewerbsfähigen Preisen.`
+        riskLevel: 'safe',
+        cultureNotes: '德国市场重视技术规格、环保认证（Blue Angel, CE）和数据透明度。避免模糊的营销语言，需提供具体参数。退货政策必须清晰（德国消费者退货率较高）。',
+        coreStrategy: '技术权威策略：详细展示产品技术参数、认证和质量检测结果，用数据说服理性消费者。',
+        exampleAdCopy: `${productName} — zertifizierte Qualität und Präzision. Jedes Produkt durchläuft strenge Qualitätskontrollen und erfüllt alle EU-Normen. Nachhaltig produziert, entwickelt für den Langzeiteinsatz.`
       },
       JP: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join('、')}。高品質、競争力のある価格、世界中に迅速発送。`
+        riskLevel: 'warning',
+        cultureNotes: '日本市场对产品外观要求极高（"美品"文化）。包装必须完美无瑕，任何瑕疵都可能导致退货。建议使用敬语风格，强调"安心"和"信頼"。避免直接比较竞争对手。',
+        coreStrategy: '安心信赖策略：强调产品质量保证、售后服务和用户评价，配合"限定"概念制造稀缺感。',
+        exampleAdCopy: `${productName} — 信頼の品質、安心の選択。厳選された素材と日本の職人技術が融合した逸品です。万が一の不良品には交換保証付き。数量限定販売。`
       },
       SA: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join(', ')}. جودة عالية، سعر تنافسي، شحن سريع لجميع أنحاء العالم.`
+        riskLevel: 'warning',
+        cultureNotes: '沙特市场严格遵守伊斯兰文化规范。女性模特需佩戴头巾，避免任何酒精、猪肉相关图像或文字。斋月期间消费模式变化显著。使用阿拉伯语更佳，数字用阿拉伯文数字。',
+        coreStrategy: '文化认同策略：强调产品符合伊斯兰价值观，突出家庭和社交场景，配合节日促销节点。',
+        exampleAdCopy: `${productName} — quality you can trust for your family. Designed to meet the highest standards of craftsmanship and reliability. Special Ramadan offers available.`
       },
       BR: {
-        original: `${productName} - ${sellingPoints.join('，')}`,
-        translated: `${productName} - ${sellingPoints.join(', ')}. Alta qualidade, preço competitivo, envio rápido para todo o mundo.`
+        riskLevel: 'safe',
+        cultureNotes: '巴西消费者热衷社交媒体分享，偏好鲜艳色彩和情感化营销。分期付款（"parcelamento"）是常见支付方式。Mercado Livre 是主要电商平台，需注意葡萄牙语本地化。',
+        coreStrategy: '社交从众策略：利用社交媒体口碑和KOL推荐，结合分期付款降低购买门槛，制造"大家都在用"的从众效应。',
+        exampleAdCopy: `${productName} — a escolha de quem busca qualidade sem complicação. Junte-se a milhares de clientes satisfeitos. Parcele em até 12x no cartão. Entrega rápida para todo o Brasil.`
       }
     }
-    const copy = marketCopy[market] || marketCopy['US']
-    sendJson(res, 200, ok({ original: copy.original, translated: copy.translated }))
+
+    const data = marketAnalysis[market] || marketAnalysis['US']
+    await new Promise(r => setTimeout(r, 400 + Math.random() * 600))
+    sendJson(res, 200, ok({
+      riskLevel: data.riskLevel,
+      cultureNotes: data.cultureNotes,
+      coreStrategy: data.coreStrategy,
+      exampleAdCopy: data.exampleAdCopy
+    }))
+    return true
+  }
+
+  // ── Ad Copy Translate ────────────────────────────────────────────
+  if ((path === '/api/ad/copy/translate' || path === '/app-api/ad/copy/translate') && method === 'POST') {
+    const body = await parseBody(req)
+    const productTitle = body.productTitle as string || 'Product'
+    const market = body.targetMarket as string || 'US'
+    await new Promise(r => setTimeout(r, 300 + Math.random() * 500))
+    sendJson(res, 200, ok({
+      translatedTitle: `[${market}] ${productTitle}`,
+      localizedCopy: `Experience the next generation of ${productTitle} — designed for the ${market} market with localized messaging that resonates with your target audience. Premium quality, exceptional performance.`
+    }))
     return true
   }
 
