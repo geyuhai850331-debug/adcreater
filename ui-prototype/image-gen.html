@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 文生图</title>
+<style>
+  :root {
+    --s0: #161616; --s1: #1e1e1e; --s2: #262626; --s3: #2e2e2e;
+    --t1: #ececec; --t2: #9c9c9c; --t3: #6b6b6b;
+    --ac: #d4a853; --ach: #e0bb6a; --acm: #3d311c;
+    --bd: #2a2a2a; --bdv: #383838; --gn: #5c9c6b; --rd: #c25450;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter","阿里巴巴普惠体",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background: var(--s0); color: var(--t1); min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+
+  /* Top bar */
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bd); position: sticky; top:0; z-index: 100; gap: 24px;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; color: var(--t1); text-decoration: none; white-space: nowrap; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--t2); text-decoration: none; font-size: 14px;
+    border-bottom: 2px solid transparent; transition: all .12s; white-space: nowrap;
+  }
+  .topbar nav a:hover { color: var(--t1); }
+  .topbar nav a.active { color: var(--t1); border-bottom-color: var(--ac); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+  .topbar .right a { color: var(--t2); text-decoration: none; }
+  .topbar .right a:hover { color: var(--t1); }
+  .points { color: var(--ac); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  /* Main layout: left panel + right canvas */
+  .main { flex: 1; display: flex; overflow: hidden; }
+  .panel {
+    width: 360px; flex-shrink: 0; border-right: 1px solid var(--bd);
+    display: flex; flex-direction: column; overflow-y: auto; padding: 24px;
+  }
+  .canvas { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; }
+
+  /* Panel sections */
+  .panel-section { margin-bottom: 24px; }
+  .panel-section label {
+    display: block; font-size: 13px; color: var(--t2); margin-bottom: 8px; font-weight: 500;
+  }
+  .panel-section textarea {
+    width: 100%; padding: 12px 14px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 14px; line-height: 1.7;
+    resize: vertical; outline: none; font-family: inherit; min-height: 120px;
+  }
+  .panel-section textarea:focus { border-color: var(--ac); }
+  .panel-section textarea::placeholder { color: var(--t3); }
+  .panel-section input[type=text] {
+    width: 100%; padding: 9px 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 14px; outline: none;
+  }
+  .panel-section input[type=text]:focus { border-color: var(--ac); }
+  .panel-section input[type=text]::placeholder { color: var(--t3); }
+  .char-count { text-align: right; font-size: 12px; color: var(--t3); margin-top: 4px; }
+
+  /* Style chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 5px 14px; border-radius: 16px; border: 1px solid var(--bd);
+    background: transparent; color: var(--t2); font-size: 13px; cursor: pointer;
+    transition: all .12s;
+  }
+  .chip:hover { border-color: var(--bdv); color: var(--t1); }
+  .chip.active { background: var(--acm); border-color: var(--ac); color: var(--ac); }
+
+  /* Select */
+  .sel {
+    width: 100%; padding: 9px 30px 9px 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 14px; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c9c9c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+
+  /* Advanced options */
+  .adv-toggle {
+    font-size: 13px; color: var(--t3); cursor: pointer; display: flex; align-items: center; gap: 4px;
+    padding: 4px 0; user-select: none;
+  }
+  .adv-toggle:hover { color: var(--t2); }
+  .adv-body { margin-top: 12px; display: none; }
+  .adv-body.open { display: block; }
+
+  /* Cost row */
+  .cost-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .cost-info { font-size: 13px; color: var(--t3); }
+  .cost-info span { color: var(--ac); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .12s; border: none;
+  }
+  .btn-primary { background: var(--ac); color: var(--s0); width: 100%; }
+  .btn-primary:hover { background: var(--ach); }
+  .btn-ghost { background: transparent; color: var(--t2); border: 1px solid var(--bd); }
+  .btn-ghost:hover { color: var(--t1); border-color: var(--bdv); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* Canvas toolbar */
+  .canvas-toolbar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--bd);
+  }
+  .canvas-toolbar .info { font-size: 13px; color: var(--t3); }
+  .canvas-toolbar .spacer { flex: 1; }
+  .view-toggle { display: flex; gap: 4px; }
+  .view-toggle button {
+    padding: 5px 12px; border-radius: 4px; border: 1px solid var(--bd);
+    background: transparent; color: var(--t2); font-size: 13px; cursor: pointer;
+  }
+  .view-toggle button.active { background: var(--s2); border-color: var(--ac); color: var(--ac); }
+
+  /* Image grid - asymmetric magazine style */
+  .image-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .img-card {
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px;
+    overflow: hidden; cursor: pointer; position: relative; transition: border-color .12s;
+    display: flex; flex-direction: column;
+  }
+  .img-card:hover { border-color: var(--bdv); }
+  .img-card.span-3 { grid-column: span 3; }
+  .img-card.span-2 { grid-column: span 2; }
+
+  .img-card .img-wrap {
+    flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .img-card .img-inner {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 64px; color: var(--t3);
+  }
+  .img-card.span-3 .img-inner { aspect-ratio: 1; }
+  .img-card.span-2 .img-inner { aspect-ratio: 4/3; }
+
+  .img-card .overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center; gap: 20px;
+    opacity: 0; transition: opacity .15s;
+  }
+  .img-card:hover .overlay { opacity: 1; }
+  .img-card .overlay button {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(0,0,0,0.6); color: var(--t1); font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .12s;
+  }
+  .img-card .overlay button:hover { background: rgba(0,0,0,0.85); border-color: #fff; }
+
+  .img-card .img-info { padding: 10px 12px; display: flex; justify-content: space-between; font-size: 11px; color: var(--t3); }
+
+  /* Skeleton */
+  .img-card .skeleton { width: 100%; height: 100%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.6} }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox .lb-img {
+    max-width: 85vw; max-height: 75vh; display: flex; align-items: center;
+    justify-content: center; font-size: 128px; color: var(--t3);
+  }
+  .lightbox .lb-info { margin-top: 16px; font-size: 13px; color: var(--t2); }
+  .lightbox .lb-actions { display: flex; gap: 12px; margin-top: 20px; }
+  .lightbox .lb-close {
+    position: absolute; top: 20px; right: 24px; font-size: 32px; color: var(--t2);
+    background: none; border: none; cursor: pointer;
+  }
+  .lightbox .lb-close:hover { color: var(--t1); }
+  .lightbox .lb-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 40px; color: var(--t2); background: none; border: none; cursor: pointer; padding: 20px;
+  }
+  .lightbox .lb-nav:hover { color: var(--t1); }
+  .lightbox .lb-prev { left: 20px; }
+  .lightbox .lb-next { right: 20px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--s2); color: var(--t1); padding: 10px 24px; border-radius: 6px;
+    font-size: 14px; border-left: 3px solid var(--gn); z-index: 1000;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1px dashed var(--bd); border-radius: 8px; padding: 20px;
+    text-align: center; color: var(--t3); font-size: 13px; cursor: pointer;
+    transition: all .12s; margin-top: 16px;
+  }
+  .drop-zone:hover { border-color: var(--bdv); color: var(--t2); }
+  .drop-zone .dz-icon { font-size: 28px; margin-bottom: 6px; }
+
+  /* Section label */
+  .section-label { font-size: 12px; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="image-gen.html" class="active">文生图</a>
+    <a href="video-gen.html">图生视频</a>
+    <a href="preview.html">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <div class="panel-section">
+      <label>画面描述</label>
+      <textarea id="prompt" placeholder="描述你想生成的画面...&#10;&#10;例如：白色连衣裙平铺在浅木色桌面上，自然光从左侧打入，面料质感清晰，构图居中，电商白底风格，高细节">白色连衣裙平铺在浅木色桌面上，自然光从左侧打入。V领设计、A字裙摆自然展开，冰丝面料的光泽和褶皱清晰可见。构图居中，干净的白底电商风格。</textarea>
+      <div class="char-count"><span id="char-num">96</span> 字</div>
+    </div>
+
+    <div class="panel-section">
+      <label>风格</label>
+      <div class="chip-row">
+        <span class="chip active" onclick="selectChip(this)">写实摄影</span>
+        <span class="chip" onclick="selectChip(this)">电商白底</span>
+        <span class="chip" onclick="selectChip(this)">场景光影</span>
+        <span class="chip" onclick="selectChip(this)">日系清新</span>
+        <span class="chip" onclick="selectChip(this)">3D渲染</span>
+        <span class="chip" onclick="selectChip(this)">极简</span>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <label>模板</label>
+      <select class="sel">
+        <option>电商白底主图</option>
+        <option>场景搭配图</option>
+        <option>九宫格模板</option>
+        <option>Banner 横幅</option>
+        <option>详情页长图</option>
+      </select>
+    </div>
+
+    <div class="panel-section">
+      <label>模型</label>
+      <select class="sel">
+        <option>FLUX.1-pro（推荐）</option>
+        <option>WeryAI Image 2.0</option>
+        <option>Imagen 3</option>
+      </select>
+    </div>
+
+    <div class="panel-section" style="display:flex; gap:12px">
+      <div style="flex:1">
+        <label>尺寸</label>
+        <select class="sel"><option>1:1</option><option>4:3</option><option>16:9</option><option>3:4</option></select>
+      </div>
+      <div style="flex:1">
+        <label>数量</label>
+        <select class="sel" id="img-count"><option>4 张</option><option>6 张</option><option>8 张</option></select>
+      </div>
+    </div>
+
+    <div class="adv-toggle" onclick="toggleAdv()">▸ 高级选项</div>
+    <div class="adv-body" id="adv-body">
+      <div class="panel-section">
+        <label>负向提示词</label>
+        <input type="text" value="模糊, 低画质, 变形, 文字, 水印, 噪点">
+      </div>
+      <div class="panel-section">
+        <label>种子 (seed)</label>
+        <input type="text" placeholder="留空则随机生成">
+      </div>
+    </div>
+
+    <div class="drop-zone" onclick="showToast('模拟上传参考图')">
+      <div class="dz-icon">🖼</div>
+      <div>拖拽参考图到此处，或点击上传</div>
+      <div style="font-size:11px;margin-top:4px">支持 JPG / PNG / WebP</div>
+    </div>
+
+    <div class="cost-row" style="margin-top:20px">
+      <div class="cost-info">生成 <span>6</span> 张图片</div>
+      <div class="cost-info">消耗 <span>30</span> 点</div>
+    </div>
+    <button class="btn btn-primary" id="gen-btn" onclick="generateImages()" style="margin-top:8px">生成图片</button>
+  </div>
+
+  <!-- RIGHT CANVAS -->
+  <div class="canvas" id="canvas">
+    <div class="canvas-toolbar">
+      <span class="info" id="result-info">共 12 张图片</span>
+      <span class="spacer"></span>
+      <div class="view-toggle">
+        <button class="active" onclick="setView('grid', this)">网格</button>
+        <button onclick="setView('list', this)">列表</button>
+      </div>
+    </div>
+
+    <!-- Image grid -->
+    <div class="image-grid" id="image-grid">
+      <!-- Row 1: large - small - large -->
+      <div class="img-card span-3" data-idx="0" onclick="openLightbox(0)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#2a2a3a,#3a2a2a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(0)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>1,024 × 1,024</span><span>20 点</span></div>
+      </div>
+      <div class="img-card span-2" data-idx="1" onclick="openLightbox(1)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#2a2a3a,#2a3a2a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(1)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>768 × 768</span><span>15 点</span></div>
+      </div>
+      <!-- Row 2: small - large - small -->
+      <div class="img-card span-2" data-idx="2" onclick="openLightbox(2)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#3a2a2a,#2a3a2a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(2)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>768 × 768</span><span>15 点</span></div>
+      </div>
+      <div class="img-card span-3" data-idx="3" onclick="openLightbox(3)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#2a3a2a,#3a3a2a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(3)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>1,024 × 1,024</span><span>20 点</span></div>
+      </div>
+      <!-- Row 3: large - small - large -->
+      <div class="img-card span-3" data-idx="4" onclick="openLightbox(4)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#3a3a2a,#2a2a3a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(4)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>1,024 × 1,024</span><span>20 点</span></div>
+      </div>
+      <div class="img-card span-2" data-idx="5" onclick="openLightbox(5)">
+        <div class="img-wrap"><div class="img-inner" style="background:linear-gradient(135deg,#2a3a3a,#3a3a3a)">🖼</div></div>
+        <div class="overlay">
+          <button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button>
+          <button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button>
+          <button onclick="event.stopPropagation();openLightbox(5)" title="放大">⛶</button>
+        </div>
+        <div class="img-info"><span>768 × 768</span><span>15 点</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="navLightbox(-1)">‹</button>
+  <button class="lb-nav lb-next" onclick="navLightbox(1)">›</button>
+  <div class="lb-img" id="lb-img">🖼</div>
+  <div class="lb-info" id="lb-info">1,024 × 1,024 · 20 点</div>
+  <div class="lb-actions">
+    <button class="btn btn-ghost btn-sm" onclick="showToast('已下载')">⬇ 下载</button>
+    <button class="btn btn-ghost btn-sm" onclick="showToast('已保存到资源库')">💾 保存到资源库</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Prompt character count
+  document.getElementById('prompt').addEventListener('input', function() {
+    document.getElementById('char-num').textContent = this.value.length;
+  });
+
+  // Style chip selection
+  function selectChip(chip) {
+    chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  }
+
+  // Advanced options toggle
+  function toggleAdv() {
+    const body = document.getElementById('adv-body');
+    const toggle = document.querySelector('.adv-toggle');
+    body.classList.toggle('open');
+    toggle.textContent = body.classList.contains('open') ? '▾ 高级选项' : '▸ 高级选项';
+  }
+
+  // View toggle
+  function setView(view, btn) {
+    document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const grid = document.getElementById('image-grid');
+    if (view === 'list') {
+      grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      grid.querySelectorAll('.img-card').forEach(c => { c.classList.remove('span-3','span-2'); });
+    } else {
+      grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+      // Restore spans
+      const spans = ['span-3','span-2','span-2','span-3','span-3','span-2'];
+      grid.querySelectorAll('.img-card').forEach((c,i) => { if(spans[i]) c.classList.add(spans[i]); });
+    }
+  }
+
+  // Generate images
+  function generateImages() {
+    const btn = document.getElementById('gen-btn');
+    const origText = btn.textContent;
+    btn.textContent = '生成中...';
+    btn.disabled = true;
+
+    const grid = document.getElementById('image-grid');
+    const count = parseInt(document.getElementById('img-count').value);
+    grid.innerHTML = Array(count).fill(0).map((_,i) => {
+      const cls = i%3===0 ? 'span-3' : 'span-2';
+      return `<div class="img-card ${cls}"><div class="img-wrap"><div class="skeleton" style="background:var(--s2);aspect-ratio:${i%3===0?'1':'4/3'}"></div></div><div class="img-info"><span>生成中...</span><span>—</span></div></div>`;
+    }).join('');
+
+    // Simulate generation
+    setTimeout(() => {
+      const gradients = [
+        'linear-gradient(135deg,#2a2a3a,#3a2a2a)','linear-gradient(135deg,#2a2a3a,#2a3a2a)',
+        'linear-gradient(135deg,#3a2a2a,#2a3a2a)','linear-gradient(135deg,#2a3a2a,#3a3a2a)',
+        'linear-gradient(135deg,#3a3a2a,#2a2a3a)','linear-gradient(135deg,#2a2a2a,#3a3a3a)',
+        'linear-gradient(135deg,#2a3a3a,#3a2a3a)','linear-gradient(135deg,#3a3a3a,#2a2a2a)'
+      ];
+      grid.innerHTML = gradients.slice(0, count).map((g,i) => {
+        const cls = i%3===0 ? 'span-3' : 'span-2';
+        return `<div class="img-card ${cls}" data-idx="${i}" onclick="openLightbox(${i})">
+          <div class="img-wrap"><div class="img-inner" style="background:${g}">🖼</div></div>
+          <div class="overlay"><button onclick="event.stopPropagation();showToast('已下载')" title="下载">⬇</button><button onclick="event.stopPropagation();showToast('已收藏')" title="收藏">♡</button><button onclick="event.stopPropagation();openLightbox(${i})" title="放大">⛶</button></div>
+          <div class="img-info"><span>1,024 × 1,024</span><span>20 点</span></div>
+        </div>`;
+      }).join('');
+      document.getElementById('result-info').textContent = `共 ${count} 张图片`;
+      btn.textContent = origText;
+      btn.disabled = false;
+      showToast(`生成完成，${count} 张图片`);
+    }, 2500);
+  }
+
+  // Lightbox
+  let lbIdx = 0;
+  function openLightbox(idx) {
+    lbIdx = idx;
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lb-img').innerHTML = '🖼';
+    document.getElementById('lb-info').textContent = `1,024 × 1,024 · 20 点`;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function navLightbox(dir) {
+    const total = document.querySelectorAll('.img-card').length;
+    lbIdx = (lbIdx + dir + total) % total;
+    // Just update display
+  }
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

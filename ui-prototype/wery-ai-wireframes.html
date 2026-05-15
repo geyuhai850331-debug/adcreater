@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI — UI Wireframes</title>
+<style>
+  /* ========== DESIGN TOKENS ========== */
+  :root {
+    --bg-root: #000000;
+    --bg-surface: #1a1a1a;
+    --bg-elevated: #242424;
+    --bg-hover: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-disabled: #5c5c5c;
+    --accent: #6c5ce7;
+    --accent-hover: #7d6ff0;
+    --success: #00d68f;
+    --warning: #ffaa00;
+    --error: #ff3d71;
+    --border: #27272a;
+    --border-hover: #3a3a3d;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0a0a0a;
+    color: var(--text-primary);
+    line-height: 1.5;
+    padding: 40px 60px;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .page-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+  }
+
+  .screen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .screen {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-root);
+    transition: border-color 0.2s;
+  }
+  .screen:hover { border-color: var(--border-hover); }
+
+  .screen-header {
+    padding: 12px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .screen-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .screen-module {
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+  }
+  .screen-body {
+    padding: 0;
+    position: relative;
+    min-height: 420px;
+    background: var(--bg-root);
+  }
+
+  /* ========== COMMON COMPONENTS ========== */
+  .sidebar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 56px;
+    background: var(--bg-root);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding-top: 16px;
+    gap: 4px;
+    z-index: 2;
+  }
+  .sidebar-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: default;
+    transition: all 0.15s;
+  }
+  .sidebar-icon.active {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+  .sidebar-icon.disabled {
+    color: var(--text-disabled);
+    font-size: 10px;
+  }
+  .sidebar-divider {
+    width: 24px; height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+  .sidebar-badge {
+    font-size: 8px;
+    color: var(--warning);
+    margin-top: -2px;
+  }
+
+  .topbar {
+    position: absolute;
+    left: 56px; top: 0; right: 0;
+    height: 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    z-index: 1;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+  }
+  .topbar-select {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .topbar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .points-badge {
+    display: flex; align-items: center; gap: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .canvas {
+    position: absolute;
+    left: 56px; top: 40px; right: 0; bottom: 0;
+    padding: 24px;
+    overflow: hidden;
+  }
+
+  /* Input elements */
+  .input-field {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    width: 100%;
+  }
+  .input-field::placeholder { color: var(--text-muted); }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .textarea-field {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    width: 100%;
+    resize: none;
+    line-height: 1.5;
+  }
+  .textarea-field::placeholder { color: var(--text-muted); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: default;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: default;
+  }
+
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .card-accent {
+    border-color: var(--accent);
+    background: rgba(108,92,231,0.08);
+  }
+
+  .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .cost-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Grid items */
+  .grid-cell {
+    aspect-ratio: 1;
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    background: var(--bg-surface);
+  }
+  .grid-cell.filled {
+    border-style: solid;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .grid-cell.filled .cell-num {
+    font-size: 18px;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Image placeholder */
+  .img-placeholder {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    overflow: hidden;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+
+  /* Step indicator */
+  .steps {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 24px;
+  }
+  .step {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .step.active { color: var(--text-primary); }
+  .step-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .step.active .step-dot { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .step-line {
+    width: 40px; height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+    border-left: 3px solid var(--success);
+  }
+
+  .login-layout {
+    display: flex;
+    height: 420px;
+  }
+  .login-hero {
+    flex: 1;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-hero-text {
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .login-hero-img {
+    width: 200px; height: 150px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+  .login-form-area {
+    width: 360px;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 40px;
+    background: var(--bg-root);
+  }
+  .login-logo {
+    font-size: 24px; font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .login-logo-sub {
+    font-size: 13px; color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+  .login-input-group {
+    margin-bottom: 12px;
+  }
+  .login-link {
+    font-size: 12px; color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Wery AI · UI Wireframes</div>
+<div class="page-subtitle">智能电商创作平台 — 暗黑电影级设计 · 全模块覆盖 · V1 范围</div>
+
+<!-- ==================== SCREEN 1: LOGIN ==================== -->
+<div class="screen-grid">
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">登录页</span>
+    <span class="screen-module">模块一</span>
+  </div>
+  <div class="screen-body" style="min-height:420px">
+    <div class="login-layout">
+      <div class="login-hero">
+        <div style="text-align:center">
+          <div class="login-hero-img">← 产品 demo 视频循环播放 →</div>
+          <div class="login-hero-text">AI 驱动的电商创作平台<br>文案 · 图片 · 视频 · 一键发布</div>
+        </div>
+      </div>
+      <div class="login-form-area">
+        <div class="login-logo">Wery AI</div>
+        <div class="login-logo-sub">智能电商创作平台</div>
+
+        <div class="login-input-group">
+          <input class="input-field" placeholder="手机号 / 邮箱" style="margin-bottom:8px">
+          <div style="position:relative">
+            <input class="input-field" placeholder="密码" style="padding-right:36px">
+            <span style="position:absolute;right:10px;top:8px;color:var(--text-muted);font-size:13px">👁</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:10px">登录</button>
+
+        <div style="text-align:center;margin:16px 0;color:var(--text-muted);font-size:12px">── 或 ──</div>
+        <div class="login-link">短信验证码登录 →</div>
+        <div class="login-link" style="margin-top:4px">没有账号？免费注册 →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 2: MARKETING COPY ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">营销文案制作</span>
+    <span class="screen-module">模块三</span>
+  </div>
+  <div class="screen-body" style="min-height:420px">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">W</div>
+      <div class="sidebar-icon active" title="营销文案">📝</div>
+      <div class="sidebar-icon" title="文生图">🎨</div>
+      <div class="sidebar-icon" title="图生视频">🎬</div>
+      <div class="sidebar-icon" title="效果预览">👁</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="资源发布">📤</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="我的资源">📁</div>
+      <div class="sidebar-icon" title="账单">💳</div>
+      <div class="sidebar-icon" title="会员">⭐</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon disabled" title="图片翻译">🈁</div>
+      <div class="sidebar-badge">即将上线</div>
+      <div class="sidebar-icon disabled" title="数字人">🤖</div>
+      <div class="sidebar-badge">即将上线</div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-select">模板: 日亚商品描述 ▾</div>
+      <div class="topbar-select">市场: 日本 Amazon ▾</div>
+      <div class="topbar-select">语言: 日语 ▾</div>
+      <div class="topbar-right">
+        <div class="points-badge">💎 1,280 点</div>
+        <div class="avatar">H</div>
+      </div>
+    </div>
+
+    <!-- Canvas: split left input / right results -->
+    <div class="canvas" style="display:flex; gap:20px">
+      <!-- Left panel: input -->
+      <div style="width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:12px">
+        <div>
+          <div class="label">产品/服务描述</div>
+          <textarea class="textarea-field" rows="5" placeholder="描述你的产品...&#10;&#10;例如：夏季新款女装连衣裙，采用冰丝面料，透气舒适，适合职场和休闲场景..."></textarea>
+        </div>
+
+        <div>
+          <div class="label">目标市场</div>
+          <div class="topbar-select" style="width:100%">日本 — Amazon ▾</div>
+        </div>
+
+        <div>
+          <div class="label">模板</div>
+          <div class="topbar-select" style="width:100%">日亚商品描述模板 ▾</div>
+        </div>
+
+        <button class="btn-primary" style="justify-content:center;padding:10px">
+          ⚡ 生成文案 · 3 版本
+        </button>
+        <div class="cost-hint">消耗 15 点 · 预计 5-8 秒</div>
+      </div>
+
+      <!-- Right panel: results -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:12px; overflow-y:auto">
+        <div class="label">生成结果</div>
+        <!-- Version cards -->
+        <div class="card" style="position:relative">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">夏の新作ワンピース — 涼感素材で快適に</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            ・アイスシルク素材で夏でもべたつかない<br>
+            ・オフィスにもカジュアルにも使える2WAYデザイン<br>
+            ・全5色展開、S〜XLまでサイズ豊富<br>
+            ・今だけ送料無料キャンペーン中
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:var(--accent)">今すぐチェック →</div>
+          <div style="position:absolute;top:12px;right:12px;display:flex;gap:4px">
+            <span class="tag">复制</span><span class="tag">编辑</span><span class="tag">保存</span>
+          </div>
+        </div>
+        <div class="card" style="opacity:0.85">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">【2026夏の新作】ひんやり快適ワンピース</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            ・接触冷感素材で-3℃の涼しさ<br>
+            ・シワになりにくくお手入れ簡単<br>
+            ・ビジネスからデイリーユースまで幅広く活躍
+          </div>
+        </div>
+        <div class="card" style="opacity:0.7">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">夏を涼しく、美しく — アイスシルクワンピース</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            ・さらさら素材で着心地抜群<br>
+            ・きれいめシルエットで体型カバー<br>
+            ・豊富なカラバリで選べる楽しさ
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 3: TEXT-TO-IMAGE ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">文生图制作</span>
+    <span class="screen-module">模块四</span>
+  </div>
+  <div class="screen-body" style="min-height:420px">
+    <div class="sidebar">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">W</div>
+      <div class="sidebar-icon" title="营销文案">📝</div>
+      <div class="sidebar-icon active" title="文生图">🎨</div>
+      <div class="sidebar-icon" title="图生视频">🎬</div>
+      <div class="sidebar-icon" title="效果预览">👁</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="资源发布">📤</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="我的资源">📁</div>
+      <div class="sidebar-icon" title="账单">💳</div>
+      <div class="sidebar-icon" title="会员">⭐</div>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-select">模板: 电商白底主图 ▾</div>
+      <div class="topbar-select">风格: 写实摄影 ▾</div>
+      <div class="topbar-select">模型: FLUX ▾</div>
+      <div class="topbar-right">
+        <div class="points-badge">💎 1,280 点</div>
+        <div class="avatar">H</div>
+      </div>
+    </div>
+
+    <div class="canvas" style="display:flex; gap:20px">
+      <!-- Left input panel -->
+      <div style="width:280px; flex-shrink:0; display:flex; flex-direction:column; gap:10px">
+        <div>
+          <div class="label">提示词 (Prompt)</div>
+          <textarea class="textarea-field" rows="4" placeholder="夏日冰丝连衣裙，白色背景，电商主图风格，专业产品摄影..."></textarea>
+        </div>
+        <div>
+          <div class="label">负向提示词（选填）</div>
+          <input class="input-field" placeholder="模糊, 低画质, 变形">
+        </div>
+        <div style="display:flex; gap:8px">
+          <div style="flex:1">
+            <div class="label">尺寸</div>
+            <div class="topbar-select" style="width:100%">1:1 ▾</div>
+          </div>
+          <div style="flex:1">
+            <div class="label">数量</div>
+            <div class="topbar-select" style="width:100%">4 张 ▾</div>
+          </div>
+        </div>
+        <div class="label" style="margin-top:4px;color:var(--text-muted);font-size:10px">高级选项 ▸</div>
+        <button class="btn-primary" style="justify-content:center;padding:10px;margin-top:4px">
+          ⚡ 生成图片
+        </button>
+        <div class="cost-hint">消耗 20 点 · 预计 6-10 秒</div>
+      </div>
+
+      <!-- Right: image grid -->
+      <div style="flex:1; display:grid; grid-template-columns: 2fr 1fr; grid-template-rows: auto auto; gap:10px">
+        <div class="img-placeholder" style="grid-row:span 1; min-height:160px; flex-direction:column; gap:4px">
+          <span style="font-size:20px">🖼</span>
+          <span>图片 1</span>
+          <span style="font-size:10px;color:var(--text-disabled)">1024×1024 · FLUX</span>
+        </div>
+        <div class="img-placeholder" style="min-height:160px; flex-direction:column; gap:4px">
+          <span style="font-size:16px">🖼</span>
+          <span>图片 2</span>
+        </div>
+        <div class="img-placeholder" style="min-height:160px; flex-direction:column; gap:4px">
+          <span style="font-size:16px">🖼</span>
+          <span>图片 3</span>
+        </div>
+        <div class="img-placeholder" style="min-height:160px; flex-direction:column; gap:4px">
+          <span style="font-size:20px">🖼</span>
+          <span>图片 4</span>
+          <span style="font-size:10px;color:var(--text-disabled)">1024×1024 · FLUX</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 4: IMAGE-TO-VIDEO ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">图生视频 — 宫格编辑器</span>
+    <span class="screen-module">模块五</span>
+  </div>
+  <div class="screen-body" style="min-height:460px">
+    <div class="sidebar">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">W</div>
+      <div class="sidebar-icon" title="营销文案">📝</div>
+      <div class="sidebar-icon" title="文生图">🎨</div>
+      <div class="sidebar-icon active" title="图生视频">🎬</div>
+      <div class="sidebar-icon" title="效果预览">👁</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="资源发布">📤</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="我的资源">📁</div>
+      <div class="sidebar-icon" title="账单">💳</div>
+      <div class="sidebar-icon" title="会员">⭐</div>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-select">模板: 九宫格轮播 ▾</div>
+      <div class="topbar-select">风格: 快节奏 ▾</div>
+      <div class="topbar-select">BGM: 电子-活力 ▾</div>
+      <div class="topbar-right">
+        <span style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;color:var(--text-muted)">9宫格</span>
+        <span style="font-size:11px;padding:2px 8px;border:1px solid var(--accent);border-radius:4px;color:var(--accent)">16宫格</span>
+        <div class="points-badge" style="margin-left:8px">💎 1,280</div>
+        <div class="avatar">H</div>
+      </div>
+    </div>
+
+    <div class="canvas" style="display:flex;flex-direction:column; gap:16px">
+      <!-- Video preview area -->
+      <div style="flex:1; background:var(--bg-root); border:1px solid var(--border); border-radius:8px;
+           display:flex; align-items:center; justify-content:center; min-height:120px; flex-direction:column; gap:8px">
+        <span style="font-size:28px">▶</span>
+        <span style="color:var(--text-muted);font-size:13px">视频预览区域 (16:9)</span>
+        <span style="color:var(--text-disabled);font-size:11px">填充下方宫格后点击生成</span>
+      </div>
+
+      <!-- 16-grid editor -->
+      <div style="display:grid; grid-template-columns: repeat(8, 1fr); gap:4px; height:120px">
+        <div class="grid-cell filled"><span class="cell-num">1</span><span style="font-size:8px;color:var(--text-muted)">主图</span></div>
+        <div class="grid-cell filled"><span class="cell-num">2</span></div>
+        <div class="grid-cell filled"><span class="cell-num">3</span></div>
+        <div class="grid-cell filled"><span class="cell-num">4</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell filled"><span class="cell-num">9</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+        <div class="grid-cell"><span>+</span></div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:center; justify-content:center">
+        <span style="font-size:11px;color:var(--text-muted)">5/16 格已填充</span>
+        <button class="btn-secondary" style="font-size:11px">从资源库选择</button>
+        <button class="btn-secondary" style="font-size:11px">拖拽上传</button>
+        <button class="btn-primary" style="font-size:13px;padding:8px 24px">🎬 生成视频</button>
+        <div class="cost-hint" style="margin-top:0">消耗 200 点</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 5: EFFECT PREVIEW ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">效果预览</span>
+    <span class="screen-module">模块六</span>
+  </div>
+  <div class="screen-body" style="min-height:420px">
+    <div class="sidebar">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">W</div>
+      <div class="sidebar-icon" title="营销文案">📝</div>
+      <div class="sidebar-icon" title="文生图">🎨</div>
+      <div class="sidebar-icon" title="图生视频">🎬</div>
+      <div class="sidebar-icon active" title="效果预览">👁</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="资源发布">📤</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="我的资源">📁</div>
+      <div class="sidebar-icon" title="账单">💳</div>
+      <div class="sidebar-icon" title="会员">⭐</div>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-select">预览模板: 商品详情卡片 ▾</div>
+      <div class="topbar-right">
+        <button class="btn-ghost">📸 截图导出</button>
+        <div class="points-badge">💎 1,280 点</div>
+        <div class="avatar">H</div>
+      </div>
+    </div>
+
+    <div class="canvas" style="display:flex; gap:20px">
+      <!-- Resource selector -->
+      <div style="width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:8px">
+        <div class="label">我的资源</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-surface);border-radius:4px;font-size:12px;color:var(--text-secondary)">
+            <span style="color:var(--success)">☑</span> 文案: 日亚描述_v2
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-surface);border-radius:4px;font-size:12px;color:var(--text-secondary)">
+            <span style="color:var(--success)">☑</span> 图片: 白底主图_3
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-surface);border-radius:4px;font-size:12px;color:var(--text-secondary)">
+            <span style="color:var(--success)">☑</span> 视频: 16格轮播_v1
+          </label>
+        </div>
+      </div>
+
+      <!-- Preview card -->
+      <div style="flex:1; display:flex; align-items:center; justify-content:center">
+        <div style="width:320px; background:#f5f5f5; border-radius:8px; overflow:hidden; color:#111;font-size:12px">
+          <div class="img-placeholder" style="height:200px;border-radius:0;border:none;background:#e0e0e0;font-size:13px;color:#999">[商品主图]</div>
+          <div style="padding:16px">
+            <div style="font-size:15px;font-weight:600;margin-bottom:6px;color:#222">夏の新作ワンピース — 涼感素材で快適に</div>
+            <div style="color:#b12704;font-size:18px;font-weight:600;margin-bottom:8px">¥3,980</div>
+            <div style="color:#555;line-height:1.6;font-size:11px">
+              ✅ アイスシルク素材で夏でもべたつかない<br>
+              ✅ オフィスにもカジュアルにも使える2WAYデザイン<br>
+              ✅ 全5色展開、S〜XLまでサイズ豊富
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <div class="img-placeholder" style="width:70px;height:70px;border-radius:4px;font-size:9px">副图1</div>
+              <div class="img-placeholder" style="width:70px;height:70px;border-radius:4px;font-size:9px">副图2</div>
+              <div class="img-placeholder" style="width:70px;height:70px;border-radius:4px;font-size:9px;position:relative">▶ 视频</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 6: RESOURCE EXPORT ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">资源导出（V1）</span>
+    <span class="screen-module">模块七</span>
+  </div>
+  <div class="screen-body" style="min-height:420px">
+    <div class="sidebar">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">W</div>
+      <div class="sidebar-icon" title="营销文案">📝</div>
+      <div class="sidebar-icon" title="文生图">🎨</div>
+      <div class="sidebar-icon" title="图生视频">🎬</div>
+      <div class="sidebar-icon" title="效果预览">👁</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon active" title="资源发布">📤</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-icon" title="我的资源">📁</div>
+      <div class="sidebar-icon" title="账单">💳</div>
+      <div class="sidebar-icon" title="会员">⭐</div>
+    </div>
+
+    <div class="topbar">
+      <div style="color:var(--text-muted);font-size:12px">V1: 导出到本地 → V2: 直接发布到平台 API</div>
+      <div class="topbar-right">
+        <div class="points-badge">💎 1,280 点</div>
+        <div class="avatar">H</div>
+      </div>
+    </div>
+
+    <div class="canvas">
+      <!-- Three-column resource selector -->
+      <div style="display:flex; gap:16px; height:100%">
+        <!-- Column: Copy -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px">
+          <div class="label">文案资源</div>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" checked style="accent-color:var(--accent)"> 日亚描述_v2 · 2026-05-14
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" style="accent-color:var(--accent)"> Amazon Listing_v1 · 2026-05-13
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" style="accent-color:var(--accent)"> SNS短文案_v3 · 2026-05-12
+          </label>
+        </div>
+
+        <!-- Column: Images -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px">
+          <div class="label">图片资源</div>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" checked style="accent-color:var(--accent)"> 白底主图_3 · 1024×1024
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" style="accent-color:var(--accent)"> 场景图_8 · 1024×1024
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" style="accent-color:var(--accent)"> 细节图_2 · 1024×1024
+          </label>
+        </div>
+
+        <!-- Column: Videos -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px">
+          <div class="label">视频资源</div>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;font-size:11px">
+            <input type="checkbox" checked style="accent-color:var(--accent)"> 16格轮播_v1 · 00:45
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--accent);border-radius:4px;font-size:11px">
+            <input type="checkbox" style="accent-color:var(--accent)"> 9格切换_v2 · 00:30
+          </label>
+        </div>
+
+        <!-- Export summary -->
+        <div style="width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div class="label">导出摘要</div>
+          <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:12px;color:var(--text-secondary)">选中 3 个文件</div>
+            <div style="font-size:11px;color:var(--text-muted)">
+              日亚描述_v2 · .txt<br>
+              白底主图_3 · .png<br>
+              16格轮播_v1 · .mp4
+            </div>
+            <div style="font-size:11px;color:var(--text-muted)">预估大小: ~32 MB</div>
+            <div class="divider"></div>
+            <button class="btn-primary" style="justify-content:center;padding:8px;font-size:12px">📥 导出 ZIP</button>
+            <button class="btn-ghost" style="font-size:11px">分别下载</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast">导出 ZIP 包含 3 个文件</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 7: MEMBERSHIP ==================== -->
+<div class="screen">
+  <div class="screen-header">
+    <span class="screen-label">会员订阅</span>
+    <span class="screen-module">模块九</span>
+  </div>
+  <div class="screen-body" style="min-height:340px; background:var(--bg-root); padding:40px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:22px;font-weight:600">选择适合你的方案</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px">每日赠送点数，按需选择档位</div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:20px">
+      <!-- Free tier -->
+      <div class="card" style="width:220px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 20px">
+        <div style="font-size:14px;color:var(--text-muted);font-weight:500">免费</div>
+        <div style="font-size:32px;font-weight:700">¥0<span style="font-size:14px;font-weight:400;color:var(--text-muted)">/月</span></div>
+        <div style="font-size:16px;color:var(--text-primary);font-weight:500">500 点/天</div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.5">
+          基础功能<br>标准画质<br>每日免费额度
+        </div>
+        <div style="margin-top:auto;padding:6px 16px;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--text-muted)">当前方案</div>
+      </div>
+
+      <!-- 98 tier -->
+      <div class="card" style="width:220px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 20px">
+        <div style="font-size:14px;color:var(--text-secondary);font-weight:500">Pro</div>
+        <div style="font-size:32px;font-weight:700">¥98<span style="font-size:14px;font-weight:400;color:var(--text-muted)">/月</span></div>
+        <div style="font-size:16px;color:var(--text-primary);font-weight:500">20,000 点/天</div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.5">
+          全部功能<br>高清画质<br>优先生成队列
+        </div>
+        <button class="btn-primary" style="margin-top:auto;width:100%;justify-content:center;font-size:12px;padding:8px">升级</button>
+      </div>
+
+      <!-- 198 tier -->
+      <div class="card card-accent" style="width:220px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 20px">
+        <div style="font-size:14px;color:var(--accent);font-weight:500">Ultra</div>
+        <div style="font-size:32px;font-weight:700">¥198<span style="font-size:14px;font-weight:400;color:var(--text-muted)">/月</span></div>
+        <div style="font-size:16px;color:var(--text-primary);font-weight:500">40,000 点/天</div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;line-height:1.5">
+          全部功能<br>4K 超清画质<br>API 接入权限<br>优先客服支持
+        </div>
+        <button class="btn-primary" style="margin-top:auto;width:100%;justify-content:center;font-size:12px;padding:8px">升级</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--text-muted)">
+      当前方案：免费会员 · 永不过期 · 每日 500 点 · 今日剩余 320 点
+    </div>
+  </div>
+</div>
+
+</div> <!-- end screen-grid -->
+
+<!-- Summary section -->
+<div style="margin-top:48px;padding:32px;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px">
+  <div style="font-size:20px;font-weight:600;margin-bottom:16px">设计系统速览</div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:24px">
+    <div>
+      <div class="label">色彩令牌</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#000;border-radius:4px;border:1px solid #333"></span> bg-root #000</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#1a1a1a;border-radius:4px;border:1px solid #333"></span> bg-surface #1a1a1a</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#242424;border-radius:4px;border:1px solid #333"></span> bg-elevated #242424</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#6c5ce7;border-radius:4px"></span> accent #6c5ce7</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#00d68f;border-radius:4px"></span> success #00d68f</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#ff3d71;border-radius:4px"></span> error #ff3d71</div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#ffaa00;border-radius:4px"></span> warning #ffaa00</div>
+      </div>
+    </div>
+    <div>
+      <div class="label">文字层级</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="font-size:24px;font-weight:700">Heading · 24px/700</div>
+        <div style="font-size:16px;font-weight:400">Body · 16px/400</div>
+        <div style="font-size:14px;color:var(--text-secondary)">Secondary · 14px/#9ca3af</div>
+        <div style="font-size:12px;color:var(--text-muted)">Caption · 12px/#6b7280</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em">LABEL · 11px UPPERCASE</div>
+      </div>
+    </div>
+    <div>
+      <div class="label">组件规格</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <button class="btn-primary" style="width:100%;justify-content:center">主按钮 (Primary)</button>
+        <button class="btn-secondary" style="width:100%;text-align:center">次按钮 (Secondary)</button>
+        <input class="input-field" placeholder="输入框 · 4px 圆角">
+        <div class="card" style="padding:12px;font-size:12px;color:var(--text-secondary)">卡片容器 · 8px 圆角 · 1px 边框</div>
+      </div>
+    </div>
+    <div>
+      <div class="label">间距系统 (4px Grid)</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;margin-top:8px">
+        xs: 4px · sm: 8px<br>
+        md: 16px · lg: 24px<br>
+        xl: 32px · 2xl: 48px<br>
+        3xl: 64px · 4xl: 96px<br>
+        radius: 4px (btn/input)<br>
+        radius: 8px (card)<br>
+        radius: 12px (modal)
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

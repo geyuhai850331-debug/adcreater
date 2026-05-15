@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 登录</title>
+<style>
+  :root {
+    --surface-0: #161616;
+    --surface-1: #1e1e1e;
+    --surface-2: #262626;
+    --surface-3: #2e2e2e;
+    --text-primary: #ececec;
+    --text-secondary: #9c9c9c;
+    --text-tertiary: #6b6b6b;
+    --accent: #d4a853;
+    --accent-hover: #e0bb6a;
+    --border: #2a2a2a;
+    --border-visible: #383838;
+    --red: #c25450;
+    --green: #5c9c6b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter", "阿里巴巴普惠体", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .login-card {
+    width: 380px;
+    padding: 40px 36px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .brand { font-size: 28px; font-weight: 600; margin-bottom: 2px; letter-spacing: 0.5px; }
+  .tagline { font-size: 13px; color: var(--text-tertiary); margin-bottom: 32px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 10px 14px;
+    background: var(--surface-0); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-primary); font-size: 15px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input.error { border-color: var(--red); }
+  .field .error-msg { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
+  .field input.error + .error-msg { display: block; }
+  .pw-row { position: relative; }
+  .pw-toggle {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-tertiary); cursor: pointer;
+    font-size: 14px; padding: 4px;
+  }
+  .btn {
+    width: 100%; padding: 10px; border: none; border-radius: 6px;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent); color: var(--surface-0);
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary.loading { color: transparent; position: relative; }
+  .btn-primary.loading::after {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 18px; height: 18px; border: 2px solid var(--surface-0);
+    border-top-color: transparent; border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .divider {
+    display: flex; align-items: center; margin: 24px 0; gap: 12px;
+    color: var(--text-tertiary); font-size: 13px;
+  }
+  .divider::before, .divider::after { content: ""; flex:1; height:1px; background: var(--border); }
+  .link { color: var(--text-secondary); font-size: 13px; text-decoration: none; }
+  .link:hover { color: var(--accent); }
+  .footer-links { text-align: center; margin-top: 24px; }
+  .mode-switch { text-align: center; margin-bottom: 24px; }
+  .mode-switch span {
+    display: inline-block; padding: 6px 20px; cursor: pointer;
+    font-size: 14px; color: var(--text-secondary);
+    border-bottom: 2px solid transparent; transition: all 0.15s;
+  }
+  .mode-switch span.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+  .captcha-row { display: flex; gap: 8px; }
+  .captcha-row input { flex: 1; }
+  .captcha-btn {
+    white-space: nowrap; padding: 10px 16px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--accent); font-size: 13px;
+    cursor: pointer;
+  }
+  .captcha-btn:hover { background: var(--surface-3); }
+  .captcha-btn:disabled { color: var(--text-tertiary); cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="login-card" id="app">
+  <!-- Mode Switch -->
+  <div class="mode-switch">
+    <span class="active" onclick="switchMode('login')">登录</span>
+    <span onclick="switchMode('register')">注册</span>
+  </div>
+
+  <div class="brand">Wery AI</div>
+  <div class="tagline">为电商卖家准备的 AI 创作工具</div>
+
+  <!-- Login Form -->
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <div class="field">
+      <label>手机号 / 邮箱</label>
+      <input type="text" id="login-account" placeholder="请输入手机号或邮箱" autocomplete="username">
+      <div class="error-msg"></div>
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <div class="pw-row">
+        <input type="password" id="login-password" placeholder="请输入密码" autocomplete="current-password">
+        <button type="button" class="pw-toggle" onclick="togglePw('login-password', this)">👁</button>
+      </div>
+      <div class="error-msg"></div>
+    </div>
+    <button type="submit" class="btn btn-primary" id="login-btn">登录</button>
+  </form>
+
+  <!-- Register Form (hidden by default) -->
+  <form id="register-form" onsubmit="handleRegister(event)" style="display:none">
+    <div class="field">
+      <label>手机号</label>
+      <input type="tel" id="reg-phone" placeholder="请输入手机号">
+      <div class="error-msg"></div>
+    </div>
+    <div class="field">
+      <label>验证码</label>
+      <div class="captcha-row">
+        <input type="text" id="reg-code" placeholder="请输入验证码">
+        <button type="button" class="captcha-btn" id="captcha-btn" onclick="sendCode()">获取验证码</button>
+      </div>
+      <div class="error-msg"></div>
+    </div>
+    <div class="field">
+      <label>设置密码</label>
+      <div class="pw-row">
+        <input type="password" id="reg-password" placeholder="至少 8 位，含字母和数字">
+        <button type="button" class="pw-toggle" onclick="togglePw('reg-password', this)">👁</button>
+      </div>
+      <div class="error-msg"></div>
+    </div>
+    <div class="field" id="invite-field" style="display:none">
+      <label>邀请码（选填）</label>
+      <input type="text" id="reg-invite" placeholder="如有邀请码可填写">
+    </div>
+    <button type="submit" class="btn btn-primary" id="reg-btn">注册</button>
+  </form>
+
+  <div class="divider" id="login-divider">或</div>
+  <div style="text-align:center" id="sms-login-link">
+    <a href="#" class="link" onclick="switchToSmsLogin(event)">短信验证码登录 →</a>
+  </div>
+  <div class="footer-links" id="login-footer">
+    <a href="#" class="link" onclick="switchMode('register'); return false;">没有账号？免费注册 →</a>
+  </div>
+  <div class="footer-links" id="register-footer" style="display:none">
+    <a href="#" class="link" onclick="switchMode('login'); return false;">已有账号？去登录 →</a>
+  </div>
+</div>
+
+<script>
+  let currentMode = 'login';
+  let captchaTimer = 0;
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-switch span').forEach((s,i) => {
+      s.classList.toggle('active', (i===0 && mode==='login') || (i===1 && mode==='register'));
+    });
+    document.getElementById('login-form').style.display = mode==='login'?'block':'none';
+    document.getElementById('register-form').style.display = mode==='register'?'block':'none';
+    document.getElementById('login-divider').style.display = mode==='login'?'flex':'none';
+    document.getElementById('sms-login-link').style.display = mode==='login'?'block':'none';
+    document.getElementById('login-footer').style.display = mode==='login'?'block':'none';
+    document.getElementById('register-footer').style.display = mode==='register'?'block':'none';
+  }
+
+  function togglePw(inputId, btn) {
+    const inp = document.getElementById(inputId);
+    const isPw = inp.type === 'password';
+    inp.type = isPw ? 'text' : 'password';
+    btn.textContent = isPw ? '🙈' : '👁';
+  }
+
+  function switchToSmsLogin(e) {
+    e.preventDefault();
+    alert('短信验证码登录（Demo）');
+  }
+
+  function sendCode() {
+    if (captchaTimer > 0) return;
+    const btn = document.getElementById('captcha-btn');
+    captchaTimer = 60;
+    btn.disabled = true;
+    btn.textContent = `${captchaTimer}s 后重发`;
+    const iv = setInterval(() => {
+      captchaTimer--;
+      btn.textContent = `${captchaTimer}s 后重发`;
+      if (captchaTimer <= 0) { clearInterval(iv); btn.disabled = false; btn.textContent = '获取验证码'; }
+    }, 1000);
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    // Simulate login
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      window.location.href = 'workbench.html';
+    }, 1200);
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    const btn = document.getElementById('reg-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      alert('注册成功！请登录。');
+      switchMode('login');
+    }, 800);
+  }
+</script>
+</body>
+</html>

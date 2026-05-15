@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 图生视频</title>
+<style>
+  :root {
+    --s0: #161616; --s1: #1e1e1e; --s2: #262626; --s3: #2e2e2e;
+    --t1: #ececec; --t2: #9c9c9c; --t3: #6b6b6b;
+    --ac: #d4a853; --ach: #e0bb6a; --acm: #3d311c;
+    --bd: #2a2a2a; --bdv: #383838; --gn: #5c9c6b; --rd: #c25450; --yw: #c9a84c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter","阿里巴巴普惠体",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background: var(--s0); color: var(--t1); min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bd); position: sticky; top:0; z-index: 100; gap: 24px;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; color: var(--t1); text-decoration: none; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--t2); text-decoration: none; font-size: 14px;
+    border-bottom: 2px solid transparent; transition: all .12s;
+  }
+  .topbar nav a:hover { color: var(--t1); }
+  .topbar nav a.active { color: var(--t1); border-bottom-color: var(--ac); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+  .topbar .right a { color: var(--t2); text-decoration: none; }
+  .topbar .right a:hover { color: var(--t1); }
+  .points { color: var(--ac); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; width: 100%; padding: 20px 24px; gap: 20px; }
+
+  /* Context toolbar */
+  .ctx-bar {
+    display: flex; align-items: center; gap: 12px; padding-bottom: 0;
+  }
+  .sel {
+    padding: 7px 30px 7px 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 13px; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c9c9c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .spacer { flex: 1; }
+  .cost-hint { font-size: 13px; color: var(--t3); }
+  .cost-hint span { color: var(--ac); }
+
+  .btn {
+    padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .12s; border: none;
+  }
+  .btn-primary { background: var(--ac); color: var(--s0); }
+  .btn-primary:hover { background: var(--ach); }
+  .btn-ghost { background: transparent; color: var(--t2); border: 1px solid var(--bd); }
+  .btn-ghost:hover { color: var(--t1); border-color: var(--bdv); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* Video Preview Area */
+  .preview-area {
+    width: 100%; aspect-ratio: 16/9; max-height: 55vh;
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .preview-empty { text-align: center; color: var(--t3); }
+  .preview-empty .icon { font-size: 64px; margin-bottom: 12px; }
+  .preview-empty .text { font-size: 14px; }
+  .preview-empty .hint { font-size: 12px; color: var(--t3); margin-top: 8px; }
+
+  /* Progress overlay */
+  .progress-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  }
+  .progress-bar-wrap { width: 280px; }
+  .progress-bar {
+    width: 100%; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; background: var(--ac); border-radius: 2px; transition: width .3s; width: 0%; }
+  .progress-text { font-size: 14px; color: var(--t2); }
+  .progress-pct { font-size: 24px; font-weight: 600; }
+
+  /* Completed state */
+  .preview-done { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .preview-done .play-btn {
+    width: 72px; height: 72px; border-radius: 50%; background: rgba(0,0,0,0.7);
+    border: 2px solid rgba(255,255,255,0.4); color: var(--t1); font-size: 28px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s;
+  }
+  .preview-done .play-btn:hover { border-color: #fff; background: rgba(0,0,0,0.85); }
+  .preview-done .done-text { font-size: 14px; color: var(--t2); }
+
+  /* Grid Section */
+  .grid-section { flex-shrink: 0; }
+  .grid-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .grid-header h3 { font-size: 14px; font-weight: 500; }
+  .grid-toggle { display: flex; gap: 4px; }
+  .grid-toggle button {
+    padding: 5px 16px; border-radius: 4px; border: 1px solid var(--bd);
+    background: transparent; color: var(--t2); font-size: 13px; cursor: pointer; transition: all .12s;
+  }
+  .grid-toggle button.active { background: var(--s2); border-color: var(--ac); color: var(--ac); }
+
+  /* The grid itself */
+  .cell-grid { display: grid; gap: 8px; }
+  .cell-grid.nine { grid-template-columns: repeat(3, 1fr); }
+  .cell-grid.sixteen { grid-template-columns: repeat(4, 1fr); }
+
+  .cell {
+    aspect-ratio: 1; border: 1px dashed var(--bd); border-radius: 6px;
+    background: var(--s1); cursor: pointer; position: relative; transition: all .12s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; color: var(--t3); font-size: 24px;
+  }
+  .cell:hover { border-color: var(--bdv); background: var(--s2); }
+  .cell.filled { border-style: solid; }
+  .cell .cell-img {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    font-size: 32px; position: relative;
+  }
+  .cell .cell-text {
+    position: absolute; bottom: 6px; left: 6px; right: 6px;
+    background: rgba(0,0,0,0.65); color: var(--t2); font-size: 10px;
+    padding: 2px 6px; border-radius: 3px; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cell .cell-delete {
+    position: absolute; top: 4px; right: 4px; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--rd); color: #fff; font-size: 12px;
+    border: none; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 2;
+  }
+  .cell.filled:hover .cell-delete { display: flex; }
+  .cell .cell-add { font-size: 24px; color: var(--t3); }
+  .cell .cell-index { position: absolute; top: 4px; left: 8px; font-size: 10px; color: var(--t3); }
+
+  /* Cell edit modal */
+  .cell-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+    display: none; align-items: center; justify-content: center;
+  }
+  .cell-modal.open { display: flex; }
+  .cell-modal .modal-box {
+    background: var(--s1); border: 1px solid var(--bdv); border-radius: 12px;
+    padding: 28px; width: 400px;
+  }
+  .cell-modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+  .cell-modal .field { margin-bottom: 14px; }
+  .cell-modal label { display: block; font-size: 13px; color: var(--t2); margin-bottom: 6px; }
+  .cell-modal input[type=text] {
+    width: 100%; padding: 9px 12px; background: var(--s0); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 14px; outline: none;
+  }
+  .cell-modal input[type=text]:focus { border-color: var(--ac); }
+  .cell-modal .btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* BGM section */
+  .bgm-bar {
+    display: flex; align-items: center; gap: 10px; padding: 0;
+  }
+  .bgm-bar label { font-size: 13px; color: var(--t2); white-space: nowrap; }
+  .volume-slider {
+    width: 100px; height: 4px; -webkit-appearance: none; appearance: none;
+    background: var(--bd); border-radius: 2px; outline: none;
+  }
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--ac); cursor: pointer;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--s2); color: var(--t1); padding: 10px 24px; border-radius: 6px;
+    font-size: 14px; border-left: 3px solid var(--gn); z-index: 1000;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="image-gen.html">文生图</a>
+    <a href="video-gen.html" class="active">图生视频</a>
+    <a href="preview.html">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Context toolbar -->
+  <div class="ctx-bar">
+    <select class="sel"><option>模板: 九宫格轮播</option><option>模板: 左右滑动展示</option><option>模板: 缩放聚焦</option><option>模板: 淡入淡出切换</option></select>
+    <select class="sel"><option>转场: 淡入淡出</option><option>转场: 平滑滑动</option><option>转场: 无转场</option></select>
+    <select class="sel" id="bgm-select" onchange="updateBgm(this.value)"><option value="">BGM: 无</option><option value="轻快电子">BGM: 轻快电子</option><option value="舒缓钢琴">BGM: 舒缓钢琴</option><option value="流行节奏">BGM: 流行节奏</option><option value="氛围环境">BGM: 氛围环境</option></select>
+    <span class="spacer"></span>
+    <span class="cost-hint">消耗 <span>200</span> 点 · 预计 <span>45</span> 秒</span>
+    <button class="btn btn-primary" id="gen-video-btn" onclick="generateVideo()">生成视频</button>
+  </div>
+
+  <!-- BGM bar -->
+  <div class="bgm-bar" id="bgm-bar" style="display:none">
+    <label>🎵 轻快电子</label>
+    <input type="range" class="volume-slider" min="0" max="100" value="70">
+    <span style="font-size:12px;color:var(--t3)">70%</span>
+  </div>
+
+  <!-- Video Preview -->
+  <div class="preview-area" id="preview-area">
+    <div class="preview-empty" id="preview-empty">
+      <div class="icon">🎬</div>
+      <div class="text">在下方网格中添加图片以预览视频</div>
+      <div class="hint">支持 9 宫格或 16 宫格模式</div>
+    </div>
+    <div class="progress-overlay" id="progress-overlay" style="display:none">
+      <div class="progress-pct" id="progress-pct">0%</div>
+      <div class="progress-bar-wrap"><div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div></div>
+      <div class="progress-text" id="progress-text">准备中...</div>
+    </div>
+  </div>
+
+  <!-- Grid section -->
+  <div class="grid-section">
+    <div class="grid-header">
+      <h3>图片序列</h3>
+      <div class="grid-toggle">
+        <button class="active" onclick="switchGrid(9, this)">九宫格</button>
+        <button onclick="switchGrid(16, this)">十六宫格</button>
+      </div>
+    </div>
+    <div class="cell-grid nine" id="cell-grid"></div>
+  </div>
+</div>
+
+<!-- Cell edit modal -->
+<div class="cell-modal" id="cell-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">编辑图片 #1</h3>
+    <div class="field">
+      <label>图片</label>
+      <div style="padding:16px;border:1px dashed var(--bd);border-radius:6px;text-align:center;color:var(--t3);cursor:pointer;font-size:13px" onclick="showToast('模拟选择图片')">点击选择图片 或 从资源库选取</div>
+    </div>
+    <div class="field">
+      <label>文案（显示在视频中）</label>
+      <input type="text" id="cell-text-input" placeholder="输入此帧的文案...">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeCellModal()">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveCell()">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentGridSize = 9;
+  let editingCellIdx = -1;
+  let cellData = {}; // idx -> {text: string, filled: bool}
+
+  // Initialize grid
+  function initGrid(n) {
+    const grid = document.getElementById('cell-grid');
+    grid.innerHTML = '';
+    grid.className = 'cell-grid ' + (n === 9 ? 'nine' : 'sixteen');
+
+    for (let i = 0; i < n; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.idx = i;
+
+      const data = cellData[i];
+      if (data && data.filled) {
+        cell.classList.add('filled');
+        cell.innerHTML = `
+          <div class="cell-img" style="background:linear-gradient(135deg,${['#2a2a3a,#3a2a2a','#2a3a2a,#3a2a3a','#3a3a2a,#2a2a3a','#2a3a3a,#3a3a3a','#3a2a3a,#2a3a2a'][i%5]})">🖼</div>
+          <div class="cell-text">${data.text || '图片'}</div>
+          <button class="cell-delete" onclick="event.stopPropagation();deleteCell(${i})">×</button>
+        `;
+        cell.onclick = function(e) { if (!e.target.classList.contains('cell-delete')) editCell(i); };
+      } else {
+        cell.innerHTML = `<span class="cell-index">${i+1}</span><span class="cell-add">+</span>`;
+        cell.onclick = function() { editCell(i); };
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function editCell(idx) {
+    editingCellIdx = idx;
+    const data = cellData[idx];
+    document.getElementById('modal-title').textContent = `编辑图片 #${idx+1}`;
+    document.getElementById('cell-text-input').value = (data && data.text) || '';
+    document.getElementById('cell-modal').classList.add('open');
+  }
+
+  function closeCellModal() {
+    document.getElementById('cell-modal').classList.remove('open');
+    editingCellIdx = -1;
+  }
+
+  function saveCell() {
+    const text = document.getElementById('cell-text-input').value.trim();
+    cellData[editingCellIdx] = { text: text || '图片', filled: true };
+    initGrid(currentGridSize);
+    closeCellModal();
+    updatePreviewState();
+  }
+
+  function deleteCell(idx) {
+    delete cellData[idx];
+    initGrid(currentGridSize);
+    updatePreviewState();
+    showToast('已移除');
+  }
+
+  function switchGrid(n, btn) {
+    currentGridSize = n;
+    document.querySelectorAll('.grid-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    initGrid(n);
+  }
+
+  function updatePreviewState() {
+    const filled = Object.values(cellData).filter(d => d && d.filled).length;
+    const preview = document.getElementById('preview-empty');
+    if (preview && filled > 0) {
+      preview.querySelector('.text').textContent = `已添加 ${filled}/${currentGridSize} 张图片`;
+    }
+  }
+
+  function updateBgm(val) {
+    const bar = document.getElementById('bgm-bar');
+    if (val) {
+      bar.style.display = 'flex';
+      bar.querySelector('label').textContent = '🎵 ' + val;
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+
+  // Generate video
+  function generateVideo() {
+    const filled = Object.values(cellData).filter(d => d && d.filled).length;
+    if (filled < 2) { showToast('请至少添加 2 张图片'); return; }
+
+    const btn = document.getElementById('gen-video-btn');
+    btn.textContent = '生成中...';
+    btn.disabled = true;
+
+    document.getElementById('preview-empty').style.display = 'none';
+    document.getElementById('progress-overlay').style.display = 'flex';
+
+    let pct = 0;
+    const iv = setInterval(() => {
+      pct += Math.random() * 8 + 2;
+      if (pct >= 100) {
+        pct = 100;
+        clearInterval(iv);
+        document.getElementById('progress-pct').textContent = '100%';
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = '合成完成';
+        // Show completed state
+        setTimeout(() => {
+          document.getElementById('progress-overlay').style.display = 'none';
+          document.getElementById('preview-area').innerHTML = `
+            <div class="preview-done">
+              <div class="play-btn" onclick="showToast('▶ 播放视频 (Demo)')">▶</div>
+              <div class="done-text">生成完成 · 45 秒 · 1080p</div>
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('已下载')">⬇ 下载 MP4</button>
+                <button class="btn btn-ghost btn-sm" onclick="showToast('已保存到资源库')">💾 保存</button>
+              </div>
+            </div>
+          `;
+          btn.textContent = '重新生成';
+          btn.disabled = false;
+          showToast('视频生成完成');
+        }, 500);
+        return;
+      }
+      document.getElementById('progress-pct').textContent = Math.round(pct) + '%';
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-text').textContent = `正在合成第 ${Math.round(pct/100*currentGridSize)}/${currentGridSize} 帧 · 预计剩余 ${Math.round((100-pct)/2)} 秒`;
+    }, 500);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Init with some pre-filled cells
+  cellData = {
+    0: {text: '白底主图', filled: true},
+    1: {text: '场景搭配', filled: true},
+    2: {text: '细节特写', filled: true},
+    4: {text: '使用场景', filled: true},
+  };
+  initGrid(9);
+</script>
+</body>
+</html>

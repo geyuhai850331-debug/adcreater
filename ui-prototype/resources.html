@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 我的资源</title>
+<style>
+  :root {
+    --surface-0: #161616; --surface-1: #1e1e1e; --surface-2: #262626;
+    --surface-3: #2e2e2e; --text-primary: #ececec; --text-secondary: #9c9c9c;
+    --text-tertiary: #6b6b6b; --accent: #d4a853; --accent-hover: #e0bb6a;
+    --border: #2a2a2a; --border-visible: #383838; --green: #5c9c6b; --red: #c25450;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter", "阿里巴巴普惠体", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--surface-0); color: var(--text-primary);
+    min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); gap: 0;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; margin-right: 32px; color: var(--text-primary); text-decoration: none; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.12s;
+  }
+  .topbar nav a:hover, .topbar nav a.active { color: var(--text-primary); }
+  .topbar nav a.active { border-bottom-color: var(--accent); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; }
+  .topbar .right a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .topbar .right a:hover { color: var(--text-primary); }
+  .points { color: var(--accent); font-size: 14px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-group { display: flex; gap: 4px; }
+  .filter-group button {
+    padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    transition: all 0.12s;
+  }
+  .filter-group button:hover { color: var(--text-primary); border-color: var(--border-visible); }
+  .filter-group button.active { background: var(--surface-2); border-color: var(--accent); color: var(--accent); }
+  .search-box {
+    padding: 7px 14px; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-primary); font-size: 14px; outline: none;
+    width: 200px; margin-left: auto;
+  }
+  .search-box::placeholder { color: var(--text-tertiary); }
+  .search-box:focus { border-color: var(--accent); }
+  .sort-select {
+    padding: 6px 28px 6px 12px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-primary); font-size: 13px; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c9c9c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+  }
+
+  .resource-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .resource-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; transition: border-color 0.12s; overflow: hidden; position: relative;
+  }
+  .resource-card:hover { border-color: var(--border-visible); }
+  .resource-card.selected { border-color: var(--accent); }
+  .resource-card .type-badge {
+    position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 500; z-index: 2;
+    background: var(--surface-2); color: var(--text-secondary);
+  }
+  .resource-card .thumb {
+    width: 100%; background: var(--surface-2); display: flex; align-items: center;
+    justify-content: center; color: var(--text-tertiary); font-size: 40px;
+  }
+  .resource-card.type-image .thumb { aspect-ratio: 1; }
+  .resource-card.type-video .thumb { aspect-ratio: 16/10; }
+  .resource-card.type-copy .thumb { aspect-ratio: auto; min-height: 120px; padding: 20px; }
+  .resource-card .card-info { padding: 12px; }
+  .resource-card .card-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .resource-card .card-meta { font-size: 11px; color: var(--text-tertiary); display: flex; justify-content: space-between; }
+  .resource-card .multi-select {
+    position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
+    border-radius: 4px; border: 2px solid var(--border-visible); background: var(--surface-1);
+    display: none; align-items: center; justify-content: center; z-index: 2;
+  }
+  .resource-card.selecting .multi-select { display: flex; }
+  .resource-card.selected .multi-select { border-color: var(--accent); background: var(--accent); display: flex; }
+  .resource-card.selected .multi-select::after { content: "✓"; color: var(--surface-0); font-size: 12px; }
+  .resource-card .video-overlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 48px; pointer-events: none;
+  }
+
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--text-tertiary); }
+  .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-state .text { font-size: 16px; margin-bottom: 8px; }
+  .empty-state a { color: var(--accent); text-decoration: none; font-size: 14px; }
+  .empty-state a:hover { text-decoration: underline; }
+
+  .pagination { display: flex; justify-content: center; gap: 4px; margin-top: 24px; }
+  .pagination button {
+    width: 36px; height: 36px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-secondary); font-size: 13px; cursor: pointer;
+  }
+  .pagination button:hover { border-color: var(--border-visible); }
+  .pagination button.active { background: var(--surface-2); border-color: var(--accent); color: var(--accent); }
+
+  .toolbar-actions { display: flex; gap: 8px; margin-left: 12px; }
+  .toolbar-actions button {
+    padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .toolbar-actions button:hover { border-color: var(--red); color: var(--red); }
+  .toolbar-actions button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .select-count { font-size: 13px; color: var(--text-secondary); display: none; }
+  .select-count.show { display: inline; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--surface-2); color: var(--text-primary);
+    padding: 10px 24px; border-radius: 6px; font-size: 14px;
+    border-left: 3px solid var(--green); z-index: 1000;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="workbench.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="workbench.html">文生图</a>
+    <a href="workbench.html">图生视频</a>
+    <a href="workbench.html">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html" class="active">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="toolbar">
+    <div class="filter-group">
+      <button class="active" onclick="filterAll(this)">全部</button>
+      <button onclick="filterType('copy', this)">文案</button>
+      <button onclick="filterType('image', this)">图片</button>
+      <button onclick="filterType('video', this)">视频</button>
+    </div>
+    <input type="text" class="search-box" placeholder="搜索资源..." oninput="searchResources(this.value)">
+    <select class="sort-select"><option>按时间排序</option><option>按名称排序</option></select>
+    <span class="spacer" style="flex:1"></span>
+    <span class="select-count" id="select-count">已选 0 项</span>
+    <div class="toolbar-actions">
+      <button onclick="toggleSelectMode()" id="select-btn">多选</button>
+      <button onclick="batchDelete()" id="delete-btn" disabled>删除</button>
+    </div>
+  </div>
+
+  <div class="resource-grid" id="resource-grid">
+    <!-- Image resources -->
+    <div class="resource-card type-image" data-type="image" data-name="白底主图_3">
+      <div class="type-badge">图片</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#2a2a3a,#3a2a2a)">🖼</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">白底主图_3</div><div class="card-meta"><span>1,024×1,024</span><span>05-14 14:30</span></div></div>
+    </div>
+    <div class="resource-card type-image" data-type="image" data-name="场景搭配_1">
+      <div class="type-badge">图片</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#2a3a2a,#3a2a3a)">🖼</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">场景搭配_1</div><div class="card-meta"><span>1,024×1,024</span><span>05-14 11:20</span></div></div>
+    </div>
+    <!-- Copy resources -->
+    <div class="resource-card type-copy" data-type="copy" data-name="日亚描述_v2">
+      <div class="type-badge">文案</div>
+      <div class="thumb" style="font-size:14px; line-height:1.6; text-align:left">夏の新作ワンピース。アイスシルク素材を使用し、通気性抜群で快適な着心地。Vネックが首元をすっきり見せ、Aラインが体型カバー。</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">日亚描述_v2</div><div class="card-meta"><span>128 字</span><span>05-14 14:30</span></div></div>
+    </div>
+    <!-- Video resource -->
+    <div class="resource-card type-video" data-type="video" data-name="16格轮播_v1">
+      <div class="type-badge">视频</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#3a3a2a,#2a2a3a); position:relative">
+        <div class="video-overlay">▶</div>
+      </div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">16格轮播_v1</div><div class="card-meta"><span>45s · 1080p</span><span>05-13 16:42</span></div></div>
+    </div>
+    <!-- More images -->
+    <div class="resource-card type-image" data-type="image" data-name="细节图_2">
+      <div class="type-badge">图片</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#3a3a3a,#2a3a2a)">🖼</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">细节图_2</div><div class="card-meta"><span>1,024×1,024</span><span>05-13 10:15</span></div></div>
+    </div>
+    <div class="resource-card type-copy" data-type="copy" data-name="SNS短文_v1">
+      <div class="type-badge">文案</div>
+      <div class="thumb" style="font-size:14px; line-height:1.6; text-align:left">今年の夏はアイスシルクで決まり！Vネック×Aラインで体型カバーもばっちり。</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">SNS短文_v1</div><div class="card-meta"><span>45 字</span><span>05-12 09:00</span></div></div>
+    </div>
+    <div class="resource-card type-image" data-type="image" data-name="白底主图_2">
+      <div class="type-badge">图片</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#2a3a3a,#3a3a3a)">🖼</div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">白底主图_2</div><div class="card-meta"><span>1,024×1,024</span><span>05-12 08:30</span></div></div>
+    </div>
+    <div class="resource-card type-video" data-type="video" data-name="九宫格演示_v1">
+      <div class="type-badge">视频</div>
+      <div class="thumb" style="background:linear-gradient(135deg,#2a2a3a,#3a3a2a)"><div class="video-overlay">▶</div></div>
+      <div class="multi-select"></div>
+      <div class="card-info"><div class="card-name">九宫格演示_v1</div><div class="card-meta"><span>30s · 1080p</span><span>05-11 14:00</span></div></div>
+    </div>
+  </div>
+
+  <div class="pagination">
+    <button>1</button>
+    <button class="active">2</button>
+    <button>3</button>
+    <button>→</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let selectMode = false;
+
+  function filterAll(btn) {
+    document.querySelectorAll('.filter-group button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.resource-card').forEach(c => c.style.display = '');
+  }
+  function filterType(type, btn) {
+    document.querySelectorAll('.filter-group button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.resource-card').forEach(c => {
+      c.style.display = c.dataset.type === type ? '' : 'none';
+    });
+  }
+  function searchResources(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.resource-card').forEach(c => {
+      c.style.display = c.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+  function toggleSelectMode() {
+    selectMode = !selectMode;
+    document.querySelectorAll('.resource-card').forEach(c => c.classList.toggle('selecting', selectMode));
+    document.getElementById('select-btn').textContent = selectMode ? '取消' : '多选';
+    document.getElementById('delete-btn').disabled = !selectMode;
+    updateSelectCount();
+    if (!selectMode) {
+      document.querySelectorAll('.resource-card').forEach(c => c.classList.remove('selected'));
+      updateSelectCount();
+    }
+  }
+  document.getElementById('resource-grid').addEventListener('click', function(e) {
+    if (!selectMode) return;
+    const card = e.target.closest('.resource-card');
+    if (card) {
+      card.classList.toggle('selected');
+      updateSelectCount();
+    }
+  });
+  function updateSelectCount() {
+    const count = document.querySelectorAll('.resource-card.selected').length;
+    const el = document.getElementById('select-count');
+    el.textContent = '已选 ' + count + ' 项';
+    el.classList.toggle('show', selectMode);
+    document.getElementById('delete-btn').disabled = count === 0;
+  }
+  function batchDelete() {
+    const cards = document.querySelectorAll('.resource-card.selected');
+    if (cards.length === 0) return;
+    if (confirm('确定删除选中的 ' + cards.length + ' 个资源？')) {
+      cards.forEach(c => c.remove());
+      updateSelectCount();
+      showToast('已删除');
+    }
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

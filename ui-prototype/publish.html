@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 资源发布</title>
+<style>
+  :root {
+    --surface-0: #161616; --surface-1: #1e1e1e; --surface-2: #262626;
+    --surface-3: #2e2e2e; --text-primary: #ececec; --text-secondary: #9c9c9c;
+    --text-tertiary: #6b6b6b; --accent: #d4a853; --accent-hover: #e0bb6a;
+    --border: #2a2a2a; --border-visible: #383838; --green: #5c9c6b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter", "阿里巴巴普惠体", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--surface-0); color: var(--text-primary);
+    min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; margin-right: 32px; color: var(--text-primary); text-decoration: none; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.12s;
+  }
+  .topbar nav a:hover { color: var(--text-primary); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; }
+  .topbar .right a { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .topbar .right a:hover, .topbar .right a.active { color: var(--text-primary); }
+  .topbar .right a.active { border-bottom: 2px solid var(--accent); padding-bottom: 16px; margin-bottom: -17px; }
+  .points { color: var(--accent); font-size: 14px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  .main { flex: 1; padding: 32px 24px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+  /* Steps */
+  .steps { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
+  .step {
+    display: flex; align-items: center; gap: 10px; padding: 0 24px;
+    font-size: 14px; color: var(--text-tertiary);
+  }
+  .step .num {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; flex-shrink: 0;
+  }
+  .step.active { color: var(--text-primary); }
+  .step.active .num { border-color: var(--accent); background: var(--accent); color: var(--surface-0); }
+  .step.done { color: var(--text-secondary); }
+  .step.done .num { border-color: var(--green); background: var(--green); color: #fff; }
+  .step-connector { width: 48px; height: 1px; background: var(--border); }
+  .step-connector.done { background: var(--green); }
+
+  .step-content { width: 100%; max-width: 700px; }
+
+  /* Step 1: Select Channel */
+  .channel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .channel-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; cursor: pointer; transition: all 0.12s; text-align: center;
+  }
+  .channel-card:hover { border-color: var(--border-visible); }
+  .channel-card.selected { border-color: var(--accent); background: var(--accent-muted); }
+  .channel-card .icon { font-size: 36px; margin-bottom: 12px; }
+  .channel-card .name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .channel-card .desc { font-size: 12px; color: var(--text-tertiary); }
+  .channel-card .status { font-size: 12px; margin-top: 8px; display: inline-block; padding: 2px 8px; border-radius: 3px; }
+  .channel-card .status.bound { background: #1a3a1a; color: var(--green); }
+  .channel-card .status.unbound { background: #3a2a1a; color: var(--yellow, #c9a84c); }
+
+  /* Step 2: Select Resources */
+  .resource-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .resource-col h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .resource-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 8px; cursor: pointer; font-size: 13px; transition: all 0.12s;
+  }
+  .resource-item:hover { border-color: var(--border-visible); }
+  .resource-item.selected { border-color: var(--accent); background: var(--accent-muted); }
+  .resource-item input[type=checkbox] { accent-color: var(--accent); }
+  .resource-item .meta { font-size: 11px; color: var(--text-tertiary); margin-left: auto; }
+
+  /* Step 3: Confirm */
+  .confirm-summary { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+  .confirm-summary h3 { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+  .confirm-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .confirm-item .label { color: var(--text-secondary); }
+  .confirm-total { display: flex; justify-content: space-between; padding-top: 16px; font-size: 15px; font-weight: 500; }
+
+  .btn {
+    padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.12s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: var(--surface-0); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text-primary); border-color: var(--border-visible); }
+  .step-actions { display: flex; justify-content: space-between; margin-top: 32px; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--surface-2); color: var(--text-primary);
+    padding: 10px 24px; border-radius: 6px; font-size: 14px;
+    border-left: 3px solid var(--green); z-index: 1000;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="workbench.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="workbench.html">文生图</a>
+    <a href="workbench.html">图生视频</a>
+    <a href="workbench.html">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html" class="active">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step active" id="step-ind-1"><span class="num">1</span>选择渠道</div>
+    <div class="step-connector" id="conn-1"></div>
+    <div class="step" id="step-ind-2"><span class="num">2</span>选择资源</div>
+    <div class="step-connector" id="conn-2"></div>
+    <div class="step" id="step-ind-3"><span class="num">3</span>确认发布</div>
+  </div>
+
+  <div class="step-content" id="step-content">
+    <!-- Step 1: Channel selection -->
+    <div id="step-1">
+      <div class="channel-grid">
+        <div class="channel-card selected" onclick="selectChannel(this)">
+          <div class="icon">🛒</div>
+          <div class="name">Amazon 日本站</div>
+          <div class="desc">商品图片 + 描述文案</div>
+          <div class="status bound">已绑定</div>
+        </div>
+        <div class="channel-card" onclick="selectChannel(this)">
+          <div class="icon">🛒</div>
+          <div class="name">Amazon 美国站</div>
+          <div class="desc">商品图片 + 描述文案</div>
+          <div class="status unbound">未绑定</div>
+        </div>
+        <div class="channel-card" onclick="selectChannel(this)">
+          <div class="icon">📱</div>
+          <div class="name">社交媒体通用</div>
+          <div class="desc">帖子素材 + 文案</div>
+          <div class="status unbound">导出下载</div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <a href="#" style="color:var(--text-tertiary); font-size:13px; text-decoration:none">+ 绑定新渠道账号</a>
+      </div>
+      <div class="step-actions">
+        <span></span>
+        <button class="btn btn-primary" onclick="goStep(2)">下一步 →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Resource picking -->
+    <div id="step-2" style="display:none">
+      <div class="resource-picker">
+        <div class="resource-col">
+          <h3>文案</h3>
+          <label class="resource-item selected"><input type="checkbox" checked> 日亚描述_v2 <span class="meta">128字</span></label>
+          <label class="resource-item"><input type="checkbox"> SNS短文_v1 <span class="meta">45字</span></label>
+          <label class="resource-item"><input type="checkbox"> Amazon Listing_v1 <span class="meta">200字</span></label>
+          <label class="resource-item"><input type="checkbox"> 日亚描述_v1 <span class="meta">150字</span></label>
+        </div>
+        <div class="resource-col">
+          <h3>图片</h3>
+          <label class="resource-item selected"><input type="checkbox" checked> 白底主图_3 <span class="meta">1:1</span></label>
+          <label class="resource-item selected"><input type="checkbox" checked> 场景搭配_1 <span class="meta">1:1</span></label>
+          <label class="resource-item"><input type="checkbox"> 细节图_2 <span class="meta">1:1</span></label>
+          <label class="resource-item"><input type="checkbox"> 白底主图_2 <span class="meta">1:1</span></label>
+        </div>
+        <div class="resource-col">
+          <h3>视频</h3>
+          <label class="resource-item"><input type="checkbox"> 16格轮播_v1 <span class="meta">45s</span></label>
+          <label class="resource-item"><input type="checkbox"> 九宫格演示_v1 <span class="meta">30s</span></label>
+          <label class="resource-item disabled" style="opacity:0.3"><input type="checkbox" disabled> 暂无更多 <span class="meta">—</span></label>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-ghost" onclick="goStep(1)">← 上一步</button>
+        <button class="btn btn-primary" onclick="goStep(3)">下一步 →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirm -->
+    <div id="step-3" style="display:none">
+      <div class="confirm-summary">
+        <h3>发布确认</h3>
+        <div class="confirm-item"><span>渠道</span><span class="label">Amazon 日本站</span></div>
+        <div class="confirm-item"><span>文案</span><span class="label">日亚描述_v2 (128 字)</span></div>
+        <div class="confirm-item"><span>图片</span><span class="label">白底主图_3, 场景搭配_1</span></div>
+        <div class="confirm-item"><span>视频</span><span class="label">无</span></div>
+        <div class="confirm-item"><span>格式</span><span class="label">Amazon 商品上传格式</span></div>
+        <div class="confirm-total"><span>预估文件大小</span><span>2.4 MB</span></div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-ghost" onclick="goStep(2)">← 上一步</button>
+        <button class="btn btn-primary" onclick="publish()">确认导出</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentStep = 1;
+
+  function selectChannel(card) {
+    document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  }
+
+  function goStep(n) {
+    currentStep = n;
+    document.querySelectorAll('[id^="step-"]').forEach(el => { if (el.id.startsWith('step-') && !el.id.includes('ind') && !el.id.includes('content')) el.style.display = 'none'; });
+    ['step-1','step-2','step-3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (id === 'step-'+n) ? 'block' : 'none';
+    });
+    // Update step indicators
+    for (let i = 1; i <= 3; i++) {
+      const ind = document.getElementById('step-ind-'+i);
+      ind.classList.remove('active', 'done');
+      if (i < n) ind.classList.add('done');
+      if (i === n) ind.classList.add('active');
+    }
+    document.getElementById('conn-1').classList.toggle('done', n > 1);
+    document.getElementById('conn-2').classList.toggle('done', n > 2);
+  }
+
+  function publish() {
+    showToast('导出成功，包含 3 个文件 · download.zip');
+    setTimeout(() => { alert('模拟下载：WeryAI_AmazonJP_20260514.zip (2.4 MB)'); }, 1500);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

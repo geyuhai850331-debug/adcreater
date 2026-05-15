@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 效果预览</title>
+<style>
+  :root {
+    --s0: #161616; --s1: #1e1e1e; --s2: #262626; --s3: #2e2e2e;
+    --t1: #ececec; --t2: #9c9c9c; --t3: #6b6b6b;
+    --ac: #d4a853; --ach: #e0bb6a; --acm: #3d311c;
+    --bd: #2a2a2a; --bdv: #383838; --gn: #5c9c6b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter","阿里巴巴普惠体",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background: var(--s0); color: var(--t1); min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bd); position: sticky; top:0; z-index: 100; gap: 24px;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; color: var(--t1); text-decoration: none; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--t2); text-decoration: none; font-size: 14px;
+    border-bottom: 2px solid transparent; transition: all .12s;
+  }
+  .topbar nav a:hover { color: var(--t1); }
+  .topbar nav a.active { color: var(--t1); border-bottom-color: var(--ac); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+  .topbar .right a { color: var(--t2); text-decoration: none; }
+  .topbar .right a:hover { color: var(--t1); }
+  .points { color: var(--ac); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  /* Main layout: sidebar + preview */
+  .main { flex: 1; display: flex; overflow: hidden; }
+
+  /* Left sidebar */
+  .sidebar {
+    width: 280px; flex-shrink: 0; border-right: 1px solid var(--bd);
+    display: flex; flex-direction: column; overflow-y: auto; padding: 24px;
+  }
+  .sidebar h3 { font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+  .sidebar .section-label {
+    font-size: 12px; color: var(--t3); text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 10px; margin-top: 8px;
+  }
+  .resource-group { margin-bottom: 20px; }
+  .resource-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px;
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px;
+    margin-bottom: 8px; cursor: pointer; transition: all .12s;
+  }
+  .resource-item:hover { border-color: var(--bdv); }
+  .resource-item.selected { border-color: var(--ac); background: var(--acm); }
+  .resource-item .checkbox {
+    width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--bdv);
+    flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+    transition: all .12s;
+  }
+  .resource-item.selected .checkbox { border-color: var(--ac); background: var(--ac); }
+  .resource-item.selected .checkbox::after { content:"✓"; color:var(--s0); font-size:12px; font-weight:600; }
+  .resource-item .item-info { flex: 1; min-width: 0; }
+  .resource-item .item-name { font-size: 14px; margin-bottom: 2px; }
+  .resource-item .item-meta { font-size: 11px; color: var(--t3); }
+  .resource-item .item-preview {
+    width: 44px; height: 44px; border-radius: 4px; background: var(--s2);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--t3);
+  }
+  .empty-hint { text-align: center; padding: 20px; color: var(--t3); font-size: 13px; line-height: 1.8; }
+  .empty-hint a { color: var(--ac); text-decoration: none; }
+
+  /* Preview area */
+  .preview-area {
+    flex: 1; display: flex; align-items: flex-start; justify-content: center;
+    padding: 24px; overflow-y: auto; background: var(--s0);
+  }
+  .preview-wrapper {
+    width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px;
+  }
+
+  /* Toolbar above preview */
+  .preview-toolbar {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sel {
+    padding: 7px 30px 7px 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 13px; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c9c9c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .spacer { flex: 1; }
+  .btn {
+    padding: 7px 18px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .12s; border: none;
+  }
+  .btn-ghost { background: transparent; color: var(--t2); border: 1px solid var(--bd); }
+  .btn-ghost:hover { color: var(--t1); border-color: var(--bdv); }
+  .btn-accent { background: var(--ac); color: var(--s0); }
+  .btn-accent:hover { background: var(--ach); }
+
+  /* Preview Frame - white background, simulating real e-commerce page */
+  .preview-frame {
+    background: #fff; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  /* === AMAZON LISTING STYLE === */
+  .amazon-listing { font-family: "Amazon Ember", Arial, sans-serif; color: #0f1111; }
+  .amazon-listing .product-hero {
+    display: flex; gap: 0; background: #fff;
+  }
+  .amazon-listing .product-images { flex: 1; padding: 20px; }
+  .amazon-listing .main-image {
+    width: 100%; aspect-ratio: 1; background: #f8f8f8; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 80px; color: #ccc; margin-bottom: 12px;
+  }
+  .amazon-listing .thumb-strip { display: flex; gap: 8px; }
+  .amazon-listing .thumb {
+    width: 60px; height: 60px; border-radius: 4px; border: 2px solid transparent;
+    background: #f5f5f5; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #ddd; cursor: pointer;
+  }
+  .amazon-listing .thumb.active { border-color: #e77600; box-shadow: 0 0 3px rgba(228,121,17,0.5); }
+  .amazon-listing .product-details { width: 280px; padding: 20px 20px 20px 0; }
+  .amazon-listing .product-title { font-size: 20px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; }
+  .amazon-listing .brand { font-size: 14px; color: #007185; margin-bottom: 8px; }
+  .amazon-listing .rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 14px; }
+  .amazon-listing .stars { color: #e77600; font-size: 16px; }
+  .amazon-listing .price-block { border-top: 1px solid #e7e7e7; padding-top: 12px; margin-bottom: 12px; }
+  .amazon-listing .price-symbol { font-size: 14px; vertical-align: super; }
+  .amazon-listing .price { font-size: 28px; font-weight: 600; }
+  .amazon-listing .bullet-list { margin: 16px 0; padding: 0; list-style: none; }
+  .amazon-listing .bullet-list li { padding: 4px 0; font-size: 14px; line-height: 1.5; color: #0f1111; }
+  .amazon-listing .bullet-list li::before { content:"• "; color: #c45500; }
+  .amazon-listing .add-to-cart {
+    width: 100%; padding: 12px; background: linear-gradient(to bottom, #f7dfa5, #f0c14b);
+    border: 1px solid #a88734; border-radius: 20px; font-size: 13px; cursor: pointer;
+    margin-bottom: 8px;
+  }
+  .amazon-listing .buy-now {
+    width: 100%; padding: 12px; background: linear-gradient(to bottom, #ffd97c, #f5b81b);
+    border: 1px solid #c89411; border-radius: 20px; font-size: 13px; cursor: pointer;
+  }
+
+  /* === SOCIAL MEDIA STYLE === */
+  .social-post {
+    background: #fff; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .social-post .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+  .social-post .post-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 600; }
+  .social-post .post-username { font-size: 13px; font-weight: 600; color: #262626; }
+  .social-post .post-image { width: 100%; aspect-ratio: 1; background: #fafafa; display: flex; align-items: center; justify-content: center; font-size: 80px; color: #e0e0e0; }
+  .social-post .post-actions { display: flex; gap: 14px; padding: 8px 16px; font-size: 22px; color: #262626; }
+  .social-post .post-likes { padding: 0 16px; font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 4px; }
+  .social-post .post-caption { padding: 0 16px 16px; font-size: 13px; line-height: 1.5; color: #262626; }
+  .social-post .post-caption .username { font-weight: 600; }
+
+  /* === E-COMMERCE BANNER STYLE === */
+  .banner-ad { background: #faf6f0; display: flex; align-items: center; min-height: 300px; }
+  .banner-ad .banner-img {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 100px; color: #e8e0d8; padding: 40px;
+  }
+  .banner-ad .banner-text { flex: 1; padding: 40px 40px 40px 0; }
+  .banner-ad .banner-title { font-size: 32px; font-weight: 700; color: #2c2c2c; margin-bottom: 12px; line-height: 1.2; }
+  .banner-ad .banner-desc { font-size: 16px; color: #666; line-height: 1.6; margin-bottom: 20px; }
+  .banner-ad .banner-cta {
+    display: inline-block; padding: 12px 32px; background: #2c2c2c; color: #fff;
+    border-radius: 4px; font-size: 14px; font-weight: 500; text-decoration: none;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--s2); color: var(--t1); padding: 10px 24px; border-radius: 6px;
+    font-size: 14px; border-left: 3px solid var(--gn); z-index: 1000;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="image-gen.html">文生图</a>
+    <a href="video-gen.html">图生视频</a>
+    <a href="preview.html" class="active">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Left sidebar: Resource selector -->
+  <div class="sidebar">
+    <h3>选择资源</h3>
+
+    <div class="section-label">文案</div>
+    <div class="resource-group">
+      <div class="resource-item selected" data-type="copy" data-id="copy1" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">日亚描述_v2</div>
+          <div class="item-meta">128 字 · 日语</div>
+        </div>
+        <div class="item-preview">📝</div>
+      </div>
+      <div class="resource-item" data-type="copy" data-id="copy2" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">SNS 短文_v1</div>
+          <div class="item-meta">45 字 · 中文</div>
+        </div>
+        <div class="item-preview">📝</div>
+      </div>
+    </div>
+
+    <div class="section-label">图片</div>
+    <div class="resource-group">
+      <div class="resource-item selected" data-type="image" data-id="img1" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">白底主图_3</div>
+          <div class="item-meta">1,024×1,024 · 1:1</div>
+        </div>
+        <div class="item-preview">🖼</div>
+      </div>
+      <div class="resource-item" data-type="image" data-id="img2" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">场景搭配_1</div>
+          <div class="item-meta">1,024×1,024 · 1:1</div>
+        </div>
+        <div class="item-preview">🖼</div>
+      </div>
+      <div class="resource-item" data-type="image" data-id="img3" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">细节图_2</div>
+          <div class="item-meta">1,024×1,024 · 1:1</div>
+        </div>
+        <div class="item-preview">🖼</div>
+      </div>
+    </div>
+
+    <div class="section-label">视频</div>
+    <div class="resource-group">
+      <div class="resource-item" data-type="video" data-id="vid1" onclick="toggleResource(this)">
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">16格轮播_v1</div>
+          <div class="item-meta">45s · 1080p</div>
+        </div>
+        <div class="item-preview" style="font-size:16px">▶</div>
+      </div>
+    </div>
+
+    <div class="empty-hint">
+      找不到？<br><a href="workbench.html">去创作新资源 →</a>
+    </div>
+  </div>
+
+  <!-- Right: Preview area -->
+  <div class="preview-area">
+    <div class="preview-wrapper">
+      <!-- Toolbar -->
+      <div class="preview-toolbar">
+        <select class="sel" id="template-select" onchange="switchTemplate(this.value)">
+          <option value="amazon">Amazon 商品页</option>
+          <option value="social">Instagram 帖子</option>
+          <option value="banner">电商 Banner</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" onclick="showToast('截图已保存到下载')">📸 截图导出</button>
+      </div>
+
+      <!-- Preview Frame -->
+      <div class="preview-frame" id="preview-frame">
+        <!-- Amazon Listing -->
+        <div class="amazon-listing" id="tpl-amazon">
+          <div class="product-hero">
+            <div class="product-images">
+              <div class="main-image">🖼</div>
+              <div class="thumb-strip">
+                <div class="thumb active">🖼</div>
+                <div class="thumb">🖼</div>
+                <div class="thumb">🖼</div>
+                <div class="thumb">▶</div>
+              </div>
+            </div>
+            <div class="product-details">
+              <div class="product-title">夏季冰丝连衣裙 V领通勤 A字裙摆 透气舒适 防晒</div>
+              <div class="brand">品牌: Wery Fashion</div>
+              <div class="rating">
+                <span class="stars">★★★★☆</span>
+                <span style="color:#007185">128 评价</span>
+              </div>
+              <div class="price-block">
+                <span class="price-symbol">¥</span><span class="price">199</span>
+              </div>
+              <ul class="bullet-list">
+                <li>アイスシルク素材を使用し、通気性抜群で快適な着心地</li>
+                <li>Vネックデザインが首元をすっきりと見せ、Aラインが体型を美しくカバー</li>
+                <li>オフィスから週末まで、幅広いシーンで活躍する一着</li>
+              </ul>
+              <button class="add-to-cart">カートに入れる</button>
+              <button class="buy-now">今すぐ購入</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Media Post -->
+        <div class="social-post" id="tpl-social" style="display:none">
+          <div class="post-header">
+            <div class="post-avatar">W</div>
+            <span class="post-username">wery_fashion</span>
+          </div>
+          <div class="post-image">🖼</div>
+          <div class="post-actions">♡ 💬 ✈</div>
+          <div class="post-likes">1,284 次赞</div>
+          <div class="post-caption">
+            <span class="username">wery_fashion</span>
+            夏の新作ワンピースが登場！アイスシルク素材で涼しく快適。Vネック×Aラインで体型カバーもばっちり。オフィスにもデイリーにも使える万能アイテムです。#新作 #夏コーデ #ワンピース
+          </div>
+        </div>
+
+        <!-- E-commerce Banner -->
+        <div class="banner-ad" id="tpl-banner" style="display:none">
+          <div class="banner-img">🖼</div>
+          <div class="banner-text">
+            <div class="banner-title">夏日新风<br>冰丝连衣裙系列</div>
+            <div class="banner-desc">アイスシルク素材で叶える、涼やかで上品な夏の装い。<br>通勤からリゾートまで、一枚でさまざまな表情を。</div>
+            <a href="#" class="banner-cta" onclick="event.preventDefault()">今すぐ見る →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function toggleResource(item) {
+    item.classList.toggle('selected');
+    showToast('预览已更新');
+  }
+
+  function switchTemplate(tpl) {
+    document.getElementById('tpl-amazon').style.display = tpl === 'amazon' ? 'block' : 'none';
+    document.getElementById('tpl-social').style.display = tpl === 'social' ? 'block' : 'none';
+    document.getElementById('tpl-banner').style.display = tpl === 'banner' ? 'block' : 'none';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

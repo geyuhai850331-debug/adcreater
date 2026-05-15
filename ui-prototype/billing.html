@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - 会员与账单</title>
+<style>
+  :root {
+    --surface-0: #161616; --surface-1: #1e1e1e; --surface-2: #262626;
+    --surface-3: #2e2e2e; --text-primary: #ececec; --text-secondary: #9c9c9c;
+    --text-tertiary: #6b6b6b; --accent: #d4a853; --accent-hover: #e0bb6a;
+    --accent-muted: #3d311c; --border: #2a2a2a; --border-visible: #383838;
+    --green: #5c9c6b; --red: #c25450; --yellow: #c9a84c; --blue: #5c88a8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter", "阿里巴巴普惠体", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--surface-0); color: var(--text-primary);
+    min-height: 100vh; font-size: 15px; line-height: 1.6;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; margin-right: 32px; color: var(--text-primary); text-decoration: none; }
+  .topbar nav { display: flex; gap: 0; flex: 1; }
+  .topbar nav a {
+    padding: 16px 18px; color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.12s;
+  }
+  .topbar nav a:hover { color: var(--text-primary); }
+  .topbar .right { display: flex; align-items: center; gap: 18px; }
+  .points { color: var(--accent); font-size: 14px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-3); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  .main { flex: 1; padding: 32px 24px; overflow-y: auto; max-width: 960px; margin: 0 auto; width: 100%; }
+
+  /* Sub-nav tabs */
+  .subnav { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .subnav a {
+    padding: 10px 24px; color: var(--text-secondary); text-decoration: none;
+    font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.12s;
+  }
+  .subnav a:hover { color: var(--text-primary); }
+  .subnav a.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+
+  /* Asset Card */
+  .asset-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 28px; display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .asset-card .balance { font-size: 36px; font-weight: 600; }
+  .asset-card .label { font-size: 13px; color: var(--text-tertiary); }
+  .asset-card .stat { text-align: center; padding: 0 24px; border-left: 1px solid var(--border); }
+  .asset-card .stat:first-child { border-left: none; }
+  .asset-card .stat .val { font-size: 18px; font-weight: 500; margin-top: 4px; }
+  .btn {
+    padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.12s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: var(--surface-0); }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text-primary); border-color: var(--border-visible); }
+
+  /* Table */
+  .table-wrap { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 16px; border-bottom: 1px solid rgba(42,42,42,0.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+  .status::before { content:""; width:6px; height:6px; border-radius:50%; }
+  .status.success::before { background: var(--green); }
+  .status.failed::before { background: var(--red); }
+  .status.refund::before { background: var(--yellow); }
+
+  /* Membership Cards */
+  .plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .plan-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 28px 24px; text-align: center; transition: all 0.12s; position: relative;
+  }
+  .plan-card:hover { border-color: var(--border-visible); }
+  .plan-card.featured { border-color: var(--accent); background: var(--accent-muted); }
+  .plan-card .badge {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: var(--surface-0); padding: 3px 14px;
+    border-radius: 10px; font-size: 11px; font-weight: 600;
+  }
+  .plan-card .plan-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .plan-card .plan-price { font-size: 32px; font-weight: 700; margin: 12px 0 4px; }
+  .plan-card .plan-price span { font-size: 14px; font-weight: 400; color: var(--text-secondary); }
+  .plan-card .plan-daily { font-size: 14px; color: var(--accent); margin-bottom: 16px; }
+  .plan-card .features { text-align: left; font-size: 13px; color: var(--text-secondary); line-height: 2; margin-bottom: 20px; }
+  .plan-card .features li { list-style: none; }
+  .plan-card .features li::before { content: "· "; color: var(--text-tertiary); }
+
+  /* Recharge Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal {
+    background: var(--surface-1); border: 1px solid var(--border-visible);
+    border-radius: 12px; padding: 32px; width: 440px; max-width: 90vw;
+  }
+  .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
+  .modal .close {
+    float: right; background: none; border: none; color: var(--text-tertiary);
+    font-size: 20px; cursor: pointer;
+  }
+  .modal .close:hover { color: var(--text-primary); }
+  .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .amount-card {
+    padding: 14px 10px; text-align: center; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer; transition: all 0.12s; background: var(--surface-0);
+  }
+  .amount-card:hover { border-color: var(--border-visible); }
+  .amount-card.selected { border-color: var(--accent); background: var(--accent-muted); }
+  .amount-card .price { font-size: 16px; font-weight: 600; }
+  .amount-card .pts { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+  .payment-methods { display: flex; gap: 12px; margin-bottom: 20px; }
+  .payment-method {
+    flex: 1; padding: 12px; text-align: center; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer; font-size: 14px; background: var(--surface-0);
+    transition: all 0.12s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .payment-method:hover { border-color: var(--border-visible); }
+  .payment-method.selected { border-color: var(--accent); }
+  .payment-method .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--border);
+  }
+  .payment-method.selected .dot { background: var(--accent); }
+  .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .modal-footer .total { font-size: 14px; }
+  .modal-footer .total span { color: var(--accent); font-weight: 500; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="workbench.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="workbench.html">文案制作</a>
+    <a href="workbench.html">文生图</a>
+    <a href="workbench.html">图生视频</a>
+    <a href="workbench.html">效果预览</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="subnav">
+    <a href="#" class="active" onclick="switchTab('membership', this, event)">会员订阅</a>
+    <a href="#" onclick="switchTab('billing', this, event)">账单明细</a>
+  </div>
+
+  <!-- Membership Tab -->
+  <div id="tab-membership">
+    <div class="plan-grid">
+      <div class="plan-card">
+        <div class="plan-name">免费</div>
+        <div class="plan-price">¥0<span>/月</span></div>
+        <div class="plan-daily">500 点 / 天</div>
+        <ul class="features">
+          <li>基础文案生成</li>
+          <li>标准图片质量</li>
+          <li>视频幻灯片合成</li>
+          <li>普通处理队列</li>
+        </ul>
+        <button class="btn btn-ghost" style="width:100%" disabled>当前方案</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="badge">推荐</div>
+        <div class="plan-name">专业版</div>
+        <div class="plan-price">¥98<span>/月</span></div>
+        <div class="plan-daily">20,000 点 / 天</div>
+        <ul class="features">
+          <li>全部文案模板</li>
+          <li>高清图片输出</li>
+          <li>全部视频模板 + BGM</li>
+          <li>优先处理队列</li>
+          <li>高级风格选项</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%" onclick="showRecharge()">升级</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">旗舰版</div>
+        <div class="plan-price">¥198<span>/月</span></div>
+        <div class="plan-daily">40,000 点 / 天</div>
+        <ul class="features">
+          <li>全部功能无限制</li>
+          <li>4K 超清输出</li>
+          <li>全部 BGM 版权音乐</li>
+          <li>最高优先队列</li>
+          <li>API 接口接入</li>
+          <li>专属客服支持</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%" onclick="showRecharge()">升级</button>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--text-tertiary)">
+      当前套餐：免费会员 · 永不过期 · 今日剩余 320/500 点
+    </div>
+  </div>
+
+  <!-- Billing Tab -->
+  <div id="tab-billing" class="hidden">
+    <div class="asset-card">
+      <div class="stat">
+        <div class="label">当前余额</div>
+        <div class="val" style="color:var(--accent)">◆ 12,800</div>
+      </div>
+      <div class="stat">
+        <div class="label">今日已用</div>
+        <div class="val">320 / 500</div>
+      </div>
+      <div class="stat">
+        <div class="label">会员等级</div>
+        <div class="val">免费会员</div>
+      </div>
+      <div class="stat">
+        <div class="label">到期时间</div>
+        <div class="val">永不过期</div>
+      </div>
+      <button class="btn btn-primary" onclick="showRecharge()">去充值 →</button>
+    </div>
+
+    <div style="display:flex; gap:4px; margin-bottom:16px">
+      <button class="btn btn-ghost" style="border-color:var(--accent);color:var(--accent)" onclick="switchBillingTab('recharge')">充值记录</button>
+      <button class="btn btn-ghost" onclick="switchBillingTab('consume')">消耗明细</button>
+    </div>
+
+    <div id="billing-recharge">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时间</th><th>金额</th><th>点数</th><th>支付方式</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>2026-05-14 14:30</td><td>¥5.00</td><td>2,000</td><td>微信支付</td><td><span class="status success">成功</span></td></tr>
+            <tr><td>2026-05-13 09:15</td><td>¥20.00</td><td>8,000</td><td>支付宝</td><td><span class="status success">成功</span></td></tr>
+            <tr><td>2026-05-12 16:42</td><td>¥5.00</td><td>2,000</td><td>支付宝</td><td><span class="status refund">已退款</span></td></tr>
+            <tr><td>2026-05-11 11:00</td><td>¥50.00</td><td>22,000</td><td>微信支付</td><td><span class="status success">成功</span></td></tr>
+            <tr><td>2026-05-10 08:22</td><td>¥20.00</td><td>8,000</td><td>支付宝</td><td><span class="status success">成功</span></td></tr>
+            <tr><td>2026-05-09 20:15</td><td>¥5.00</td><td>2,000</td><td>微信支付</td><td><span class="status success">成功</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="billing-consume" class="hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>时间</th><th>模块</th><th>资源名称</th><th>消耗点数</th></tr></thead>
+          <tbody>
+            <tr><td>2026-05-14 14:31</td><td>文案制作</td><td>日亚描述_v2</td><td>-15</td></tr>
+            <tr><td>2026-05-14 14:30</td><td>文生图</td><td>白底主图_3</td><td>-20</td></tr>
+            <tr><td>2026-05-14 11:20</td><td>文生图</td><td>场景搭配_1</td><td>-20</td></tr>
+            <tr><td>2026-05-13 16:42</td><td>图生视频</td><td>16格轮播_v1</td><td>-200</td></tr>
+            <tr><td>2026-05-13 10:15</td><td>文生图</td><td>细节图_2</td><td>-20</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recharge Modal -->
+<div class="modal-overlay hidden" id="recharge-modal">
+  <div class="modal">
+    <button class="close" onclick="hideRecharge()">✕</button>
+    <h3>充值点数</h3>
+    <div class="amount-grid" id="amount-grid">
+      <div class="amount-card selected" data-amount="5" data-points="2000" onclick="selectAmount(this)"><div class="price">¥5</div><div class="pts">2,000 点</div></div>
+      <div class="amount-card" data-amount="20" data-points="8000" onclick="selectAmount(this)"><div class="price">¥20</div><div class="pts">8,000 点</div></div>
+      <div class="amount-card" data-amount="50" data-points="22000" onclick="selectAmount(this)"><div class="price">¥50</div><div class="pts">22,000 点</div></div>
+      <div class="amount-card" data-amount="100" data-points="45000" onclick="selectAmount(this)"><div class="price">¥100</div><div class="pts">45,000 点</div></div>
+      <div class="amount-card" data-amount="200" data-points="100000" onclick="selectAmount(this)"><div class="price">¥200</div><div class="pts">100,000 点</div></div>
+      <div class="amount-card" style="border-style:dashed" onclick="customAmount()"><div class="price" style="color:var(--text-tertiary)">自定义</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">支付方式</div>
+    <div class="payment-methods">
+      <div class="payment-method selected" data-method="alipay" onclick="selectPayment(this)"><span class="dot"></span>支付宝</div>
+      <div class="payment-method" data-method="wechat" onclick="selectPayment(this)"><span class="dot"></span>微信支付</div>
+    </div>
+    <div class="modal-footer">
+      <div class="total">应付 <span id="modal-total">¥5.00</span> → <span id="modal-points">2,000 点</span></div>
+      <button class="btn btn-primary" onclick="doPay()">确认支付</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface-2);color:var(--text-primary);padding:10px 24px;border-radius:6px;font-size:14px;border-left:3px solid var(--green);z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none"></div>
+
+<script>
+  let selectedAmount = 5, selectedPoints = 2000;
+
+  function switchTab(tab, link, e) {
+    e.preventDefault();
+    document.querySelectorAll('.subnav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById('tab-membership').classList.toggle('hidden', tab !== 'membership');
+    document.getElementById('tab-billing').classList.toggle('hidden', tab !== 'billing');
+  }
+  function switchBillingTab(tab) {
+    document.getElementById('billing-recharge').classList.toggle('hidden', tab !== 'recharge');
+    document.getElementById('billing-consume').classList.toggle('hidden', tab !== 'consume');
+    document.querySelectorAll('#tab-billing .btn-ghost').forEach(b => {
+      b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text-secondary)';
+    });
+    const btn = document.querySelector(`#tab-billing .btn-ghost`);
+    event.target.style.borderColor = 'var(--accent)';
+    event.target.style.color = 'var(--accent)';
+  }
+  function showRecharge() { document.getElementById('recharge-modal').classList.remove('hidden'); }
+  function hideRecharge() { document.getElementById('recharge-modal').classList.add('hidden'); }
+  function selectAmount(card) {
+    document.querySelectorAll('.amount-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedAmount = parseInt(card.dataset.amount);
+    selectedPoints = parseInt(card.dataset.points);
+    document.getElementById('modal-total').textContent = '¥'+selectedAmount+'.00';
+    document.getElementById('modal-points').textContent = selectedPoints.toLocaleString()+' 点';
+  }
+  function selectPayment(el) {
+    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function customAmount() { alert('自定义金额（Demo）'); }
+  function doPay() {
+    hideRecharge();
+    const t = document.getElementById('toast');
+    t.textContent = '支付成功，已到账 '+selectedPoints.toLocaleString()+' 点';
+    t.className = ''; t.classList.add('show'); t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+  }
+</script>
+</body>
+</html>

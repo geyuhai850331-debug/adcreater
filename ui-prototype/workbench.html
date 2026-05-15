@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wery AI - AI 创作工作台</title>
+<style>
+  :root {
+    --s0: #161616; --s1: #1e1e1e; --s2: #262626; --s3: #2e2e2e;
+    --t1: #ececec; --t2: #9c9c9c; --t3: #6b6b6b;
+    --ac: #d4a853; --ach: #e0bb6a; --acm: #3d311c;
+    --bd: #2a2a2a; --bdv: #383838; --gn: #5c9c6b; --rd: #c25450; --yw: #c9a84c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Inter","阿里巴巴普惠体",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background: var(--s0); color: var(--t1); min-height: 100vh; font-size: 15px; line-height: 1.6;
+  }
+  .topbar {
+    height: 56px; display: flex; align-items: center; padding: 0 24px; gap: 24px;
+    background: rgba(22,22,22,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bd); position: sticky; top:0; z-index: 100;
+  }
+  .topbar .logo { font-size: 16px; font-weight: 600; color: var(--t1); text-decoration: none; white-space: nowrap; }
+  .topbar nav { display: flex; gap: 0; flex: 1; overflow-x: auto; }
+  .topbar nav a {
+    padding: 16px 14px; color: var(--t2); text-decoration: none; font-size: 13px;
+    border-bottom: 2px solid transparent; transition: all .12s; white-space: nowrap;
+  }
+  .topbar nav a:hover { color: var(--t1); }
+  .topbar nav a.disabled { color: var(--t3); cursor: default; opacity: 0.5; }
+  .topbar nav a.disabled:hover { color: var(--t3); }
+  .topbar .right { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+  .topbar .right a { color: var(--t2); text-decoration: none; }
+  .topbar .right a:hover { color: var(--t1); }
+  .points { color: var(--ac); white-space: nowrap; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+  /* Section */
+  .section {
+    padding: 28px 32px; border-bottom: 1px solid var(--bd);
+    scroll-margin-top: 56px;
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+  }
+  .section-header h2 { font-size: 20px; font-weight: 600; }
+  .section-header .badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 10px;
+    background: var(--s2); color: var(--t3);
+  }
+  .section-header .badge.locked {
+    background: #2a1a1a; color: var(--rd);
+  }
+
+  /* Controls */
+  .ctx-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .sel {
+    padding: 7px 30px 7px 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; color: var(--t1); font-size: 13px; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239c9c9c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .spc { flex: 1; }
+  .btn {
+    padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .12s; border: none; white-space: nowrap;
+  }
+  .btn-p { background: var(--ac); color: var(--s0); }
+  .btn-p:hover { background: var(--ach); }
+  .btn-g { background: transparent; color: var(--t2); border: 1px solid var(--bd); }
+  .btn-g:hover { color: var(--t1); border-color: var(--bdv); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .cost { font-size: 13px; color: var(--t3); white-space: nowrap; }
+  .cost span { color: var(--ac); }
+
+  /* Textarea */
+  .input-area { background: var(--s1); border: 1px solid var(--bd); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .input-area textarea {
+    width: 100%; min-height: 90px; background: transparent; border: none;
+    color: var(--t1); font-size: 15px; line-height: 1.7; resize: vertical; outline: none; font-family: inherit;
+  }
+  .input-area textarea::placeholder { color: var(--t3); }
+  .input-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--t3); margin-top: 8px; }
+
+  /* Chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip {
+    padding: 5px 14px; border-radius: 16px; border: 1px solid var(--bd);
+    background: transparent; color: var(--t2); font-size: 13px; cursor: pointer; transition: all .12s;
+  }
+  .chip:hover { border-color: var(--bdv); color: var(--t1); }
+  .chip.on { background: var(--acm); border-color: var(--ac); color: var(--ac); }
+
+  /* Copy Results */
+  .copy-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .copy-card {
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px; padding: 20px;
+    transition: border-color .12s; position: relative;
+  }
+  .copy-card:hover { border-color: var(--bdv); }
+  .copy-card .ver { font-size: 11px; color: var(--t3); margin-bottom: 8px; }
+  .copy-card .txt { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+  .copy-card .acts { display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
+  .copy-card:hover .acts { opacity: 1; }
+  .copy-hist { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0; }
+  .copy-hist .mini {
+    flex-shrink: 0; width: 170px; padding: 12px; background: var(--s1); border: 1px solid var(--bd);
+    border-radius: 6px; cursor: pointer; transition: all .12s;
+  }
+  .copy-hist .mini:hover { border-color: var(--bdv); }
+  .copy-hist .mini .p { font-size: 12px; color: var(--t2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .copy-hist .mini .d { font-size: 11px; color: var(--t3); margin-top: 6px; }
+
+  /* Image Grid */
+  .img-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .img-card {
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px; overflow: hidden;
+    cursor: pointer; position: relative; transition: border-color .12s; display: flex; flex-direction: column;
+  }
+  .img-card:hover { border-color: var(--bdv); }
+  .img-card.s3 { grid-column: span 3; }
+  .img-card.s2 { grid-column: span 2; }
+  .img-card .iw { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+  .img-card .ii { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; color: var(--t3); }
+  .img-card.s3 .ii { aspect-ratio: 1; }
+  .img-card.s2 .ii { aspect-ratio: 4/3; }
+  .img-card .ol {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex;
+    align-items: center; justify-content: center; gap: 16px; opacity: 0; transition: opacity .15s;
+  }
+  .img-card:hover .ol { opacity: 1; }
+  .img-card .ol button {
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(0,0,0,0.6); color: var(--t1); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .12s;
+  }
+  .img-card .ol button:hover { background: rgba(0,0,0,0.85); border-color: #fff; }
+  .img-card .inf { padding: 9px 12px; display: flex; justify-content: space-between; font-size: 11px; color: var(--t3); }
+
+  /* Video Grid */
+  .vid-preview {
+    width: 100%; aspect-ratio: 16/9; max-height: 400px; background: var(--s1);
+    border: 1px solid var(--bd); border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; margin-bottom: 18px;
+  }
+  .vid-preview .ph { text-align: center; color: var(--t3); }
+  .vid-preview .ph .ic { font-size: 56px; margin-bottom: 8px; }
+  .cell-grid { display: grid; gap: 8px; }
+  .cell-grid.g9 { grid-template-columns: repeat(3, 1fr); }
+  .cell-grid.g16 { grid-template-columns: repeat(4, 1fr); }
+  .cell {
+    aspect-ratio: 1; border: 1px dashed var(--bd); border-radius: 6px;
+    background: var(--s1); cursor: pointer; position: relative; transition: all .12s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--t3); font-size: 24px;
+  }
+  .cell:hover { border-color: var(--bdv); background: var(--s2); }
+  .cell.filled { border-style: solid; font-size: 32px; }
+  .cell .ct { position: absolute; bottom: 6px; left: 6px; right: 6px; background: rgba(0,0,0,0.65); color: var(--t2); font-size: 10px; padding: 2px 6px; border-radius: 3px; text-align: center; }
+  .cell .cd { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--rd); color: #fff; font-size: 10px; border: none; cursor: pointer; display: none; align-items: center; justify-content: center; }
+  .cell.filled:hover .cd { display: flex; }
+  .grid-tog { display: flex; gap: 4px; }
+  .grid-tog button {
+    padding: 5px 14px; border-radius: 4px; border: 1px solid var(--bd);
+    background: transparent; color: var(--t2); font-size: 13px; cursor: pointer;
+  }
+  .grid-tog button.on { background: var(--s2); border-color: var(--ac); color: var(--ac); }
+
+  /* Preview */
+  .preview-layout { display: flex; gap: 20px; }
+  .preview-side { width: 260px; flex-shrink: 0; }
+  .preview-side h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; }
+  .pres-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 6px;
+    margin-bottom: 6px; cursor: pointer; font-size: 13px; transition: all .12s;
+  }
+  .pres-item:hover { border-color: var(--bdv); }
+  .pres-item.on { border-color: var(--ac); background: var(--acm); }
+  .pres-item .dot {
+    width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--bdv);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .pres-item.on .dot { border-color: var(--ac); background: var(--ac); }
+  .pres-item.on .dot::after { content:"✓"; color:var(--s0); font-size:10px; font-weight:600; }
+  .preview-main { flex:1; display:flex; justify-content:center; }
+  .preview-frame {
+    width: 100%; max-width: 480px; background: #fff; border-radius: 8px;
+    overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .amz-hero { display: flex; }
+  .amz-imgs { flex: 1; padding: 20px; }
+  .amz-main-img { width: 100%; aspect-ratio: 1; background: #f8f8f8; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 72px; color: #ddd; margin-bottom: 10px; }
+  .amz-thumbs { display: flex; gap: 6px; }
+  .amz-thumb { width: 54px; height: 54px; border-radius: 4px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ddd; }
+  .amz-info { width: 260px; padding: 20px 20px 20px 0; font-family: Arial,sans-serif; color: #0f1111; }
+  .amz-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+  .amz-brand { font-size: 13px; color: #007185; margin-bottom: 6px; }
+  .amz-stars { color: #e77600; font-size: 14px; margin-bottom: 8px; }
+  .amz-price { font-size: 26px; font-weight: 600; padding-top: 10px; border-top: 1px solid #e7e7e7; margin-bottom: 10px; }
+  .amz-bullets { list-style: none; font-size: 13px; line-height: 1.7; }
+  .amz-bullets li::before { content:"• "; color: #c45500; }
+  .amz-btn {
+    display: block; width: 100%; padding: 10px; border-radius: 20px; font-size: 12px;
+    text-align: center; margin-top: 6px; cursor: default;
+  }
+  .amz-btn.cart { background: linear-gradient(to bottom,#f7dfa5,#f0c14b); border: 1px solid #a88734; }
+  .amz-btn.buy { background: linear-gradient(to bottom,#ffd97c,#f5b81b); border: 1px solid #c89411; }
+
+  /* Locked section */
+  .locked-overlay {
+    background: var(--s1); border: 1px solid var(--bd); border-radius: 8px;
+    padding: 60px 40px; text-align: center; color: var(--t3);
+  }
+  .locked-overlay .icon { font-size: 56px; margin-bottom: 14px; opacity: 0.5; }
+  .locked-overlay .title { font-size: 18px; color: var(--t2); margin-bottom: 6px; }
+  .locked-overlay .desc { font-size: 14px; line-height: 1.7; }
+
+  /* Skeleton */
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.6} }
+  .skel { background: var(--s2); animation: pulse 2s ease-in-out infinite; border-radius: 4px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--s2); color: var(--t1); padding: 10px 24px; border-radius: 6px;
+    font-size: 14px; border-left: 3px solid var(--gn); z-index: 1000;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  .sec-label { font-size: 12px; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="logo">Wery AI</a>
+  <nav>
+    <a href="#sec-copy">文案制作</a>
+    <a href="#sec-image">文生图</a>
+    <a href="#sec-video">图生视频</a>
+    <a href="#sec-preview">效果预览</a>
+    <a href="#sec-translate" class="disabled">图片翻译</a>
+    <a href="#sec-digital" class="disabled">数字人</a>
+  </nav>
+  <div class="right">
+    <a href="resources.html">我的资源</a>
+    <a href="publish.html">发布</a>
+    <span class="points">◆ 12,800</span>
+    <div class="avatar">王</div>
+  </div>
+</div>
+
+<!-- ====== 1. 文案制作 ====== -->
+<div class="section" id="sec-copy">
+  <div class="section-header">
+    <h2>营销文案制作</h2>
+    <span class="badge">AI 生成</span>
+  </div>
+  <div class="ctx-row">
+    <select class="sel"><option>模板: 日亚商品描述</option><option>Amazon Listing 模板</option><option>SNS 短文模板</option></select>
+    <select class="sel"><option>目标市场: 日本 Amazon</option><option>美国 Amazon</option><option>东南亚 Shopee</option></select>
+    <select class="sel"><option>语言: 日语</option><option>英语</option><option>中文</option></select>
+    <span class="spc"></span>
+    <span class="cost">生成 3 版本 · 消耗 <span>15</span> 点</span>
+    <button class="btn btn-p" onclick="generateCopy()">生成文案</button>
+  </div>
+  <div class="input-area">
+    <textarea id="copy-input" placeholder="描述你的产品...&#10;&#10;例如：夏季新款女装连衣裙，冰丝面料，透气舒适，适合 25-35 岁职场女性，通勤和休闲场景。V 领修饰颈部，A 字裙摆包容身型。">夏季新款女装连衣裙，采用冰丝面料，透气舒适。V 领设计修饰颈部曲线，A 字裙摆包容多种身型。适合 25-35 岁职场女性，通勤和休闲场景皆可。</textarea>
+    <div class="input-meta"><span id="copy-chars">字数: 62</span><span>目标语言: 日语</span></div>
+  </div>
+  <div class="sec-label">生成结果</div>
+  <div class="copy-results" id="copy-results">
+    <div class="copy-card">
+      <div class="ver">版本 1</div>
+      <div class="txt">夏の新作ワンピース。アイスシルク素材を使用し、通気性抜群で快適な着心地。Vネックが首元をすっきり見せ、Aラインが体型を美しくカバー。オフィスから週末まで、幅広いシーンで活躍。</div>
+      <div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div>
+    </div>
+    <div class="copy-card">
+      <div class="ver">版本 2</div>
+      <div class="txt">サマードレス新登場。今年の夏はこの一枚で決まり。通勤から週末まで、さらりと着こなせる。すっきりVネック×広がりすぎないAラインの黄金バランス。</div>
+      <div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div>
+    </div>
+    <div class="copy-card">
+      <div class="ver">版本 3</div>
+      <div class="txt">涼感素材で夏を乗り切る。毎日着たくなる、アイスシルクのワンピース。Vネック×Aラインで体型カバーもばっちり。仕事も休日も、これ一枚で。</div>
+      <div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div>
+    </div>
+  </div>
+  <div class="sec-label">历史记录</div>
+  <div class="copy-hist">
+    <div class="mini"><div class="p">夏の新作ワンピース。アイスシルク素材を使用し...</div><div class="d">05-14 14:30</div></div>
+    <div class="mini"><div class="p">冬用防寒ジャケット。厳しい寒さから守る高機能...</div><div class="d">05-13 10:15</div></div>
+    <div class="mini"><div class="p">春の新作カーディガン。オフィスカジュアルに最適...</div><div class="d">05-12 16:42</div></div>
+    <div class="mini"><div class="p">夏用UVカットパーカー。軽量で持ち運びに便利...</div><div class="d">05-11 09:00</div></div>
+  </div>
+</div>
+
+<!-- ====== 2. 文生图 ====== -->
+<div class="section" id="sec-image">
+  <div class="section-header">
+    <h2>文生图</h2>
+    <span class="badge">AI 生成</span>
+  </div>
+  <div class="ctx-row">
+    <select class="sel"><option>模板: 电商白底主图</option><option>场景搭配图</option><option>九宫格模板</option></select>
+    <select class="sel"><option>风格: 写实摄影</option><option>电商白底</option><option>日系清新</option><option>3D 渲染</option></select>
+    <select class="sel"><option>模型: FLUX.1-pro</option><option>WeryAI Image 2.0</option></select>
+    <select class="sel"><option>尺寸: 1:1</option><option>4:3</option><option>16:9</option></select>
+    <span class="spc"></span>
+    <span class="cost">生成 6 张 · 消耗 <span>30</span> 点</span>
+    <button class="btn btn-p" onclick="generateImages()">生成图片</button>
+  </div>
+  <div class="input-area">
+    <textarea id="img-prompt" placeholder="描述你想生成的画面...&#10;&#10;例如：白色连衣裙平铺在浅木色桌面上，自然光从左侧打入，面料质感清晰，电商白底风格，高细节">白色连衣裙平铺在浅木色桌面上，自然光从左侧打入。V领设计、A字裙摆自然展开，冰丝面料的光泽和褶皱清晰可见。构图居中，干净的电商白底风格，高细节。</textarea>
+    <div style="margin-top:8px;font-size:12px;color:var(--t3)">负向提示词: 模糊, 低画质, 变形, 文字, 水印</div>
+  </div>
+  <div class="sec-label">生成结果</div>
+  <div class="img-grid" id="img-grid">
+    <div class="img-card s3"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#2a2a3a,#3a2a2a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>1,024×1,024</span><span>20 点</span></div></div>
+    <div class="img-card s2"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#2a2a3a,#2a3a2a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>768×768</span><span>15 点</span></div></div>
+    <div class="img-card s2"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#3a2a2a,#2a3a2a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>768×768</span><span>15 点</span></div></div>
+    <div class="img-card s3"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#2a3a2a,#3a3a2a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>1,024×1,024</span><span>20 点</span></div></div>
+    <div class="img-card s3"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#3a3a2a,#2a2a3a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>1,024×1,024</span><span>20 点</span></div></div>
+    <div class="img-card s2"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,#2a3a3a,#3a3a3a)">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>768×768</span><span>15 点</span></div></div>
+  </div>
+</div>
+
+<!-- ====== 3. 图生视频 ====== -->
+<div class="section" id="sec-video">
+  <div class="section-header">
+    <h2>图生视频</h2>
+    <span class="badge">AI 生成</span>
+  </div>
+  <div class="ctx-row">
+    <select class="sel"><option>模板: 九宫格轮播</option><option>左右滑动展示</option><option>缩放聚焦动画</option></select>
+    <select class="sel"><option>转场: 淡入淡出</option><option>平滑滑动</option><option>无转场</option></select>
+    <select class="sel"><option>BGM: 无</option><option>轻快电子</option><option>舒缓钢琴</option><option>流行节奏</option></select>
+    <span class="spc"></span>
+    <span class="cost">消耗 <span>200</span> 点 · 预计 <span>45</span> 秒</span>
+    <button class="btn btn-p" id="gen-vid-btn" onclick="generateVideo()">生成视频</button>
+  </div>
+
+  <div class="vid-preview" id="vid-preview">
+    <div class="ph"><div class="ic">🎬</div><div style="font-size:14px">在下方网格中添加图片以预览视频效果</div><div style="font-size:12px;color:var(--t3);margin-top:4px">支持 9 宫格或 16 宫格模式</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span class="sec-label" style="margin:0">图片序列</span>
+    <div class="grid-tog">
+      <button class="on" onclick="switchVidGrid(9,this)">九宫格</button>
+      <button onclick="switchVidGrid(16,this)">十六宫格</button>
+    </div>
+  </div>
+  <div class="cell-grid g9" id="cell-grid"></div>
+</div>
+
+<!-- ====== 4. 效果预览 ====== -->
+<div class="section" id="sec-preview">
+  <div class="section-header">
+    <h2>效果预览</h2>
+    <span class="badge">预览</span>
+  </div>
+  <div class="ctx-row">
+    <select class="sel" onchange="switchPreviewTpl(this.value)">
+      <option value="amazon">模板: Amazon 商品页</option>
+      <option value="social">Instagram 帖子</option>
+    </select>
+    <span class="spc"></span>
+    <button class="btn btn-g" onclick="showToast('截图已保存')">📸 截图导出</button>
+  </div>
+  <div class="preview-layout">
+    <div class="preview-side">
+      <h3>选择资源</h3>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:8px">文案</div>
+      <div class="pres-item on" onclick="this.classList.toggle('on')"><span class="dot"></span>日亚描述_v2</div>
+      <div class="pres-item" onclick="this.classList.toggle('on')"><span class="dot"></span>SNS 短文_v1</div>
+      <div style="font-size:11px;color:var(--t3);margin:12px 0 8px">图片</div>
+      <div class="pres-item on" onclick="this.classList.toggle('on')"><span class="dot"></span>白底主图_3</div>
+      <div class="pres-item" onclick="this.classList.toggle('on')"><span class="dot"></span>场景搭配_1</div>
+      <div style="font-size:11px;color:var(--t3);margin:12px 0 8px">视频</div>
+      <div class="pres-item" onclick="this.classList.toggle('on')"><span class="dot"></span>16格轮播_v1</div>
+    </div>
+    <div class="preview-main">
+      <div class="preview-frame" id="preview-frame">
+        <!-- Amazon Listing -->
+        <div id="tpl-amazon">
+          <div class="amz-hero">
+            <div class="amz-imgs">
+              <div class="amz-main-img">🖼</div>
+              <div class="amz-thumbs"><div class="amz-thumb">🖼</div><div class="amz-thumb">🖼</div><div class="amz-thumb">▶</div></div>
+            </div>
+            <div class="amz-info">
+              <div class="amz-title">夏季冰丝连衣裙 V领通勤 A字裙摆 透气舒适</div>
+              <div class="amz-brand">品牌: Wery Fashion</div>
+              <div class="amz-stars">★★★★☆ (128 评价)</div>
+              <div class="amz-price">¥199</div>
+              <ul class="amz-bullets">
+                <li>アイスシルク素材、通気性抜群で快適</li>
+                <li>Vネック×Aラインの黄金バランス</li>
+                <li>オフィスから週末まで幅広く活躍</li>
+              </ul>
+              <div class="amz-btn cart">カートに入れる</div>
+              <div class="amz-btn buy">今すぐ購入</div>
+            </div>
+          </div>
+        </div>
+        <!-- Social Post -->
+        <div id="tpl-social" style="display:none;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#262626">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600">W</div><span style="font-size:13px;font-weight:600">wery_fashion</span></div>
+          <div style="width:100%;aspect-ratio:1;background:#fafafa;display:flex;align-items:center;justify-content:center;font-size:80px;color:#e0e0e0">🖼</div>
+          <div style="display:flex;gap:14px;padding:8px 16px;font-size:22px">♡ 💬 ✈</div>
+          <div style="padding:0 16px;font-size:13px;font-weight:600">1,284 次赞</div>
+          <div style="padding:0 16px 16px;font-size:13px;line-height:1.5"><b>wery_fashion</b> 夏の新作ワンピースが登場！アイスシルク素材で涼しく快適。#新作 #夏コーデ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 5. 图片翻译（占位） ====== -->
+<div class="section" id="sec-translate">
+  <div class="section-header">
+    <h2>图片翻译</h2>
+    <span class="badge locked">即将上线</span>
+  </div>
+  <div class="locked-overlay">
+    <div class="icon">🌐</div>
+    <div class="title">图片翻译功能正在开发中</div>
+    <div class="desc">
+      上传商品图片，自动识别并翻译图片中的文字。<br>
+      支持中文 ↔ 日语、英语、韩语等电商主流语言。<br><br>
+      预计上线时间：V1.1 版本
+    </div>
+  </div>
+</div>
+
+<!-- ====== 6. 数字人（占位） ====== -->
+<div class="section" id="sec-digital">
+  <div class="section-header">
+    <h2>数字人</h2>
+    <span class="badge locked">即将上线</span>
+  </div>
+  <div class="locked-overlay">
+    <div class="icon">🎭</div>
+    <div class="title">AI 数字人视频功能正在开发中</div>
+    <div class="desc">
+      选择数字人形象，输入口播文案，一键生成虚拟主播讲解视频。<br>
+      适用于直播带货预告、商品讲解、社媒内容创作。<br><br>
+      预计上线时间：V2.0 版本
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Copy character count
+  document.getElementById('copy-input').addEventListener('input', function() {
+    document.getElementById('copy-chars').textContent = '字数: ' + this.value.length;
+  });
+
+  // Generate copy
+  function generateCopy() {
+    const el = document.getElementById('copy-results');
+    el.innerHTML = '<div class="copy-card"><div class="skel" style="height:100px"></div></div><div class="copy-card"><div class="skel" style="height:100px"></div></div><div class="copy-card"><div class="skel" style="height:100px"></div></div>';
+    setTimeout(() => {
+      el.innerHTML = `
+        <div class="copy-card"><div class="ver">版本 1</div><div class="txt">夏の新作ワンピース。アイスシルク素材を使用し、通気性抜群で快適な着心地。</div><div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div></div>
+        <div class="copy-card"><div class="ver">版本 2</div><div class="txt">サマードレス新登場。今年の夏はこの一枚で決まり。通勤から週末まで。</div><div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div></div>
+        <div class="copy-card"><div class="ver">版本 3</div><div class="txt">涼感素材で夏を乗り切る。毎日着たくなるアイスシルクワンピース。</div><div class="acts"><button class="btn btn-g btn-sm" onclick="showToast('已复制')">复制</button><button class="btn btn-g btn-sm">编辑</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">保存</button></div></div>
+      `;
+    }, 1500);
+  }
+
+  // Generate images
+  function generateImages() {
+    const grid = document.getElementById('img-grid');
+    grid.innerHTML = Array(6).fill(0).map((_,i) => {
+      const cls = i%3===0?'s3':'s2';
+      return `<div class="img-card ${cls}"><div class="iw"><div class="skel" style="width:100%;aspect-ratio:${i%3===0?'1':'4/3'}"></div></div><div class="inf"><span>生成中...</span></div></div>`;
+    }).join('');
+    setTimeout(() => {
+      const grads = ['#2a2a3a,#3a2a2a','#2a2a3a,#2a3a2a','#3a2a2a,#2a3a2a','#2a3a2a,#3a3a2a','#3a3a2a,#2a2a3a','#2a3a3a,#3a3a3a'];
+      grid.innerHTML = grads.map((g,i) => {
+        const cls = i%3===0?'s3':'s2';
+        return `<div class="img-card ${cls}"><div class="iw"><div class="ii" style="background:linear-gradient(135deg,${g})">🖼</div><div class="ol"><button onclick="showToast('已下载')">⬇</button><button onclick="showToast('已收藏')">♡</button><button>⛶</button></div></div><div class="inf"><span>1,024×1,024</span><span>20 点</span></div></div>`;
+      }).join('');
+      showToast('生成完成，6 张图片');
+    }, 2000);
+  }
+
+  // Video grid
+  let vidGridSize = 9;
+  let vidData = {0:{t:'白底主图'},1:{t:'场景搭配'},2:{t:'细节特写'},4:{t:'使用场景'}};
+
+  function initVidGrid() {
+    const grid = document.getElementById('cell-grid');
+    grid.className = 'cell-grid ' + (vidGridSize===9?'g9':'g16');
+    grid.innerHTML = '';
+    for(let i=0;i<vidGridSize;i++) {
+      const d = vidData[i];
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (d?' filled':'');
+      cell.onclick = function(e) {
+        if (e.target.classList.contains('cd')) return;
+        if (vidData[i]) { delete vidData[i]; } else { vidData[i] = {t:'图片'}; }
+        initVidGrid();
+      };
+      if (d) {
+        cell.innerHTML = `🖼<span class="ct">${d.t}</span><button class="cd" onclick="event.stopPropagation();delete vidData[${i}];initVidGrid()">×</button>`;
+      } else {
+        cell.textContent = '+';
+      }
+      grid.appendChild(cell);
+    }
+  }
+  function switchVidGrid(n, btn) {
+    vidGridSize = n;
+    document.querySelectorAll('.grid-tog button').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    initVidGrid();
+  }
+  initVidGrid();
+
+  function generateVideo() {
+    const filled = Object.keys(vidData).length;
+    if (filled < 2) { showToast('请至少添加 2 张图片'); return; }
+    const btn = document.getElementById('gen-vid-btn');
+    btn.textContent = '生成中...'; btn.disabled = true;
+    const prev = document.getElementById('vid-preview');
+    let pct = 0;
+    prev.innerHTML = `<div style="text-align:center;padding:40px"><div style="font-size:32px;font-weight:600;margin-bottom:12px" id="vpct">0%</div><div style="width:260px;height:3px;background:rgba(255,255,255,0.15);border-radius:2px;overflow:hidden;margin:0 auto"><div style="height:100%;background:var(--ac);border-radius:2px;transition:width .3s;width:0%" id="vbar"></div></div><div style="font-size:13px;color:var(--t2);margin-top:10px" id="vtxt">准备中...</div></div>`;
+    const iv = setInterval(() => {
+      pct += Math.random()*8+2;
+      if(pct>=100){pct=100;clearInterval(iv);
+        document.getElementById('vpct').textContent='100%';
+        document.getElementById('vbar').style.width='100%';
+        document.getElementById('vtxt').textContent='合成完成';
+        setTimeout(()=>{
+          prev.innerHTML=`<div style="text-align:center"><div style="width:72px;height:72px;border-radius:50%;background:rgba(0,0,0,0.7);border:2px solid rgba(255,255,255,0.4);color:#fff;font-size:28px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px" onclick="showToast('▶ 播放视频')">▶</div><div style="font-size:14px;color:var(--t2)">生成完成 · 45 秒 · 1080p</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:center"><button class="btn btn-g btn-sm" onclick="showToast('已下载')">⬇ 下载 MP4</button><button class="btn btn-g btn-sm" onclick="showToast('已保存到资源库')">💾 保存</button></div></div>`;
+          btn.textContent='重新生成';btn.disabled=false;showToast('视频生成完成');
+        },500);
+        return;
+      }
+      document.getElementById('vpct').textContent=Math.round(pct)+'%';
+      document.getElementById('vbar').style.width=pct+'%';
+      document.getElementById('vtxt').textContent=`正在合成第 ${Math.round(pct/100*vidGridSize)}/${vidGridSize} 帧 · 预计剩余 ${Math.round((100-pct)/2)} 秒`;
+    },500);
+  }
+
+  // Preview template switch
+  function switchPreviewTpl(tpl) {
+    document.getElementById('tpl-amazon').style.display = tpl==='amazon'?'block':'none';
+    document.getElementById('tpl-social').style.display = tpl==='social'?'block':'none';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>t.classList.remove('show'),2500);
+  }
+
+  // Smooth scroll for nav
+  document.querySelectorAll('.topbar nav a[href^="#"]').forEach(a => {
+    a.addEventListener('click', function(e) {
+      if (this.classList.contains('disabled')) { e.preventDefault(); return; }
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+
+  // Highlight nav on scroll
+  window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.section[id]');
+    const navLinks = document.querySelectorAll('.topbar nav a[href^="#"]');
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.borderBottomColor = a.getAttribute('href')===('#'+current) ? 'var(--ac)' : 'transparent';
+      if (a.getAttribute('href')===('#'+current)) a.style.color = 'var(--t1)';
+      else if (!a.classList.contains('disabled')) a.style.color = 'var(--t2)';
+    });
+  });
+</script>
+</body>
+</html>
