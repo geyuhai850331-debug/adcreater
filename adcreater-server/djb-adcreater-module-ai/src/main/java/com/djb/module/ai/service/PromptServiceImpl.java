@@ -129,6 +129,27 @@ public class PromptServiceImpl implements PromptService {
                 productName,
                 variables.getOrDefault("selling_points", ""));
         }
+        if ("marketing_copy".equals(category)) {
+            return "你是一位专业的跨境电商产品文案本地化专家。\n\n" +
+                "# 任务\n" +
+                "根据用户提供的以下信息，**只生成最终的本地化产品文案**，不要输出任何其他内容。\n\n" +
+                "# 输入信息\n" +
+                "- 商品名称：" + productName + "\n" +
+                "- 产品说明：" + variables.getOrDefault("product_description", "") + "\n" +
+                "- 中文广告词：" + variables.getOrDefault("chinese_ad_copy", "") + "\n" +
+                "- 目标市场：" + variables.getOrDefault("target_market", "USA") + "\n" +
+                "- 合规风险等级：" + variables.getOrDefault("risk_level", "safe") + "\n" +
+                "- 文化本土化建议：" + variables.getOrDefault("culture_notes", "") + "\n" +
+                "- 核心营销策略：" + variables.getOrDefault("core_strategy", "") + "\n\n" +
+                "# 输出要求\n" +
+                "- 只输出一段纯文本产品文案（2-4句），用于商品页面展示。\n" +
+                "- 严格基于原文进行本地化改写，保留所有核心语义。\n" +
+                "- 不得添加输入中没有的卖点、功能、形容词。\n" +
+                "- 允许调整语序、合并短句、使用当地惯用语、合规调整绝对化表达。\n" +
+                "- 如有绝对化或敏感表达，改为合规说法但不改变核心意思。\n\n" +
+                "# 开始执行\n" +
+                "只输出最终产品文案，不要加引号、JSON 或解释。";
+        }
         if ("marketing".equals(category)) {
             return "你是一位专业的跨境电商营销专家和内容策略师。\n\n" +
                 "# 任务\n" +

@@ -48,6 +48,55 @@ public class MarketingController {
         "\\{[^{}]*\"risk_level\"[^{}]*\"culture_notes\"[^{}]*\"core_strategy\"[^{}]*\"example_ad_copy\"[^{}]*\\}",
         Pattern.DOTALL);
 
+    @Operation(summary = "重新生成示例文案")
+    @PostMapping("/regenerate-copy")
+    public CommonResult<MarketingAnalyzeRespVO> regenerateCopy(@Valid @RequestBody RegenerateCopyReqVO reqVO) {
+        Long userId = WebFrameworkUtils.getLoginUserId();
+
+        Map<String, String> vars = Map.of(
+            "product_name", reqVO.getProductName(),
+            "product_description", reqVO.getProductDescription(),
+            "chinese_ad_copy", reqVO.getChineseAdCopy() != null ? reqVO.getChineseAdCopy() : "",
+            "target_market", reqVO.getTargetMarket(),
+            "risk_level", reqVO.getRiskLevel(),
+            "culture_notes", reqVO.getCultureNotes(),
+            "core_strategy", reqVO.getCoreStrategy()
+        );
+
+        String prompt = promptService.resolvePrompt("marketing_copy", vars);
+
+        int cost = 2;
+        PointsTransactionDO tx = billingService.preConsume(userId, cost, null);
+
+        try {
+            AiResult result = orchestrationService.translate(
+                prompt, "auto", "en", reqVO.getTargetMarket());
+
+            if (!result.isSuccess()) {
+                throw new RuntimeException("AI 文案生成失败: " + result.getErrorMessage());
+            }
+
+            String regeneratedCopy = result.getRevisedPrompt().trim();
+            // Strip surrounding quotes if present
+            if (regeneratedCopy.startsWith("\"") && regeneratedCopy.endsWith("\"")) {
+                regeneratedCopy = regeneratedCopy.substring(1, regeneratedCopy.length() - 1);
+            }
+
+            MarketingAnalyzeRespVO resp = new MarketingAnalyzeRespVO();
+            resp.setRiskLevel(reqVO.getRiskLevel());
+            resp.setCultureNotes(reqVO.getCultureNotes());
+            resp.setCoreStrategy(reqVO.getCoreStrategy());
+            resp.setExampleAdCopy(regeneratedCopy);
+
+            billingService.confirmConsume(tx.getId());
+            return success(resp);
+        } catch (Exception e) {
+            billingService.rollbackConsume(tx.getId());
+            log.error("Regenerate copy failed for user {}", userId, e);
+            throw new RuntimeException("文案重新生成失败: " + e.getMessage(), e);
+        }
+    }
+
     @Operation(summary = "分析营销策略")
     @PostMapping("/analyze")
     public CommonResult<MarketingAnalyzeRespVO> analyze(@Valid @RequestBody MarketingAnalyzeReqVO reqVO) {
