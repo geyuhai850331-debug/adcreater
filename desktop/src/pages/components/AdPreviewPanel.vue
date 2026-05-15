@@ -142,33 +142,74 @@
     <!-- Bottom Section: Tabs -->
     <div class="preview-bottom">
       <el-tabs v-model="activeTab" class="detail-tabs">
-        <!-- Tab 1: 商品描述 / Ad Copy -->
-        <el-tab-pane label="商品描述" name="copy">
-          <div class="tab-content" v-if="adCopy">
+        <!-- Tab 1: 营销分析 -->
+        <el-tab-pane label="营销分析" name="copy">
+          <div class="tab-content" v-if="adCopy?.analysis">
             <div class="description-block">
               <h4 class="block-title">产品信息</h4>
               <div class="desc-meta">
                 <span><strong>产品名称：</strong>{{ adCopy.productName }}</span>
-                <span><strong>目标市场：</strong>{{ marketNames[adCopy.targetMarket] || adCopy.targetMarket }} ({{ marketLangLabel }})</span>
-                <span><strong>卖点标签：</strong>{{ (adCopy.sellingPoints || []).join('、') || '未设置' }}</span>
+                <span><strong>目标市场：</strong>{{ marketNames[adCopy.targetMarket] || adCopy.targetMarket }}</span>
+                <span><strong>中文广告词：</strong>{{ adCopy.chineseAdCopy || '未设置' }}</span>
               </div>
             </div>
 
-            <div class="description-block" v-if="adCopy.translatedCopy">
-              <h4 class="block-title">本地化文案</h4>
-              <div class="translated-card">
-                <div class="lang-badge">{{ marketLangLabel }}</div>
-                <p class="translated-text">{{ adCopy.translatedCopy.translated }}</p>
+            <div class="analysis-cards">
+              <!-- Risk Level -->
+              <div class="analysis-card compliance-card">
+                <div class="card-header">
+                  <span class="card-label">合规评估</span>
+                  <el-tag
+                    :type="adCopy.analysis.riskLevel === 'safe' ? 'success' : 'warning'"
+                    size="default"
+                    effect="dark"
+                  >
+                    {{ adCopy.analysis.riskLevel === 'safe' ? 'SAFE 合规' : 'WARNING 需关注' }}
+                  </el-tag>
+                </div>
               </div>
-              <div class="original-card" v-if="adCopy.translatedCopy.original">
-                <div class="lang-badge original">原文</div>
-                <p class="original-text">{{ adCopy.translatedCopy.original }}</p>
+
+              <!-- Culture Notes -->
+              <div class="analysis-card">
+                <div class="card-header">
+                  <span class="card-label">文化本土化建议</span>
+                </div>
+                <el-alert
+                  :title="adCopy.analysis.cultureNotes"
+                  type="info"
+                  :closable="false"
+                  show-icon
+                />
+              </div>
+
+              <!-- Core Strategy -->
+              <div class="analysis-card strategy-card">
+                <div class="card-header">
+                  <span class="card-label">核心营销策略</span>
+                </div>
+                <p class="strategy-text">{{ adCopy.analysis.coreStrategy }}</p>
+              </div>
+
+              <!-- Example Ad Copy -->
+              <div class="analysis-card copy-card">
+                <div class="card-header">
+                  <span class="card-label">示例广告词</span>
+                  <el-button
+                    size="small"
+                    type="primary"
+                    plain
+                    @click="copyAdCopy"
+                  >
+                    <el-icon><DocumentCopy /></el-icon> 复制
+                  </el-button>
+                </div>
+                <div class="copy-content">
+                  <p>{{ adCopy.analysis.exampleAdCopy }}</p>
+                </div>
               </div>
             </div>
-
-            <el-empty v-if="!adCopy?.translatedCopy" description="文案尚未翻译" :image-size="60" />
           </div>
-          <el-empty v-else description="暂无文案数据" :image-size="60" />
+          <el-empty v-else description="尚未进行营销分析" :image-size="60" />
         </el-tab-pane>
 
         <!-- Tab 2: 素材详情 -->
@@ -255,7 +296,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Download, FolderOpened, PictureFilled, VideoCameraFilled } from '@element-plus/icons-vue'
+import { Download, FolderOpened, PictureFilled, VideoCameraFilled, DocumentCopy } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
@@ -296,7 +337,7 @@ const galleryItems = computed(() => {
 
 const estimatedPoints = computed(() => {
   let pts = 0
-  if (props.adCopy?.translatedCopy) pts += 5
+  if (props.adCopy?.analysis) pts += 5
   if (props.adImage?.generatedImage) pts += 10
   if (props.adVideo?.generatedVideo) pts += 30
   return pts
@@ -421,6 +462,16 @@ function handleDownloadAll() {
 function handleNew() {
   sessionStorage.removeItem('adPreviewData')
   emit('reset')
+}
+
+async function copyAdCopy() {
+  if (!props.adCopy?.analysis?.exampleAdCopy) return
+  try {
+    await navigator.clipboard.writeText(props.adCopy.analysis.exampleAdCopy)
+    ElMessage.success('已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败')
+  }
 }
 </script>
 
@@ -809,5 +860,63 @@ function handleNew() {
   font-size: var(--text-base);
   font-weight: 500;
   color: var(--color-text);
+}
+
+/* Analysis cards in preview */
+.analysis-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.analysis-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-bg-card);
+}
+
+.analysis-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.analysis-card .card-label {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.analysis-card.compliance-card {
+  border-left: 4px solid var(--color-primary);
+}
+
+.analysis-card.strategy-card {
+  border-left: 4px solid var(--color-warning);
+  background: var(--color-bg);
+}
+
+.analysis-card .strategy-text {
+  margin: 0;
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+
+.analysis-card .copy-content {
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.analysis-card .copy-content p {
+  margin: 0;
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+  white-space: pre-wrap;
+  font-size: var(--text-sm);
 }
 </style>
