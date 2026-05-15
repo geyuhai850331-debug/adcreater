@@ -11,7 +11,8 @@ public enum PromptCategoryEnum {
     VIDEO_KEYFRAME("video_keyframe", "视频-关键帧"),
     VIDEO_KEYFRAME_IMAGE("video_keyframe_image", "视频-关键帧图片"),
     VIDEO_KEYFRAME_GRID("video_keyframe_grid", "视频-关键帧网格"),
-    DIGITAL_HUMAN("digital_human", "数字人");
+    DIGITAL_HUMAN("digital_human", "数字人"),
+    MARKETING("marketing", "营销策划");
 
     private final String code;
     private final String desc;

@@ -129,6 +129,39 @@ public class PromptServiceImpl implements PromptService {
                 productName,
                 variables.getOrDefault("selling_points", ""));
         }
+        if ("marketing".equals(category)) {
+            return "你是一位专业的跨境电商营销专家和内容策略师。\n\n" +
+                "# 任务\n" +
+                "分析提供的产品信息（图片描述、文字描述、中文广告推广词）、目标平台、目标市场，输出一个 JSON 对象。\n\n" +
+                "# 输出 JSON 结构（键名固定，值中除示例广告词外均为分析结论）\n" +
+                "{\n" +
+                "  \"risk_level\": \"safe 或 warning\",\n" +
+                "  \"culture_notes\": \"文化背景分析与本土化建议\",\n" +
+                "  \"core_strategy\": \"核心营销策略描述\",\n" +
+                "  \"example_ad_copy\": \"示例广告词（英文或目标市场语言），用户可直接使用或作为修改参考\"\n" +
+                "}\n\n" +
+                "# 分析要求\n" +
+                "1. **合规性检查** → 输出 risk_level\n" +
+                "   - 检查夸大功效、品牌侵权、违禁品类等。\n" +
+                "   - safe = 无明显风险；warning = 存在需修改的内容。\n" +
+                "2. **文化本土化** → 输出 culture_notes\n" +
+                "   - 考虑幽默、禁忌、信任信号、计量单位、日期格式、季节性等。\n" +
+                "3. **核心策略** → 输出 core_strategy\n" +
+                "   - 选择最有效的单一营销心理触发点（痛点反差、价格锚点、从众心理、稀缺性、权威背书等）。\n" +
+                "4. **示例广告词** → 输出 example_ad_copy\n" +
+                "   - 基于原始情报（不可遗漏任何卖点）生成一段可直接展示的文案。\n" +
+                "   - 必须符合平台政策和目标市场语言习惯，不是直接翻译中文。\n" +
+                "   - 长度适中，适合产品页面展示。\n\n" +
+                "# 输入信息\n" +
+                "产品名称：" + productName + "\n" +
+                "产品描述：" + variables.getOrDefault("product_description", "") + "\n" +
+                "中文广告推广词：" + variables.getOrDefault("chinese_ad_copy", "") + "\n" +
+                "目标市场：" + variables.getOrDefault("target_market", "USA") + "\n\n" +
+                "# 重要约束\n" +
+                "- 只输出 JSON，不要有任何额外文字。\n" +
+                "- 所有值使用英文双引号，不要添加注释。\n" +
+                "- 如果缺少某些信息，基于常识合理推断并注明（在 culture_notes 中说明）。";
+        }
         return String.format("Generate %s content for: %s. Style: %s.",
             category,
             productName,
