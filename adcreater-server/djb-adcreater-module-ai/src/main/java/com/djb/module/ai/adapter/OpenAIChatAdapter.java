@@ -12,51 +12,71 @@ public class OpenAIChatAdapter implements AiModelAdapter {
 
     @Override
     public AiResult call(AiRequest request, AiModelConfigDO config) {
-        String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
-        String endpoint = (config.getEndpointUrl() != null ? config.getEndpointUrl() : "https://api.openai.com")
-                + "/v1/chat/completions";
+        try {
+            String apiKey = new String(Base64.getDecoder().decode(config.getApiKey()));
+            String endpoint = (config.getEndpointUrl() != null ? config.getEndpointUrl() : "https://api.openai.com")
+                    + "/v1/chat/completions";
 
-        String model = request.getModel() != null ? request.getModel() : "gpt-4o-mini";
+            String model = request.getModel() != null ? request.getModel() : "gpt-4o-mini";
 
-        List<Map<String, String>> messages = List.of(
-            Map.of("role", "user", "content", request.getPrompt())
-        );
+            List<Map<String, String>> messages = List.of(
+                Map.of("role", "user", "content", request.getPrompt())
+            );
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("model", model);
-        body.put("messages", messages);
-        body.put("temperature", 0.7);
-        body.put("max_tokens", 2048);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("model", model);
+            body.put("messages", messages);
+            body.put("temperature", 0.7);
+            body.put("max_tokens", 2048);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = webClient.post()
-            .uri(endpoint)
-            .header("Authorization", "Bearer " + apiKey)
-            .header("Content-Type", "application/json")
-            .bodyValue(body)
-            .retrieve()
-            .bodyToMono(Map.class)
-            .block();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = webClient.post()
+                .uri(endpoint)
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
 
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-        @SuppressWarnings("unchecked")
-        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-        String content = (String) message.get("content");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+            if (choices == null || choices.isEmpty()) {
+                return AiResult.builder()
+                    .success(false)
+                    .errorMessage("AI response contained no choices")
+                    .build();
+            }
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> usage = (Map<String, Object>) response.get("usage");
-        int inputTokens = usage != null && usage.get("prompt_tokens") instanceof Number
-            ? ((Number) usage.get("prompt_tokens")).intValue() : 0;
-        int outputTokens = usage != null && usage.get("completion_tokens") instanceof Number
-            ? ((Number) usage.get("completion_tokens")).intValue() : 0;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+            String content = message != null ? (String) message.get("content") : null;
+            if (content == null) {
+                return AiResult.builder()
+                    .success(false)
+                    .errorMessage("AI response contained no content (possibly content-filtered)")
+                    .build();
+            }
 
-        return AiResult.builder()
-            .success(true)
-            .revisedPrompt(content)
-            .inputTokens(inputTokens)
-            .outputTokens(outputTokens)
-            .build();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> usage = (Map<String, Object>) response.get("usage");
+            int inputTokens = usage != null && usage.get("prompt_tokens") instanceof Number
+                ? ((Number) usage.get("prompt_tokens")).intValue() : 0;
+            int outputTokens = usage != null && usage.get("completion_tokens") instanceof Number
+                ? ((Number) usage.get("completion_tokens")).intValue() : 0;
+
+            return AiResult.builder()
+                .success(true)
+                .revisedPrompt(content)
+                .inputTokens(inputTokens)
+                .outputTokens(outputTokens)
+                .build();
+        } catch (Exception e) {
+            return AiResult.builder()
+                .success(false)
+                .errorMessage("Chat completion failed: " + e.getMessage())
+                .build();
+        }
     }
 
     @Override
