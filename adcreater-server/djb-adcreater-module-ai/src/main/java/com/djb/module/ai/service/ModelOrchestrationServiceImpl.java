@@ -8,6 +8,8 @@ import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
 import com.djb.module.ai.dal.mapper.AiModelConfigMapper;
 import com.djb.common.exception.AiCallException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
@@ -15,6 +17,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @Service
+@Slf4j
 public class ModelOrchestrationServiceImpl implements ModelOrchestrationService {
 
     @Resource
@@ -22,6 +25,13 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
 
     @Resource
     private ApplicationContext applicationContext;
+
+    /** 硬编码 fallback：模型管理未实现时使用 spring.ai.openai 配置 */
+    @Value("${spring.ai.openai.api-key:}")
+    private String fallbackApiKey;
+
+    @Value("${spring.ai.openai.base-url:https://api.openai.com}")
+    private String fallbackBaseUrl;
 
     @Override
     public AiResult generateImage(AiRequest request, Consumer<String> progressCallback) {
@@ -56,8 +66,8 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
                 .orderByAsc(AiModelConfigDO::getPriority));
 
         if (configs.isEmpty()) {
-            return AiResult.builder().success(false)
-                .errorMessage("No enabled model found for task type: " + taskType).build();
+            log.warn("No enabled model in DB for task type: {}, using hardcoded fallback", taskType);
+            return executeWithFallbackConfig(request);
         }
 
         Exception lastException = null;
@@ -81,6 +91,27 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
 
         String msg = lastException != null ? lastException.getMessage() : "All models failed";
         return AiResult.builder().success(false).errorMessage(msg).build();
+    }
+
+    /**
+     * 硬编码 fallback：模型管理未实现时，使用 application.yaml 中的 OpenAI 配置
+     * 后续模型管理上线后，此方法可删除，走 DB 查询路径
+     */
+    private AiResult executeWithFallbackConfig(AiRequest request) {
+        if (fallbackApiKey == null || fallbackApiKey.isBlank()) {
+            return AiResult.builder().success(false)
+                .errorMessage("No model configured. Please set spring.ai.openai.api-key in application.yaml").build();
+        }
+        AiModelConfigDO fallbackConfig = new AiModelConfigDO();
+        fallbackConfig.setModelName("gpt-4o-mini");
+        fallbackConfig.setAdapterClass("com.djb.module.ai.adapter.OpenAIChatAdapter");
+        fallbackConfig.setApiKey(Base64.getEncoder().encodeToString(fallbackApiKey.getBytes()));
+        fallbackConfig.setEndpointUrl(fallbackBaseUrl);
+        fallbackConfig.setIsEnabled(true);
+        fallbackConfig.setPriority(0);
+
+        AiModelAdapter adapter = getAdapter(fallbackConfig.getAdapterClass());
+        return adapter.call(request, fallbackConfig);
     }
 
     private AiModelAdapter getAdapter(String adapterClassName) {
