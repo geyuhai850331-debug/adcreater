@@ -102,6 +102,7 @@ import { UserFilled, DArrowLeft, DArrowRight, SwitchButton } from '@element-plus
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import { useThemeStore } from '@/stores/theme'
 import client from '@/api/client'
+import { clearAuthSession } from '@/utils/auth'
 
 const COLLAPSE_KEY = 'adcreater-sidebar-collapsed'
 
@@ -118,7 +119,7 @@ const themeLabel = computed(() => themeStore.theme === 'dark' ? '深色模式' :
 
 async function fetchBalance() {
   try {
-    const res = await client.get('/billing/balance') as any
+    const res = await client.get('/app-api/billing/balance') as any
     balance.value = res?.balance ?? res?.data?.balance ?? 0
   } catch {
     // balance fetch can fail silently
@@ -131,8 +132,7 @@ function toggleCollapse() {
 }
 
 function handleLogout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('username')
+  clearAuthSession()
   router.push('/login')
 }
 

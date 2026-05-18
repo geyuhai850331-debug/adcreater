@@ -1,7 +1,7 @@
 /**
  * AdCreater Desktop Mock API Server
  *
- * Vite plugin intercepting /api/* requests for UI development without a running backend.
+ * Vite plugin intercepting /api/* and /app-api/* requests for UI development without a running backend.
  * All responses follow yudao-cloud format: { code: 0, data: {...}, message: "Success" }
  *
  * To disable: set VITE_DISABLE_MOCK=true or comment out the plugin in vite.config.ts
@@ -100,14 +100,14 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
   }
 
   // ── Billing ──────────────────────────────────────────────────────
-  if (path === '/api/billing/balance' && method === 'GET') {
+  if ((path === '/api/billing/balance' || path === '/app-api/billing/balance') && method === 'GET') {
     sendJson(res, 200, ok({ balance: 580 }))
     return true
   }
 
-  if (path === '/api/billing/transaction/page' && method === 'GET') {
+  if ((path === '/api/billing/transaction/page' || path === '/app-api/billing/transaction/page') && method === 'GET') {
     const q = getQuery(url.href)
-    const page = parseInt(q.get('page') || '1', 10)
+    const page = parseInt(q.get('pageNo') || q.get('page') || '1', 10)
     const pageSize = parseInt(q.get('pageSize') || '10', 10)
     const start = (page - 1) * pageSize
     const records = transactions.slice(start, start + pageSize)
@@ -115,14 +115,14 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/billing/recharge' && method === 'POST') {
+  if ((path === '/api/billing/recharge' || path === '/app-api/billing/recharge') && method === 'POST') {
     // Immediate success (no payUrl → treated as instant credit)
     sendJson(res, 200, ok({ payUrl: null, message: '充值成功' }))
     return true
   }
 
   // ── Templates ────────────────────────────────────────────────────
-  if (path === '/api/templates/list' && method === 'GET') {
+  if ((path === '/api/templates/list' || path === '/app-api/template/list') && method === 'GET') {
     sendJson(res, 200, ok(templates))
     return true
   }
@@ -132,13 +132,13 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/templates/sync' && method === 'POST') {
+  if ((path === '/api/templates/sync' || path === '/app-api/template/sync') && method === 'POST') {
     sendJson(res, 200, ok({ updated: [], deleted: [], message: '已是最新版本' }))
     return true
   }
 
   // ── Ad Creation ──────────────────────────────────────────────────
-  if (path === '/api/ad/copy/translate' && method === 'POST') {
+  if ((path === '/api/ad/copy/translate' || path === '/app-api/ad/copy/translate') && method === 'POST') {
     const body = await parseBody(req)
     const productName = body.productName as string || 'Product'
     const market = body.targetMarket as string || 'US'
@@ -175,7 +175,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/image/generate' && method === 'POST') {
+  if ((path === '/api/ad/image/generate' || path === '/app-api/ad/image/generate') && method === 'POST') {
     const body = await parseBody(req)
     const width = (body.width as number) || 1500
     const height = (body.height as number) || 1500
@@ -187,7 +187,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/video/generate' && method === 'POST') {
+  if ((path === '/api/ad/video/generate' || path === '/app-api/ad/video/generate') && method === 'POST') {
     const body = await parseBody(req)
     const duration = (body.duration as number) || 15
     const style = (body.style as string) || 'smooth'
@@ -198,7 +198,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/video/keyframe/generate' && method === 'POST') {
+  if ((path === '/api/ad/video/keyframe/generate' || path === '/app-api/ad/video/keyframe/generate') && method === 'POST') {
     const body = await parseBody(req)
     const index = (body.index as number) ?? 0
     const style = (body.style as string) || 'modern'
@@ -209,7 +209,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/video/storyboard/generate' && method === 'POST') {
+  if ((path === '/api/ad/video/storyboard/generate' || path === '/app-api/ad/video/storyboard/generate') && method === 'POST') {
     const body = await parseBody(req)
     const desc = (body.productDescription as string) || '默认商品'
     const points = desc.split(/[，,。.\n、]/).filter((s: string) => s.trim())
@@ -226,7 +226,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/video/storyboard/regenerate' && method === 'POST') {
+  if ((path === '/api/ad/video/storyboard/regenerate' || path === '/app-api/ad/video/storyboard/regenerate') && method === 'POST') {
     const body = await parseBody(req)
     const desc = (body.description as string) || '场景描述'
     const keyFrames = Array.from({ length: 4 }, (_, j) => ({
@@ -238,7 +238,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/video/keyframe/grid' && method === 'POST') {
+  if ((path === '/api/ad/video/keyframe/grid' || path === '/app-api/ad/video/keyframe/grid') && method === 'POST') {
     const body = await parseBody(req)
     const idx = (body.sceneIndex as number) ?? 0
     const grid = placeholderImage(1280, 960, `Storyboard ${idx + 1} Grid`)
@@ -247,7 +247,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
     return true
   }
 
-  if (path === '/api/ad/projects/recent' && method === 'GET') {
+  if ((path === '/api/ad/projects/recent' || path === '/app-api/ad/projects/recent') && method === 'GET') {
     const projects = [
       { name: '夏季新款运动鞋推广', type: 'image', createdAt: new Date(Date.now() - 2 * 86400000).toISOString(), status: '已完成' },
       { name: '智能手表促销视频', type: 'video', createdAt: new Date(Date.now() - 5 * 86400000).toISOString(), status: '已完成' },
@@ -260,17 +260,17 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, url: URL
   }
 
   // ── Delivery ─────────────────────────────────────────────────────
-  if (path === '/api/delivery/avatar/generate' && method === 'POST') {
+  if ((path === '/api/delivery/avatar/generate' || path === '/app-api/delivery/avatar/generate') && method === 'POST') {
     await new Promise(r => setTimeout(r, 500 + Math.random() * 1000))
     const thumb = placeholderImage(1080, 1920, 'Digital Human')
     sendJson(res, 200, ok({ url: thumb, videoUrl: thumb }))
     return true
   }
 
-  if (path === '/api/delivery/export-sizes' && method === 'POST') {
+  if ((path === '/api/delivery/export-sizes' || path === '/app-api/delivery/export-sizes') && method === 'POST') {
     const body = await parseBody(req)
     const platforms = body.platforms as string[] || []
-    const baseImage = body.baseImage as string || ''
+    const baseImage = body.baseImageUrl as string || body.baseImage as string || ''
     const urls: Record<string, Record<string, string>> = {}
     const sizeMap: Record<string, Array<{ w: number; h: number }>> = {
       amazon: [{ w: 1500, h: 1500 }, { w: 2000, h: 2000 }, { w: 1600, h: 1600 }],
@@ -305,10 +305,10 @@ export function mockApiServer(): Plugin {
         console.log('[mock] Mock disabled (VITE_DISABLE_MOCK=true)')
         return
       }
-      console.log('[mock] Mock API server enabled — intercepting /api/* requests')
+      console.log('[mock] Mock API server enabled — intercepting /api/* and /app-api/* requests')
       server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
         const urlStr = (req.url || '/')
-        if (!urlStr.startsWith('/api/')) {
+        if (!urlStr.startsWith('/api/') && !urlStr.startsWith('/app-api/')) {
           return next()
         }
         const url = new URL(urlStr, 'http://localhost')

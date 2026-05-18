@@ -770,7 +770,7 @@ async function handleGenerateStoryboards() {
   storyboards.value = []
 
   try {
-    const res = await client.post('/ad/video/storyboard/generate', {
+    const res = await client.post('/app-api/ad/video/storyboard/generate', {
       productDescription: productDescription.value.trim(),
       category: category.value || undefined,
       targetPlatform: targetPlatform.value || undefined,
@@ -807,7 +807,7 @@ async function handleGenerateStoryboards() {
 async function handleRegenerateStoryboard(idx: number) {
   regeneratingIdx.value = idx
   try {
-    const res = await client.post('/ad/video/storyboard/regenerate', {
+    const res = await client.post('/app-api/ad/video/storyboard/regenerate', {
       description: storyboards.value[idx].description,
       index: idx
     }) as any
@@ -874,7 +874,7 @@ async function handleGenerateSingleFrame(sbIdx: number, kfIdx: number) {
   const key = `${sbIdx}-${kfIdx}`
   frameGenerating.value = { ...frameGenerating.value, [key]: true }
   try {
-    const res = await client.post('/ad/video/keyframe/generate', {
+    const res = await client.post('/app-api/ad/video/keyframe/generate', {
       prompt: kf.prompt,
       sceneIndex: sbIdx,
       frameIndex: kfIdx
@@ -901,7 +901,7 @@ async function handleGenerateGrid(sbIdx: number) {
 
   gridStatus.value = { ...gridStatus.value, [sbIdx]: 'generating' }
   try {
-    const res = await client.post('/ad/video/keyframe/grid', {
+    const res = await client.post('/app-api/ad/video/keyframe/grid', {
       prompts,
       sceneIndex: sbIdx
     }) as any
@@ -995,7 +995,7 @@ async function handleGenerateVideo() {
   simulateVideoProgress()
 
   try {
-    const res = await client.post('/ad/video/generate', {
+    const res = await client.post('/app-api/ad/video/generate', {
       storyboards: storyboards.value,
       gridImages: gridImages.value,
       duration: duration.value,
@@ -1012,7 +1012,7 @@ async function handleGenerateVideo() {
     progressStatus.value = 'success'
     ElMessage.success('视频生成完成')
   } catch {
-    const res = await client.post('/ad/video/generate', { duration: duration.value }) as any
+    const res = await client.post('/app-api/ad/video/generate', { duration: duration.value, storyboards: [] }) as any
     const data = res?.data ?? res
     generatedVideo.value = { url: data?.url || data?.videoUrl, label: `广告视频 - ${duration.value}s` }
     progress.value = 100

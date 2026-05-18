@@ -147,18 +147,18 @@ function formatTime(iso: string): string {
 
 async function fetchData() {
   try {
-    const bal = await client.get('/billing/balance') as any
+    const bal = await client.get('/app-api/billing/balance') as any
     stats.balance = bal?.balance ?? bal?.data?.balance ?? 0
   } catch { /* ignore */ }
 
   try {
-    const tmpl = await client.get('/templates/page', { params: { page: 1, pageSize: 1 } }) as any
-    const total = tmpl?.total ?? tmpl?.data?.total ?? 0
-    stats.templateCount = total
+    const tmpl = await client.get('/app-api/template/list') as any
+    const list = tmpl?.data ?? tmpl ?? []
+    stats.templateCount = Array.isArray(list) ? list.length : 0
   } catch { /* ignore */ }
 
   try {
-    const proj = await client.get('/ad/projects/recent') as any
+    const proj = await client.get('/app-api/ad/projects/recent') as any
     const list = proj?.data ?? proj ?? []
     recentProjects.value = Array.isArray(list) ? list.slice(0, 5) : []
     stats.monthlyGenerated = recentProjects.value.filter(

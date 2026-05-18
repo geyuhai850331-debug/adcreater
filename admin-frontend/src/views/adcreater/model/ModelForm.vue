@@ -42,7 +42,14 @@
         <el-switch v-model="form.isEnabled" active-text="启用" inactive-text="禁用" />
       </el-form-item>
       <el-form-item label="优先级" prop="priority">
-        <el-input-number v-model="form.priority" :min="0" :max="999" class="!w-200px" />
+        <el-select v-model="form.priority" placeholder="请选择优先级" class="!w-200px">
+          <el-option
+            v-for="priority in priorityOptions"
+            :key="priority"
+            :label="String(priority)"
+            :value="priority"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="额外配置" prop="extraConfig">
         <el-input
@@ -83,12 +90,13 @@ const loading = ref(false)
 const testing = ref(false)
 const showApiKey = ref(false)
 const formRef = ref<FormInstance>()
+const priorityOptions = [1, 2, 3, 4, 5]
 
 const form = reactive({
   id: null as number | null,
   modelName: '',
   category: 'copy',
-  adapterClass: '',
+  adapterClass: 'OpenAIAdapter',
   apiKey: '',
   endpointUrl: '',
   isEnabled: true,
@@ -100,18 +108,19 @@ const rules: FormRules = {
   modelName: [{ required: true, message: '请输入模型名称', trigger: 'blur' }],
   category: [{ required: true, message: '请选择类别', trigger: 'change' }],
   adapterClass: [{ required: true, message: '请输入适配器类', trigger: 'blur' }],
-  apiKey: [{ required: true, message: '请输入 API Key', trigger: 'blur' }]
+  apiKey: [{ required: true, message: '请输入 API Key', trigger: 'blur' }],
+  priority: [{ required: true, message: '请选择优先级', trigger: 'change' }]
 }
 
 function fillForm(row?: Partial<AiModelVO>) {
   form.id = row?.id ?? null
   form.modelName = row?.modelName || ''
   form.category = row?.category || 'copy'
-  form.adapterClass = row?.adapterClass || ''
+  form.adapterClass = row?.adapterClass || 'OpenAIAdapter'
   form.apiKey = row?.apiKey || ''
   form.endpointUrl = row?.endpointUrl || ''
   form.isEnabled = row?.isEnabled ?? true
-  form.priority = row?.priority ?? 1
+  form.priority = priorityOptions.includes(row?.priority ?? 1) ? (row?.priority ?? 1) : 1
   form.extraConfig = row?.extraConfig
     ? typeof row.extraConfig === 'string'
       ? row.extraConfig

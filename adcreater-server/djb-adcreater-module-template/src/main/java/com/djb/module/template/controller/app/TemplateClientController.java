@@ -10,6 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 
+import java.util.List;
+
 import static com.djb.framework.common.pojo.CommonResult.success;
 
 /**
@@ -26,6 +28,12 @@ public class TemplateClientController {
 
     @Resource
     private TemplateService templateService;
+
+    @GetMapping("/list")
+    @Operation(summary = "查询已发布模板列表")
+    public CommonResult<List<AppTemplateSimpleRespVO>> getList() {
+        return success(templateService.getPublishedTemplateList());
+    }
 
     @PostMapping("/sync")
     @Operation(summary = "同步模板版本")

@@ -73,6 +73,21 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    public List<AppTemplateSimpleRespVO> getPublishedTemplateList() {
+        List<TemplateDO> templates = templateMapper.selectList(new LambdaQueryWrapper<TemplateDO>()
+                .eq(TemplateDO::getStatus, "published")
+                .orderByDesc(TemplateDO::getId));
+        return templates.stream().map(template -> {
+            AppTemplateSimpleRespVO respVO = new AppTemplateSimpleRespVO();
+            respVO.setId(template.getId());
+            respVO.setName(template.getName());
+            respVO.setType(template.getCategory());
+            respVO.setThumbnail(template.getThumbnailUrl());
+            return respVO;
+        }).toList();
+    }
+
+    @Override
     @Transactional
     public Long publishVersion(Long templateId, String fileUrl, String changelog) {
         TemplateVersionDO latestVersion = versionMapper.selectLatestByTemplateId(templateId);

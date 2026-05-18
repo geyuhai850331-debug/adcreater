@@ -240,10 +240,10 @@ async function handleGenerateAvatar() {
   simulateAvatarProgress()
 
   try {
-    const res = await client.post('/delivery/avatar/generate', {
+    const res = await client.post('/app-api/delivery/avatar/generate', {
       avatarId: selectedAvatar.value,
       script: script.value,
-      voice: selectedVoice.value,
+      voiceId: selectedVoice.value,
       duration: duration.value
     }) as any
     const data = res?.data ?? res
@@ -325,9 +325,9 @@ async function handleExport() {
 
   exporting.value = true
   try {
-    const res = await client.post('/delivery/export-sizes', {
+    const res = await client.post('/app-api/delivery/export-sizes', {
       platforms: selectedPlatforms.value,
-      baseImage: baseImageUrl.value
+      baseImageUrl: baseImageUrl.value
     }) as any
 
     const data = res?.data ?? res

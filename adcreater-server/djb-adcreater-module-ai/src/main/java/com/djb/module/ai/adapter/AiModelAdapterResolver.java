@@ -2,13 +2,8 @@ package com.djb.module.ai.adapter;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public final class AiModelAdapterResolver {
-
-    private static final Map<String, Set<String>> SIMPLE_NAME_ALIASES = Map.of(
-            OpenAIAdapter.class.getSimpleName(), Set.of("DeepSeekAdapter")
-    );
 
     private AiModelAdapterResolver() {
     }
@@ -26,8 +21,7 @@ public final class AiModelAdapterResolver {
         Class<?> adapterType = adapter.getClass();
         String requestedSimpleName = extractSimpleName(adapterClass);
         return adapterType.getName().equals(adapterClass)
-                || adapterType.getSimpleName().equals(requestedSimpleName)
-                || SIMPLE_NAME_ALIASES.getOrDefault(adapterType.getSimpleName(), Set.of()).contains(requestedSimpleName);
+                || adapterType.getSimpleName().equals(requestedSimpleName);
     }
 
     private static String extractSimpleName(String adapterClass) {

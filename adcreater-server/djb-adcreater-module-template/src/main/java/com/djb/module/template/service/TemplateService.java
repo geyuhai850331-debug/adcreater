@@ -11,6 +11,7 @@ public interface TemplateService {
     void deleteTemplate(Long id);
     TemplateRespVO getTemplate(Long id);
     PageResult<TemplateRespVO> getTemplatePage(TemplatePageReqVO pageReqVO);
+    List<AppTemplateSimpleRespVO> getPublishedTemplateList();
     Long publishVersion(Long templateId, String fileUrl, String changelog);
     List<TemplateVersionRespVO> getVersions(Long templateId);
     SyncResultVO syncTemplates(SyncRequestVO reqVO);

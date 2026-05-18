@@ -5,6 +5,7 @@ import com.djb.framework.common.enums.UserTypeEnum;
 import com.djb.framework.common.pojo.CommonResult;
 import com.djb.framework.security.config.SecurityProperties;
 import com.djb.framework.security.core.util.SecurityFrameworkUtils;
+import com.djb.framework.tenant.core.aop.TenantIgnore;
 import com.djb.module.member.controller.app.auth.vo.*;
 import com.djb.module.member.convert.auth.AuthConvert;
 import com.djb.module.member.service.auth.MemberAuthService;
@@ -41,6 +42,14 @@ public class AppAuthController {
 
     @Resource
     private SecurityProperties securityProperties;
+
+    @PostMapping("/register")
+    @Operation(summary = "使用手机 + 密码注册")
+    @PermitAll
+    @TenantIgnore
+    public CommonResult<AppAuthLoginRespVO> register(@RequestBody @Valid AppAuthRegisterReqVO reqVO) {
+        return success(authService.register(reqVO));
+    }
 
     @PostMapping("/login")
     @Operation(summary = "使用手机 + 密码登录")

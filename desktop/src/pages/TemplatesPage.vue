@@ -115,7 +115,7 @@ const filteredTemplates = computed(() => {
 
 async function fetchTemplates() {
   try {
-    const res = await client.get('/templates/list') as any
+    const res = await client.get('/app-api/template/list') as any
     const list = res?.data ?? res ?? []
     templates.value = Array.isArray(list) ? list : []
   } catch {
@@ -126,7 +126,7 @@ async function fetchTemplates() {
 async function syncTemplates() {
   syncing.value = true
   try {
-    await client.post('/templates/sync')
+    await client.post('/app-api/template/sync', {})
     ElMessage.success('同步成功')
     await fetchTemplates()
   } catch (err: any) {

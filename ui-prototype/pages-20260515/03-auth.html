@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — Sign In</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;--text-disabled:#3A3734;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--accent-pressed:#4FB88E;
+  --status-error:#D94A4A;--status-info:#5B9BD5;
+  --hover:rgba(255,255,255,0.04);--selected:rgba(103,216,174,0.10);
+  --font-display:'Cormorant Garamond','Noto Serif SC',serif;
+  --font-ui:'Work Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  --radius-sm:2px;--radius-md:4px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);--dur-normal:250ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;display:flex;overflow:hidden}
+a{color:var(--accent);text-decoration:none;transition:color var(--dur-normal)}
+a:hover{color:var(--accent-soft)}
+button{font-family:var(--font-ui);cursor:pointer;border:none}
+
+/* Split layout */
+.auth-left{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#0a0d0f 0%,#0d1014 40%,#0b0e12 100%)}
+.auth-left::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse at 30% 40%,rgba(103,216,174,.03) 0%,transparent 50%),
+  radial-gradient(ellipse at 70% 60%,rgba(240,237,232,.02) 0%,transparent 50%)}
+.hero-content{position:relative;z-index:1;text-align:center;padding:var(--space-3xl);max-width:480px}
+.hero-wordmark{font-family:var(--font-display);font-size:3rem;font-weight:300;letter-spacing:.1em;color:var(--text-primary);margin-bottom:var(--space-lg);animation:fadeUp var(--dur-normal) var(--ease-out) both}
+.hero-wordmark span{font-style:italic}
+.hero-tagline{font-family:var(--font-display);font-size:1.25rem;font-weight:300;font-style:italic;color:var(--text-secondary);margin-bottom:var(--space-2xl);animation:fadeUp var(--dur-normal) var(--ease-out) .1s both}
+.hero-stats{display:flex;gap:var(--space-2xl);justify-content:center;margin-top:var(--space-2xl);animation:fadeUp var(--dur-normal) var(--ease-out) .2s both}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:var(--font-mono);font-size:1.75rem;font-weight:400;color:var(--accent);margin-bottom:var(--space-xs)}
+.hero-stat-label{font-size:.625rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Right panel — auth form */
+.auth-right{width:440px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:var(--space-3xl);background:var(--bg-base);border-left:1px solid var(--border-subtle)}
+.auth-header{margin-bottom:var(--space-2xl)}
+.auth-header h2{font-family:var(--font-display);font-size:1.75rem;font-weight:300;letter-spacing:.04em;margin-bottom:var(--space-xs)}
+.auth-header p{font-size:.875rem;color:var(--text-secondary)}
+.auth-tabs{display:flex;gap:0;margin-bottom:var(--space-xl);border-bottom:1px solid var(--border-subtle)}
+.auth-tab{font-family:var(--font-mono);font-size:.6875rem;padding:8px 0;margin-right:var(--space-lg);color:var(--text-tertiary);border-bottom:1px solid transparent;background:none;transition:all var(--dur-normal)}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.auth-tab:hover:not(.active){color:var(--text-secondary)}
+
+.auth-field{margin-bottom:var(--space-lg)}
+.auth-field label{display:block;font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:var(--space-xs)}
+.auth-input{font-family:var(--font-ui);font-size:.9375rem;padding:10px 12px;width:100%;background:var(--bg-elevated);border:1px solid var(--border-visible);color:var(--text-primary);border-radius:var(--radius-sm);transition:border-color var(--dur-normal)}
+.auth-input:focus{outline:none;border-color:var(--accent)}
+.auth-input::placeholder{color:var(--text-tertiary)}
+.auth-error{font-size:.6875rem;color:var(--status-error);margin-top:var(--space-xs);display:none;align-items:center;gap:var(--space-xs)}
+.auth-error.show{display:flex}
+.auth-forgot{font-size:.6875rem;text-align:right;margin-top:var(--space-xs)}
+.auth-field-row{display:flex;gap:var(--space-md)}
+.auth-field-row .auth-field{flex:1}
+
+.auth-submit{width:100%;padding:12px;margin-top:var(--space-md);background:var(--accent);color:var(--bg-base);font-family:var(--font-ui);font-size:.875rem;font-weight:500;border-radius:var(--radius-sm);letter-spacing:.02em;transition:all var(--dur-normal);display:flex;align-items:center;justify-content:center;gap:var(--space-sm)}
+.auth-submit:hover{background:var(--accent-soft)}
+.auth-submit:disabled{opacity:.4;cursor:not-allowed}
+.auth-submit.loading{background:var(--bg-elevated);color:var(--text-secondary)}
+.spinner{width:16px;height:16px;border:2px solid var(--bg-base);border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite}
+.auth-submit.loading .spinner{border-color:var(--text-secondary);border-top-color:transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.auth-divider{display:flex;align-items:center;gap:var(--space-md);margin:var(--space-lg) 0;font-size:.625rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary)}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border-subtle)}
+.auth-alt-btn{width:100%;padding:10px;margin-bottom:var(--space-sm);background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-visible);border-radius:var(--radius-sm);font-size:.8125rem;font-weight:500;transition:all var(--dur-normal);display:flex;align-items:center;justify-content:center;gap:var(--space-sm)}
+.auth-alt-btn:hover{background:var(--hover);border-color:var(--text-tertiary)}
+.auth-footer{text-align:center;margin-top:var(--space-lg);font-size:.75rem;color:var(--text-tertiary)}
+
+/* Trial banner */
+.trial-banner{background:var(--selected);border:1px solid rgba(103,216,174,.2);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-xl);display:flex;align-items:flex-start;gap:var(--space-md)}
+.trial-banner-icon{font-size:1.25rem;flex-shrink:0}
+.trial-banner h4{font-size:.8125rem;font-weight:500;margin-bottom:2px}
+.trial-banner p{font-size:.75rem;color:var(--text-secondary);line-height:1.5}
+
+@media(max-width:768px){
+  .auth-left{display:none}
+  .auth-right{width:100%;border-left:none;padding:var(--space-xl)}
+}
+</style>
+</head>
+<body>
+
+<!-- Left hero -->
+<div class="auth-left">
+  <div class="hero-content">
+    <div class="hero-wordmark">Dream<span>Cast</span></div>
+    <p class="hero-tagline">将梦想变为真实的场景</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">10x</div>
+        <div class="hero-stat-label">Faster than hiring</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">3</div>
+        <div class="hero-stat-label">Content types</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">JP</div>
+        <div class="hero-stat-label">Amazon Japan ready</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right auth panel -->
+<div class="auth-right">
+  <div class="auth-header">
+    <h2>Welcome back</h2>
+    <p>Sign in to your DreamCast workspace</p>
+  </div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchAuthTab('signin')">Sign In</button>
+    <button class="auth-tab" onclick="switchAuthTab('signup')">Create Account</button>
+  </div>
+
+  <!-- Sign In form -->
+  <form id="signinForm" onsubmit="handleSignIn(event)">
+    <div class="auth-field">
+      <label>Email</label>
+      <input class="auth-input" type="email" placeholder="you@example.com" required autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input class="auth-input" type="password" placeholder="········" required autocomplete="current-password">
+    </div>
+    <div class="auth-forgot"><a href="#">Forgot password?</a></div>
+    <button class="auth-submit" type="submit" id="signinBtn">Sign In</button>
+  </form>
+
+  <!-- Sign Up form (hidden by default) -->
+  <form id="signupForm" style="display:none" onsubmit="handleSignUp(event)">
+    <!-- Trial banner only on sign up -->
+    <div class="trial-banner">
+      <span class="trial-banner-icon">&#9678;</span>
+      <div>
+        <h4>Start with a free 14-day trial</h4>
+        <p>500 points per day. No credit card required. Cancel anytime.</p>
+      </div>
+    </div>
+    <div class="auth-field-row">
+      <div class="auth-field">
+        <label>First Name</label>
+        <input class="auth-input" type="text" placeholder="Li" required>
+      </div>
+      <div class="auth-field">
+        <label>Last Name</label>
+        <input class="auth-input" type="text" placeholder="Wei" required>
+      </div>
+    </div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input class="auth-input" type="email" placeholder="you@example.com" required autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input class="auth-input" type="password" placeholder="Min 8 characters" required minlength="8" autocomplete="new-password">
+    </div>
+    <button class="auth-submit" type="submit" id="signupBtn">Start Free Trial</button>
+    <p style="font-size:.6875rem;color:var(--text-tertiary);text-align:center;margin-top:var(--space-md)">By creating an account, you agree to our Terms and Privacy Policy.</p>
+  </form>
+
+  <div class="auth-divider">or continue with</div>
+  <button class="auth-alt-btn" onclick="handleEmailLink()">&#9993; Email Magic Link</button>
+
+  <div class="auth-footer" id="authFooter">
+    Don't have an account? <a href="#" onclick="switchAuthTab('signup');return false">Start free trial</a>
+  </div>
+</div>
+
+<script>
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'signin') {
+    document.getElementById('signinForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+    document.querySelector('.auth-header h2').textContent = 'Welcome back';
+    document.querySelector('.auth-header p').textContent = 'Sign in to your DreamCast workspace';
+    document.getElementById('authFooter').innerHTML = "Don't have an account? <a href=\"#\" onclick=\"switchAuthTab('signup');return false\">Start free trial</a>";
+  } else {
+    document.getElementById('signinForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+    document.querySelector('.auth-header h2').textContent = 'Start creating';
+    document.querySelector('.auth-header p').textContent = '14-day free trial. No credit card.';
+    document.getElementById('authFooter').innerHTML = "Already have an account? <a href=\"#\" onclick=\"switchAuthTab('signin');return false\">Sign in</a>";
+  }
+}
+
+function handleSignIn(e) {
+  e.preventDefault();
+  const btn = document.getElementById('signinBtn');
+  btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  btn.classList.add('loading');
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = 'Sign In';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }, 1500);
+}
+
+function handleSignUp(e) {
+  e.preventDefault();
+  const btn = document.getElementById('signupBtn');
+  btn.innerHTML = '<span class="spinner"></span> Creating account...';
+  btn.classList.add('loading');
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = 'Start Free Trial';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }, 1500);
+}
+
+function handleEmailLink() { alert('Magic link sent to your email'); }
+</script>
+</body>
+</html>

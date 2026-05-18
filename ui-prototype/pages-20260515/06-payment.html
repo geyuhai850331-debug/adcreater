@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — Buy Points</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--status-success:#7ED89A;--status-warning:#E5B84C;
+  --hover:rgba(255,255,255,.04);--selected:rgba(103,216,174,.10);
+  --font-display:'Cormorant Garamond',serif;--font-ui:'Work Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --sp:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:32px;--sp-2xl:48px;--sp-3xl:64px;
+  --r-sm:2px;--r-md:4px;--r-lg:8px;
+  --ease:cubic-bezier(.16,1,.3,1);--dur:250ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;line-height:1.6;display:flex;flex-direction:column}
+button{font-family:var(--font-ui);cursor:pointer;border:none;background:none;color:inherit}
+
+.topbar{display:flex;align-items:center;padding:var(--sp-md) var(--sp-xl);border-bottom:1px solid var(--border-subtle);gap:var(--sp-xl)}
+.brand{font-family:var(--font-display);font-size:1.5rem;font-weight:300;letter-spacing:.08em}
+.br{font-size:.75rem;color:var(--text-tertiary)}
+.br span{color:var(--text-secondary)}
+.tr{margin-left:auto;display:flex;align-items:center;gap:var(--sp-md)}
+.pts{font-family:var(--font-mono);font-size:.75rem;color:var(--accent)}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+.main{max-width:720px;margin:0 auto;padding:var(--sp-3xl) var(--sp-xl)}
+h1{font-family:var(--font-display);font-size:2rem;font-weight:300;letter-spacing:.02em;margin-bottom:var(--sp-xs)}
+.p-sub{font-size:.875rem;color:var(--text-secondary);margin-bottom:var(--sp-2xl)}
+
+/* Steps */
+.steps{display:flex;gap:var(--sp-md);margin-bottom:var(--sp-2xl)}
+.step{flex:1;text-align:center;position:relative;padding-top:var(--sp-lg)}
+.step::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;border:2px solid var(--border-visible);background:var(--bg-base);z-index:1}
+.step.active::before{border-color:var(--accent);background:var(--accent)}
+.step.done::before{border-color:var(--accent);background:var(--accent)}
+.step::after{content:'';position:absolute;top:5px;left:calc(50% + 8px);right:calc(-50% + 8px);height:2px;background:var(--border-visible);z-index:0}
+.step:last-child::after{display:none}
+.step-label{font-size:.625rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-top:var(--sp-sm)}
+.step.active .step-label{color:var(--accent)}
+.step.done .step-label{color:var(--accent)}
+
+/* Point packages */
+.packages{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--sp-md);margin-bottom:var(--sp-2xl)}
+.pkg{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:var(--sp-lg);cursor:pointer;transition:all var(--dur);text-align:center}
+.pkg:hover{border-color:var(--border-visible)}
+.pkg.active{border-color:var(--accent);background:var(--selected)}
+.pkg.active::after{content:'✓';position:absolute;top:var(--sp-sm);right:var(--sp-sm);font-size:.625rem;color:var(--accent);font-weight:600}
+.pkg-price{font-family:var(--font-mono);font-size:1.5rem;font-weight:500;color:var(--accent);margin-bottom:var(--sp)}
+.pkg-pts{font-family:var(--font-mono);font-size:.75rem;color:var(--text-secondary)}
+.pkg-best{font-size:.625rem;color:var(--status-warning);margin-top:var(--sp-sm)}
+.custom-input{font-family:var(--font-mono);font-size:.875rem;padding:8px 12px;background:var(--bg-elevated);border:1px solid var(--border-visible);color:var(--text-primary);border-radius:var(--r-sm);width:100px;text-align:center}
+.custom-input:focus{outline:none;border-color:var(--accent)}
+
+/* Payment method */
+.methods{display:flex;gap:var(--sp-md);margin-bottom:var(--sp-2xl)}
+.method{flex:1;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:var(--sp-lg);cursor:pointer;transition:all var(--dur);display:flex;align-items:center;gap:var(--sp-md)}
+.method:hover{border-color:var(--border-visible)}
+.method.active{border-color:var(--accent);background:var(--selected)}
+.method-icon{font-size:1.25rem;width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;background:var(--bg-elevated);flex-shrink:0}
+.method-name{font-size:.8125rem;font-weight:500}
+.method-desc{font-size:.6875rem;color:var(--text-tertiary)}
+.radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-visible);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-left:auto}
+.method.active .radio{border-color:var(--accent)}
+.method.active .radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* Summary card */
+.summary{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:var(--sp-lg)}
+.summary h3{font-size:.8125rem;font-weight:500;margin-bottom:var(--sp-md)}
+.summary-row{display:flex;justify-content:space-between;padding:var(--sp-sm) 0;font-size:.8125rem;color:var(--text-secondary)}
+.summary-row.total{border-top:1px solid var(--border-subtle);margin-top:var(--sp-sm);padding-top:var(--sp-md);font-size:.9375rem;font-weight:500;color:var(--text-primary)}
+.summary-row.total .val{font-family:var(--font-mono);color:var(--accent)}
+
+.btn-primary{font-family:var(--font-mono);font-size:.8125rem;font-weight:500;background:var(--accent);color:var(--bg-base);padding:12px 24px;border-radius:var(--r-sm);letter-spacing:.02em;width:100%;margin-top:var(--sp-lg);transition:all var(--dur)}
+.btn-primary:hover{background:var(--accent-soft)}
+
+.balance{font-family:var(--font-mono);font-size:.75rem;color:var(--text-tertiary);text-align:center;margin-top:var(--sp-lg)}
+.balance span{color:var(--accent)}
+
+@media(max-width:768px){
+  .packages{grid-template-columns:repeat(3,1fr)}
+  .methods{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="brand">DreamCast</span><span class="br">Account <span>/</span> Buy Points</span>
+  <div class="tr"><span class="pts">18,500 pts</span><div class="av">L</div></div>
+</header>
+
+<main class="main">
+  <h1>Buy Points</h1>
+  <p class="p-sub">Top up your point balance to generate more content</p>
+
+  <div class="steps">
+    <div class="step active"><div class="step-label">Select Package</div></div>
+    <div class="step"><div class="step-label">Pay</div></div>
+    <div class="step"><div class="step-label">Done</div></div>
+  </div>
+
+  <h2 style="font-size:.8125rem;font-weight:500;margin-bottom:var(--sp-md)">Choose Amount</h2>
+  <div class="packages">
+    <div class="pkg" style="position:relative" onclick="selectPkg(this,'5')">
+      <div class="pkg-price">¥5</div><div class="pkg-pts">2,000 pts</div>
+    </div>
+    <div class="pkg" style="position:relative" onclick="selectPkg(this,'20')">
+      <div class="pkg-price">¥20</div><div class="pkg-pts">8,000 pts</div>
+    </div>
+    <div class="pkg active" style="position:relative" onclick="selectPkg(this,'50')">
+      <div class="pkg-price">¥50</div><div class="pkg-pts">20,000 pts</div><div class="pkg-best">Most Popular</div>
+    </div>
+    <div class="pkg" style="position:relative" onclick="selectPkg(this,'100')">
+      <div class="pkg-price">¥100</div><div class="pkg-pts">42,000 pts</div><div class="pkg-best">Best Value +5%</div>
+    </div>
+    <div class="pkg" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center" onclick="document.getElementById('customInput').focus()">
+      <div class="pkg-price">Custom</div><div class="pkg-pts">
+        <input class="custom-input" id="customInput" placeholder="¥___" oninput="selectPkg(this.parentElement.parentElement,this.value||'50')">
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:.8125rem;font-weight:500;margin-bottom:var(--sp-md)">Payment Method</h2>
+  <div class="methods">
+    <div class="method active" onclick="this.parentElement.querySelectorAll('.method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+      <div class="method-icon">支</div>
+      <div><div class="method-name">Alipay</div><div class="method-desc">支付宝</div></div>
+      <div class="radio"></div>
+    </div>
+    <div class="method" onclick="this.parentElement.querySelectorAll('.method').forEach(m=>m.classList.remove('active'));this.classList.add('active')">
+      <div class="method-icon">微</div>
+      <div><div class="method-name">WeChat Pay</div><div class="method-desc">微信支付</div></div>
+      <div class="radio"></div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <h3>Order Summary</h3>
+    <div class="summary-row"><span>Package</span><span class="val" id="summaryPts">20,000 pts</span></div>
+    <div class="summary-row"><span>Rate</span><span class="val">400 pts/¥</span></div>
+    <div class="summary-row total"><span>Total</span><span class="val" id="summaryTotal">¥50</span></div>
+  </div>
+
+  <button class="btn-primary" onclick="pay()">Pay ¥<span id="btnAmount">50</span> with <span id="btnMethod">Alipay</span></button>
+  <div class="balance">Current balance: <span>18,500 pts</span> &rarr; <span id="afterBalance">38,500 pts</span> after purchase</div>
+</main>
+
+<script>
+let selectedAmount = '50';
+function selectPkg(el, amt) {
+  document.querySelectorAll('.pkg').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  selectedAmount = amt;
+  const ptsMap = {5:2000,20:8000,50:20000,100:42000};
+  const pts = ptsMap[amt] || Math.floor(Number(amt)*400);
+  document.getElementById('summaryPts').textContent = pts.toLocaleString()+' pts';
+  document.getElementById('summaryTotal').textContent = '¥'+amt;
+  document.getElementById('btnAmount').textContent = amt;
+  document.getElementById('afterBalance').textContent = (18500+pts).toLocaleString()+' pts';
+}
+function pay() {
+  const m = document.querySelector('.method.active .method-name').textContent;
+  document.getElementById('btnMethod').textContent = m;
+  alert('Redirecting to '+m+' payment...');
+}
+</script>
+</body>
+</html>

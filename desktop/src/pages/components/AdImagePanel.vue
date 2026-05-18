@@ -143,7 +143,7 @@ const dimensions = [
 
 async function fetchTemplates() {
   try {
-    const res = await client.get('/templates/list') as any
+    const res = await client.get('/app-api/template/list') as any
     const list = res?.data ?? res ?? []
     templates.value = Array.isArray(list) ? list : []
     if (templates.value.length > 0 && !selectedTemplate.value) {
@@ -198,11 +198,13 @@ async function handleGenerate() {
 
   try {
     const dim = dimensions.find((d) => d.key === selectedDimension.value)
-    const res = await client.post('/ad/image/generate', {
+    const res = await client.post('/app-api/ad/image/generate', {
       productName: props.adCopy?.productName,
       targetMarket: props.adCopy?.targetMarket,
-      templateId: selectedTemplate.value,
       style: selectedStyle.value,
+      sellingPoints: Array.isArray(props.adCopy?.sellingPoints)
+        ? props.adCopy.sellingPoints.join(', ')
+        : '',
       width: dim?.width || 1500,
       height: dim?.height || 1500
     }) as any

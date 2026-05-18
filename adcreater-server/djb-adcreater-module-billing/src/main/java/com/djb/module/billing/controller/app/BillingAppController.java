@@ -1,6 +1,7 @@
 package com.djb.module.billing.controller.app;
 
 import com.djb.module.billing.dal.dataobject.PointsTransactionDO;
+import com.djb.module.billing.controller.app.vo.AppBillingRechargeReqVO;
 import com.djb.module.billing.dal.mapper.PointsTransactionMapper;
 import com.djb.module.billing.service.BillingService;
 import com.djb.framework.common.pojo.CommonResult;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 import static com.djb.framework.common.pojo.CommonResult.success;
@@ -53,5 +55,17 @@ public class BillingAppController {
             new LambdaQueryWrapper<PointsTransactionDO>()
                 .eq(PointsTransactionDO::getUserId, userId)
                 .orderByDesc(PointsTransactionDO::getCreateTime)));
+    }
+
+    @PostMapping("/recharge")
+    @Operation(summary = "用户充值")
+    public CommonResult<Map<String, Object>> recharge(@Valid @RequestBody AppBillingRechargeReqVO reqVO) {
+        Long userId = WebFrameworkUtils.getLoginUserId();
+        billingService.recharge(userId, reqVO.getPoints(), "用户充值套餐 " + reqVO.getPackageId());
+        return success(Map.of(
+                "payUrl", null,
+                "message", "充值成功",
+                "packageId", reqVO.getPackageId()
+        ));
     }
 }

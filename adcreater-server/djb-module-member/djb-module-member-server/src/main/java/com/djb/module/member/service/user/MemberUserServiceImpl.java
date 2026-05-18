@@ -49,6 +49,8 @@ import static com.djb.module.member.enums.ErrorCodeConstants.*;
 @Slf4j
 public class MemberUserServiceImpl implements MemberUserService {
 
+    private static final Long DEFAULT_TENANT_ID = 1L;
+
     @Resource
     private MemberUserMapper memberUserMapper;
 
@@ -88,19 +90,36 @@ public class MemberUserServiceImpl implements MemberUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public MemberUserDO registerUser(String mobile, String password, String registerIp, Integer terminal) {
+        validateMobileUnique(null, mobile);
+        return createUser(mobile, password, null, null, registerIp, terminal, DEFAULT_TENANT_ID);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public MemberUserDO createUser(String nickname, String avtar, String registerIp, Integer terminal) {
-        return createUser(null, nickname, avtar, registerIp, terminal);
+        return createUser(null, null, nickname, avtar, registerIp, terminal);
     }
 
     private MemberUserDO createUser(String mobile, String nickname, String avtar,
                                     String registerIp, Integer terminal) {
-        // 生成密码
-        String password = IdUtil.fastSimpleUUID();
+        return createUser(mobile, null, nickname, avtar, registerIp, terminal);
+    }
+
+    private MemberUserDO createUser(String mobile, String password, String nickname, String avtar,
+                                    String registerIp, Integer terminal) {
+        return createUser(mobile, password, nickname, avtar, registerIp, terminal, null);
+    }
+
+    private MemberUserDO createUser(String mobile, String password, String nickname, String avtar,
+                                    String registerIp, Integer terminal, Long tenantId) {
+        String userPassword = StrUtil.blankToDefault(password, IdUtil.fastSimpleUUID());
         // 插入用户
         MemberUserDO user = new MemberUserDO();
+        user.setTenantId(tenantId);
         user.setMobile(mobile);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-        user.setPassword(encodePassword(password)); // 加密密码
+        user.setPassword(encodePassword(userPassword)); // 加密密码
         user.setRegisterIp(registerIp);
         user.setRegisterTerminal(terminal);
         user.setNickname(nickname);

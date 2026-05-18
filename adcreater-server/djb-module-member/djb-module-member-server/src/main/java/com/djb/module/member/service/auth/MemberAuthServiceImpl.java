@@ -6,6 +6,7 @@ import com.djb.framework.common.enums.TerminalEnum;
 import com.djb.framework.common.enums.UserTypeEnum;
 import com.djb.framework.common.util.monitor.TracerUtils;
 import com.djb.framework.common.util.servlet.ServletUtils;
+import com.djb.framework.tenant.core.util.TenantUtils;
 import com.djb.module.member.controller.app.auth.vo.*;
 import com.djb.module.member.convert.auth.AuthConvert;
 import com.djb.module.member.dal.dataobject.user.MemberUserDO;
@@ -60,6 +61,13 @@ public class MemberAuthServiceImpl implements MemberAuthService {
     private SocialClientApi socialClientApi;
     @Resource
     private OAuth2TokenCommonApi oauth2TokenApi;
+
+    @Override
+    public AppAuthLoginRespVO register(AppAuthRegisterReqVO reqVO) {
+        MemberUserDO user = userService.registerUser(reqVO.getMobile(), reqVO.getPassword(), getClientIP(), getTerminal());
+        return TenantUtils.execute(user.getTenantId(),
+                () -> createTokenAfterLoginSuccess(user, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE, null));
+    }
 
     @Override
     public AppAuthLoginRespVO login(AppAuthLoginReqVO reqVO) {

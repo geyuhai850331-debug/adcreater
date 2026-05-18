@@ -1,5 +1,8 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { clearAuthSession } from '@/utils/auth'
+
+const DEFAULT_TENANT_ID = '1'
 
 const client = axios.create({
   baseURL: '/api',
@@ -12,6 +15,14 @@ const client = axios.create({
 // Request interceptor - attach Bearer token
 client.interceptors.request.use(
   (config) => {
+    if (config.url?.startsWith('/app-api')) {
+      config.baseURL = ''
+    }
+
+    if (!config.headers['tenant-id']) {
+      config.headers['tenant-id'] = localStorage.getItem('tenantId') || DEFAULT_TENANT_ID
+    }
+
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -30,11 +41,10 @@ client.interceptors.response.use(
   },
   (error) => {
     const status = error.response?.status
-    const message = error.response?.data?.message || error.message || '请求失败'
+    const message = error.response?.data?.msg || error.response?.data?.message || error.message || '请求失败'
 
     if (status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+      clearAuthSession()
       window.location.href = '/#/login'
       ElMessage.error('登录已过期，请重新登录')
     } else if (status === 403) {

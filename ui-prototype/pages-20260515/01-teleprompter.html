@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — 营销文案制作</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;--text-disabled:#3A3734;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--accent-pressed:#4FB88E;
+  --status-success:#7ED89A;--status-warning:#E5B84C;--status-error:#D94A4A;--status-info:#5B9BD5;
+  --hover:rgba(255,255,255,0.04);--selected:rgba(103,216,174,0.10);--pressed:rgba(103,216,174,0.18);
+  --font-display:'Cormorant Garamond','Noto Serif SC',serif;
+  --font-ui:'Work Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  --radius-sm:2px;--radius-md:4px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --dur-fast:150ms;--dur-normal:250ms;--dur-slow:350ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;line-height:1.6;display:flex;flex-direction:column}
+button{font-family:var(--font-ui);cursor:pointer;border:none;background:none;color:inherit}
+a{color:var(--accent);text-decoration:none}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;padding:var(--space-md) var(--space-xl);border-bottom:1px solid var(--border-subtle);gap:var(--space-xl);flex-shrink:0}
+.topbar-brand{font-family:var(--font-display);font-size:1.5rem;font-weight:300;letter-spacing:.08em;color:var(--text-primary)}
+.topbar-breadcrumb{font-size:.75rem;color:var(--text-tertiary);display:flex;align-items:center;gap:var(--space-sm)}
+.topbar-breadcrumb span{color:var(--text-secondary)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:var(--space-md)}
+.topbar-pts{font-family:var(--font-mono);font-size:.75rem;color:var(--accent)}
+.topbar-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+/* Layout */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar — floating glass */
+.sidebar{width:220px;flex-shrink:0;background:rgba(17,17,17,.85);backdrop-filter:blur(24px);border-right:1px solid var(--border-subtle);padding:var(--space-lg) var(--space-md);overflow-y:auto;display:flex;flex-direction:column}
+.side-section{font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);padding:var(--space-lg) var(--space-sm) var(--space-xs);margin-top:var(--space-sm)}
+.side-section:first-child{margin-top:0;padding-top:0}
+.side-item{display:flex;align-items:center;gap:var(--space-sm);font-size:.8125rem;padding:8px 12px;margin-bottom:2px;border-radius:var(--radius-sm);color:var(--text-secondary);transition:all var(--dur-fast) var(--ease-out);width:100%;text-align:left}
+.side-item:hover{color:var(--text-primary);background:var(--hover)}
+.side-item.active{color:var(--text-primary);background:var(--selected)}
+.side-item.disabled{color:var(--text-disabled);opacity:.5;cursor:not-allowed}
+.side-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;opacity:0}
+.side-item.active .side-dot{opacity:1}
+.side-item.disabled .side-dot{display:none}
+.side-count{font-family:var(--font-mono);font-size:.625rem;color:var(--text-tertiary);margin-left:auto}
+
+/* Canvas */
+.canvas{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.canvas-header{padding:var(--space-lg) var(--space-xl);border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;flex-shrink:0}
+.ch-label{font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)}
+.ch-pill{font-family:var(--font-mono);font-size:.75rem;padding:4px 12px;border-radius:var(--radius-sm);transition:all var(--dur-fast)}
+.ch-pill-active{background:var(--selected);color:var(--accent)}
+.ch-pill-option{background:var(--hover);color:var(--text-primary);cursor:pointer}
+.ch-pill-option:hover{background:var(--selected);color:var(--accent)}
+.ch-divider{width:1px;height:20px;background:var(--border-subtle)}
+.ch-model{font-family:var(--font-mono);font-size:.6875rem;color:var(--text-tertiary);margin-left:auto}
+.ch-model span{color:var(--accent)}
+
+.canvas-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:var(--space-2xl) var(--space-xl);max-width:800px;margin:0 auto;width:100%}
+.canvas-body-centered{justify-content:center}
+
+/* Prompt title */
+.prompt-title{font-family:var(--font-display);font-size:1.5rem;font-weight:300;letter-spacing:.02em;margin-bottom:var(--space-2xl);color:var(--text-primary)}
+
+/* Teleprompter */
+.tp-wrapper{flex:1;display:flex;flex-direction:column}
+.tp-input{font-family:var(--font-mono);font-size:.9375rem;line-height:1.8;color:var(--text-primary);background:transparent;border:none;outline:none;width:100%;resize:none;caret-color:var(--accent);flex:1;padding:0}
+.tp-input::placeholder{color:var(--text-tertiary)}
+.tp-context{font-family:var(--font-mono);font-size:.75rem;color:var(--text-tertiary);margin-bottom:var(--space-lg);line-height:1.8}
+.tp-context span{color:var(--accent)}
+.tp-meta{display:flex;justify-content:space-between;align-items:center;padding-top:var(--space-lg);border-top:1px solid var(--border-subtle);flex-shrink:0}
+.tp-hint{font-family:var(--font-mono);font-size:.6875rem;color:var(--text-tertiary);display:flex;align-items:center;gap:var(--space-sm)}
+.tp-hint kbd{font-family:var(--font-mono);font-size:.625rem;background:var(--bg-elevated);border:1px solid var(--border-visible);border-radius:var(--radius-sm);padding:1px 5px;color:var(--text-secondary)}
+.tp-actions{display:flex;align-items:center;gap:var(--space-md)}
+.tp-cost{font-family:var(--font-mono);font-size:.75rem;color:var(--accent)}
+.tp-variants{display:flex;gap:var(--space-xs);margin-right:var(--space-md)}
+.tp-var-btn{font-family:var(--font-mono);font-size:.6875rem;padding:2px 8px;border-radius:var(--radius-sm);color:var(--text-tertiary);border:1px solid var(--border-subtle);transition:all var(--dur-fast)}
+.tp-var-btn:hover{border-color:var(--border-visible);color:var(--text-secondary)}
+.tp-var-btn.active{border-color:var(--accent);color:var(--accent);background:var(--selected)}
+.tp-generate{font-family:var(--font-mono);font-size:.75rem;font-weight:500;background:var(--accent);color:var(--bg-base);padding:8px 20px;border-radius:var(--radius-sm);letter-spacing:.02em;transition:all var(--dur-fast)}
+.tp-generate:hover:not(:disabled){background:var(--accent-soft)}
+.tp-generate:disabled{opacity:.3;cursor:not-allowed}
+.tp-generate-step2{background:var(--accent-pressed);animation:pulse .6s var(--ease-out)}
+
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(103,216,174,.4)}50%{box-shadow:0 0 0 8px rgba(103,216,174,0)}}
+
+/* Film burn */
+.film-burn{position:fixed;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(229,184,76,.35),transparent);pointer-events:none;z-index:1000;opacity:0;transition:opacity 300ms ease-out}
+.film-burn.active{opacity:1}
+
+/* Snackbar */
+.snackbar{position:fixed;bottom:var(--space-xl);left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-visible);padding:var(--space-sm) var(--space-lg);border-radius:var(--radius-md);font-size:.8125rem;z-index:1100;opacity:0;transition:all var(--dur-normal) var(--ease-out);pointer-events:none}
+.snackbar.show{opacity:1}
+.snackbar .cost{font-family:var(--font-mono);color:var(--accent)}
+
+/* Status bar */
+.status-bar{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-sm) var(--space-xl);border-top:1px solid var(--border-subtle);font-size:.6875rem;color:var(--text-tertiary);font-family:var(--font-mono);flex-shrink:0}
+.status-bar span{color:var(--text-secondary)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.status-bar-right{margin-left:auto}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .canvas-header{padding:var(--space-md)}
+  .canvas-body{padding:var(--space-lg)}
+  .ch-label{display:none}
+  .tp-input{font-size:.875rem}
+  .topbar{padding:var(--space-sm) var(--space-md)}
+  .topbar-breadcrumb{display:none}
+}
+@media(prefers-reduced-motion:reduce){.film-burn{display:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="topbar-brand">DreamCast</span>
+  <div class="topbar-breadcrumb">AI 电商 <span>/</span> 营销文案制作</div>
+  <div class="topbar-right">
+    <span class="topbar-pts" id="pointBalance">18,500 pts</span>
+    <div class="topbar-avatar">L</div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="side-section">AI 电商</div>
+    <button class="side-item active"><span class="side-dot"></span>营销文案制作</button>
+    <button class="side-item"><span class="side-dot"></span>文生图制作</button>
+    <button class="side-item"><span class="side-dot"></span>图生视频制作</button>
+    <div class="side-section">Resources</div>
+    <button class="side-item">效果预览</button>
+    <button class="side-item">资源发布</button>
+    <div class="side-section">Coming Soon</div>
+    <button class="side-item disabled">图片翻译</button>
+    <button class="side-item disabled">数字人</button>
+    <div class="side-section" style="margin-top:auto">Account</div>
+    <button class="side-item"><span class="side-dot"></span>Billing &amp; Points</button>
+    <button class="side-item">Settings</button>
+  </nav>
+
+  <main class="canvas">
+    <div class="canvas-header">
+      <span class="ch-label">Market</span>
+      <span class="ch-pill ch-pill-active">Amazon Japan</span>
+      <span class="ch-pill ch-pill-option">Amazon US</span>
+      <span class="ch-pill ch-pill-option">Shopee SEA</span>
+      <span class="ch-divider"></span>
+      <span class="ch-label">Template</span>
+      <span class="ch-pill ch-pill-active">A+ Content</span>
+      <span class="ch-pill ch-pill-option">Short + Bullets</span>
+      <span class="ch-pill ch-pill-option">Social Promo</span>
+      <span class="ch-model">Model: <span>GPT-4o</span></span>
+    </div>
+
+    <div class="canvas-body canvas-body-centered">
+      <h1 class="prompt-title" id="promptTitle">产品文案生成</h1>
+
+      <div class="tp-wrapper">
+        <div class="tp-context" id="tpContext">
+          <span>Market:</span> Amazon Japan &nbsp;<span>Language:</span> 日本語 &nbsp;<span>Template:</span> A+ Content<br>
+          <span>Variants:</span> 3
+        </div>
+        <textarea class="tp-input" id="tpInput" rows="5" placeholder="Describe your product, its key features, and the target customer...">スキンケア美容液、30代女性向け。Amazon Japan販売。
+オーガニック認証取得、無添加処方。敏感肌にも安心。
+特徴：
+・ヒアルロン酸5倍配合、浸透力が通常の3倍
+・無香料・無着色・アルコールフリー
+・1本で約2ヶ月分（朝晩使用時）
+ターゲット：美容感度の高い30-45歳女性、ギフト需要もあり</textarea>
+      </div>
+
+      <div class="tp-meta">
+        <div class="tp-hint">
+          <kbd>⌘</kbd>+<kbd>Enter</kbd> to preview
+        </div>
+        <div class="tp-actions">
+          <div class="tp-variants">
+            <button class="tp-var-btn active">3</button>
+            <button class="tp-var-btn">5</button>
+          </div>
+          <span class="tp-cost" id="tpCost">50 pts</span>
+          <button class="tp-generate" id="btnGenerate" onclick="doGenerate()">Preview</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span class="status-dot"></span> Ready
+      <span>|</span> 18,500 pts available
+      <span>|</span> Today: 2,450 used
+      <span class="status-bar-right">Trial: 12 days remaining</span>
+    </div>
+  </main>
+</div>
+
+<div class="film-burn" id="filmBurn" ontransitionend="this.classList.remove('active')"></div>
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+let generationStep = 0;
+const POINT_COST = 50;
+let currentBalance = 18500;
+
+function doGenerate() {
+  const input = document.getElementById('tpInput');
+  if (!input.value.trim()) return;
+
+  if (generationStep === 0) {
+    generationStep = 1;
+    const btn = document.getElementById('btnGenerate');
+    btn.textContent = 'Confirm · 50 pts';
+    btn.classList.add('tp-generate-step2');
+    document.getElementById('promptTitle').textContent = 'Preview: press ⌘+Enter to confirm';
+    document.getElementById('tpCost').style.color = 'var(--status-warning)';
+    document.getElementById('tpCost').textContent = '50 pts (confirm)';
+    return;
+  }
+
+  if (generationStep === 1) {
+    generationStep = 0;
+    const btn = document.getElementById('btnGenerate');
+    btn.textContent = 'Preview';
+    btn.classList.remove('tp-generate-step2');
+    document.getElementById('promptTitle').textContent = '产品文案生成';
+    document.getElementById('tpCost').style.color = 'var(--accent)';
+    document.getElementById('tpCost').textContent = '50 pts';
+
+    const fb = document.getElementById('filmBurn');
+    fb.classList.remove('active');
+    void fb.offsetWidth;
+    fb.classList.add('active');
+
+    currentBalance -= POINT_COST;
+    document.getElementById('pointBalance').textContent = currentBalance.toLocaleString() + ' pts';
+
+    setTimeout(() => {
+      const snack = document.getElementById('snackbar');
+      snack.innerHTML = 'Generated 3 variants <span class="cost">· 50 pts consumed</span>';
+      snack.classList.add('show');
+      setTimeout(() => snack.classList.remove('show'), 2500);
+    }, 350);
+  }
+}
+
+document.getElementById('tpInput').addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    doGenerate();
+  }
+});
+
+document.querySelectorAll('.tp-var-btn').forEach(b => {
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.tp-var-btn').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tpContext').innerHTML =
+      `<span>Market:</span> Amazon Japan &nbsp;<span>Language:</span> 日本語 &nbsp;<span>Template:</span> A+ Content<br><span>Variants:</span> ${this.textContent}`;
+    document.getElementById('tpCost').textContent = (this.textContent === '5' ? '80' : '50') + ' pts';
+  });
+});
+
+document.querySelectorAll('.ch-pill-option').forEach(p => {
+  p.addEventListener('click', function() {
+    const parent = this.parentElement;
+    const label = parent.querySelector('.ch-label');
+    const active = parent.querySelector('.ch-pill-active');
+    if (active) active.className = 'ch-pill ch-pill-option';
+    this.className = 'ch-pill ch-pill-active';
+  });
+});
+
+// Auto-resize textarea
+document.fonts.ready.then(() => {
+  const input = document.getElementById('tpInput');
+  input.style.height = 'auto';
+  input.style.height = input.scrollHeight + 'px';
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+  });
+});
+</script>
+</body>
+</html>

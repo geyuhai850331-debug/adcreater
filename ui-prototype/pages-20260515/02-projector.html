@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — Result</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--accent-pressed:#4FB88E;
+  --status-success:#7ED89A;--status-warning:#E5B84C;--status-error:#D94A4A;
+  --font-display:'Cormorant Garamond','Noto Serif SC',serif;
+  --font-ui:'Work Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  --radius-sm:2px;--radius-md:4px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);--dur-normal:250ms;--dur-slow:350ms;--dur-long:700ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow:hidden}
+button{font-family:var(--font-ui);cursor:pointer;border:none;color:inherit}
+
+/* Full-bleed projector */
+.projector{width:100%;height:100vh;position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+/* Variant tabs */
+.var-tabs{display:flex;align-items:center;gap:0;padding:var(--space-md) var(--space-xl);flex-shrink:0;z-index:10;position:relative}
+.var-tab{font-family:var(--font-mono);font-size:.6875rem;padding:6px 16px;color:var(--text-tertiary);border-bottom:1px solid transparent;transition:all var(--dur-normal) var(--ease-out);background:none}
+.var-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.var-tab:hover:not(.active){color:var(--text-secondary)}
+.var-spacer{flex:1}
+.var-action{font-family:var(--font-mono);font-size:.6875rem;padding:6px 12px;border:1px solid var(--border-visible);border-radius:var(--radius-sm);color:var(--text-secondary);transition:all var(--dur-normal);background:none}
+.var-action:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Content — full bleed */
+.content-area{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.content-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a1410 0%,#14181a 50%,#111418 100%)}
+.content-bg::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse at 70% 30%,rgba(103,216,174,.04) 0%,transparent 60%),
+  radial-gradient(ellipse at 30% 50%,rgba(240,237,232,.03) 0%,transparent 50%),
+  radial-gradient(ellipse at 50% 80%,rgba(229,184,76,.02) 0%,transparent 50%)}
+
+.content-text{position:relative;z-index:1;text-align:center;max-width:680px;padding:var(--space-2xl);animation:fadeIn var(--dur-long) var(--ease-out) both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.content-label{font-family:var(--font-mono);font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:var(--space-lg);display:flex;align-items:center;justify-content:center;gap:var(--space-sm)}
+.content-label::before,.content-label::after{content:'';width:24px;height:1px;background:var(--accent);opacity:.3}
+
+.content-title{font-family:var(--font-display);font-size:2.5rem;font-weight:300;letter-spacing:.02em;line-height:1.2;margin-bottom:var(--space-lg);text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.content-subtitle{font-family:var(--font-ui);font-size:.9375rem;color:rgba(240,237,232,.7);line-height:1.9;margin-bottom:var(--space-2xl);max-width:560px;margin-left:auto;margin-right:auto}
+
+.content-bullets{text-align:left;max-width:440px;margin:0 auto var(--space-2xl);display:flex;flex-direction:column;gap:var(--space-md)}
+.content-bullet{display:flex;gap:var(--space-md);align-items:flex-start}
+.content-bullet-icon{width:18px;height:18px;border-radius:50%;background:rgba(103,216,174,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.content-bullet-icon::after{content:'✓';font-size:.625rem;color:var(--accent);font-weight:600}
+.content-bullet-text{font-size:.875rem;color:rgba(240,237,232,.75);line-height:1.6}
+
+.content-cta{font-family:var(--font-ui);font-size:.875rem;font-weight:500;color:var(--accent);cursor:pointer;letter-spacing:.02em;transition:color var(--dur-normal)}
+.content-cta:hover{color:var(--accent-soft)}
+.content-cta::after{content:' →'}
+
+/* Bottom toolbar — auto-hide */
+.toolbar{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(8,8,8,.95));padding:var(--space-2xl) var(--space-xl) var(--space-lg);display:flex;gap:var(--space-md);justify-content:center;align-items:center;opacity:0;transition:opacity var(--dur-slow) var(--ease-out);z-index:10}
+.projector:hover .toolbar,.content-area:focus-within .toolbar{opacity:1}
+.btn{font-size:.8125rem;padding:8px 20px;border-radius:var(--radius-sm);font-weight:500;transition:all var(--dur-normal);background:none}
+.btn-ghost{color:var(--text-secondary)}
+.btn-ghost:hover{background:var(--hover);color:var(--text-primary)}
+.btn-outline{color:var(--text-primary);border:1px solid var(--border-visible)}
+.btn-outline:hover{background:var(--hover)}
+.btn-primary{background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;letter-spacing:.02em}
+.btn-primary:hover{background:var(--accent-soft)}
+.toolbar-meta{font-family:var(--font-mono);font-size:.625rem;color:var(--text-tertiary);position:absolute;left:var(--space-xl)}
+.toolbar-nav{display:flex;gap:var(--space-xs);position:absolute;right:var(--space-xl)}
+.toolbar-nav-btn{width:28px;height:28px;border:1px solid var(--border-visible);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--text-secondary);transition:all var(--dur-normal);background:none}
+.toolbar-nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Side panel — glass overlay */
+.side-panel{position:absolute;top:var(--space-xl);right:var(--space-xl);background:rgba(17,17,17,.85);backdrop-filter:blur(20px);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);z-index:10;display:flex;flex-direction:column;gap:var(--space-xs);min-width:160px;opacity:0;transition:opacity var(--dur-normal)}
+.projector:hover .side-panel{opacity:1}
+.panel-item{font-family:var(--font-mono);font-size:.625rem;padding:6px 10px;border-radius:var(--radius-sm);color:var(--text-tertiary);display:flex;justify-content:space-between;align-items:center;transition:all var(--dur-normal)}
+.panel-item:hover{background:var(--hover);color:var(--text-secondary)}
+.panel-val{color:var(--accent)}
+
+/* Snackbar */
+.snackbar{position:fixed;bottom:var(--space-xl);left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-visible);padding:var(--space-sm) var(--space-lg);border-radius:var(--radius-md);font-size:.8125rem;z-index:1100;opacity:0;transition:all var(--dur-normal) var(--ease-out);pointer-events:none;font-family:var(--font-mono)}
+.snackbar.show{opacity:1}
+
+@media(max-width:768px){
+  .content-title{font-size:1.75rem}
+  .content-subtitle{font-size:.875rem}
+  .content-bullets{max-width:100%}
+  .side-panel{display:none}
+  .var-tabs{padding:var(--space-sm) var(--space-md);overflow-x:auto}
+  .toolbar-nav{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){.content-text{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="projector" id="projector">
+  <!-- Variant tabs -->
+  <div class="var-tabs">
+    <button class="var-tab active">Variant A</button>
+    <button class="var-tab">Variant B</button>
+    <button class="var-tab">Variant C</button>
+    <span class="var-spacer"></span>
+    <button class="var-action" onclick="snack('Copied to clipboard')">Copy All</button>
+    <button class="var-action" onclick="snack('Exported as text')">Export</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area" tabindex="0">
+    <div class="content-bg"></div>
+    <div class="content-text" id="contentText">
+      <div class="content-label">Variant A · 日本語 · A+ Content</div>
+      <h1 class="content-title">透明感あふれる、<br>あなただけの素肌へ</h1>
+      <p class="content-subtitle">
+        ヒアルロン酸5倍配合の高浸透美容液。オーガニック認証取得の無添加処方が、
+        敏感肌にもやさしく、角質層の奥深くまで潤いを届けます。
+        朝晩の2プッシュで、内側から輝くような透明感のある肌へ。
+      </p>
+      <div class="content-bullets">
+        <div class="content-bullet">
+          <span class="content-bullet-icon"></span>
+          <span class="content-bullet-text">ヒアルロン酸5倍配合 — 通常の3倍の浸透力で角質層のすみずみまで</span>
+        </div>
+        <div class="content-bullet">
+          <span class="content-bullet-icon"></span>
+          <span class="content-bullet-text">オーガニック認証取得 — 無香料・無着色・アルコールフリー、敏感肌にも安心</span>
+        </div>
+        <div class="content-bullet">
+          <span class="content-bullet-icon"></span>
+          <span class="content-bullet-text">1本で約2ヶ月分 — 朝晩使用でコスパ◎ ギフトにも最適な高級パッケージ</span>
+        </div>
+      </div>
+      <a class="content-cta">今すぐチェック — 30日間返金保証付き</a>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <div class="panel-item">Chars <span class="panel-val">458</span></div>
+      <div class="panel-item">Tone <span class="panel-val">Premium</span></div>
+      <div class="panel-item">Level <span class="panel-val">B2+</span></div>
+      <div class="panel-item">Reading <span class="panel-val">2.1min</span></div>
+    </div>
+
+    <!-- Bottom toolbar -->
+    <div class="toolbar">
+      <span class="toolbar-meta">Generated 2 min ago · 50 pts</span>
+      <button class="btn btn-ghost">Copy</button>
+      <button class="btn btn-outline">Edit</button>
+      <button class="btn btn-primary">Save to Project</button>
+      <div class="toolbar-nav">
+        <button class="toolbar-nav-btn" onclick="prevVariant()">&larr;</button>
+        <button class="toolbar-nav-btn" onclick="nextVariant()">&rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+function snack(msg) {
+  const s = document.getElementById('snackbar');
+  s.textContent = msg;
+  s.classList.add('show');
+  setTimeout(() => s.classList.remove('show'), 2000);
+}
+
+document.querySelectorAll('.var-tab').forEach((tab, i) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.var-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelector('.content-label').innerHTML = `Variant ${'ABC'[i]} · 日本語 · A+ Content`;
+    document.querySelector('.content-text').style.animation = 'none';
+    void document.querySelector('.content-text').offsetWidth;
+    document.querySelector('.content-text').style.animation = 'fadeIn var(--dur-long) var(--ease-out) both';
+  });
+});
+
+let cv = 0;
+function prevVariant() {
+  cv = (cv - 1 + 3) % 3;
+  document.querySelectorAll('.var-tab')[cv].click();
+}
+function nextVariant() {
+  cv = (cv + 1) % 3;
+  document.querySelectorAll('.var-tab')[cv].click();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextVariant();
+  if (e.key === 'ArrowLeft') prevVariant();
+  if ((e.metaKey||e.ctrlKey) && e.key === 'c') { e.preventDefault(); snack('Copied to clipboard'); }
+});
+</script>
+</body>
+</html>

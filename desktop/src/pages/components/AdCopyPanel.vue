@@ -102,6 +102,9 @@ const translatedCopy = ref<any>(null)
 const marketLabels: Record<string, string> = {
   US: '英语', UK: '英语', DE: '德语', JP: '日语', SA: '阿拉伯语', BR: '葡萄牙语'
 }
+const marketLangCodes: Record<string, string> = {
+  US: 'en-US', UK: 'en-GB', DE: 'de-DE', JP: 'ja-JP', SA: 'ar-SA', BR: 'pt-BR'
+}
 const marketLabel = computed(() => marketLabels[form.targetMarket] || form.targetMarket)
 
 const canTranslate = computed(() =>
@@ -135,12 +138,19 @@ async function handleTranslate() {
   }
   translating.value = true
   try {
-    const res = await client.post('/ad/copy/translate', {
-      productName: form.productName,
+    const res = await client.post('/app-api/ad/copy/translate', {
+      productTitle: form.productName,
+      productDescription: '',
       targetMarket: form.targetMarket,
-      sellingPoints: form.sellingPoints
+      sellingPoints: form.sellingPoints,
+      sourceLang: 'zh-CN',
+      targetLang: marketLangCodes[form.targetMarket] || 'en-US'
     }) as any
-    translatedCopy.value = res?.data ?? res
+    const data = res?.data ?? res
+    translatedCopy.value = {
+      original: form.productName,
+      translated: data?.localizedCopy || data?.translatedTitle || form.productName
+    }
     ElMessage.success('翻译完成')
   } catch (err: any) {
     ElMessage.error('翻译失败: ' + (err?.message || '未知错误'))

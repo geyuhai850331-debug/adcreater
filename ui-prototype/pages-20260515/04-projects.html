@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — Projects</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;--text-disabled:#3A3734;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--accent-pressed:#4FB88E;
+  --status-success:#7ED89A;--status-warning:#E5B84C;--status-error:#D94A4A;
+  --hover:rgba(255,255,255,0.04);--selected:rgba(103,216,174,0.10);--pressed:rgba(103,216,174,0.18);
+  --font-display:'Cormorant Garamond','Noto Serif SC',serif;
+  --font-ui:'Work Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  --radius-sm:2px;--radius-md:4px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);--dur-fast:150ms;--dur-normal:250ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;line-height:1.6}
+button{font-family:var(--font-ui);cursor:pointer;border:none;background:none;color:inherit}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;padding:var(--space-md) var(--space-xl);border-bottom:1px solid var(--border-subtle);gap:var(--space-xl);position:sticky;top:0;background:var(--bg-base);z-index:100}
+.topbar-brand{font-family:var(--font-display);font-size:1.5rem;font-weight:300;letter-spacing:.08em}
+.topbar-nav{display:flex;gap:var(--space-xl)}
+.topbar-nav a{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);transition:color var(--dur-normal);text-decoration:none;padding:var(--space-xs) 0;border-bottom:1px solid transparent}
+.topbar-nav a:hover,.topbar-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:var(--space-md)}
+.topbar-pts{font-family:var(--font-mono);font-size:.75rem;color:var(--accent)}
+.topbar-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+/* Main content */
+.main{max-width:960px;margin:0 auto;padding:var(--space-3xl) var(--space-xl)}
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-2xl)}
+.page-header h1{font-family:var(--font-display);font-size:2rem;font-weight:300;letter-spacing:.02em;margin-bottom:var(--space-xs)}
+.page-header p{font-size:.875rem;color:var(--text-secondary)}
+.btn-primary{font-family:var(--font-mono);font-size:.75rem;font-weight:500;background:var(--accent);color:var(--bg-base);padding:10px 20px;border-radius:var(--radius-sm);letter-spacing:.02em;transition:all var(--dur-normal);flex-shrink:0}
+.btn-primary:hover{background:var(--accent-soft)}
+
+/* Quick stats */
+.quick-stats{display:flex;gap:var(--space-xl);margin-bottom:var(--space-2xl);padding:var(--space-lg);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md)}
+.quick-stat{flex:1}
+.quick-stat-num{font-family:var(--font-mono);font-size:1.25rem;color:var(--accent);margin-bottom:var(--space-xs)}
+.quick-stat-label{font-size:.6875rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em}
+.quick-stat-change{font-size:.625rem;margin-top:2px;font-family:var(--font-mono)}
+.quick-stat-change.up{color:var(--status-success)}
+.quick-stat-change.down{color:var(--status-error)}
+
+/* Search & filters */
+.toolbar-row{display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-xl)}
+.search-input{font-family:var(--font-ui);font-size:.875rem;padding:8px 12px;background:var(--bg-elevated);border:1px solid var(--border-visible);color:var(--text-primary);border-radius:var(--radius-sm);flex:1;max-width:320px;transition:border-color var(--dur-normal)}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.search-input::placeholder{color:var(--text-tertiary)}
+.filter-pill{font-family:var(--font-mono);font-size:.6875rem;padding:6px 12px;border-radius:var(--radius-sm);color:var(--text-tertiary);border:1px solid var(--border-subtle);transition:all var(--dur-fast)}
+.filter-pill:hover{border-color:var(--border-visible);color:var(--text-secondary)}
+.filter-pill.active{border-color:var(--accent);color:var(--accent);background:var(--selected)}
+.filter-spacer{flex:1}
+.sort-label{font-size:.625rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)}
+.sort-select{font-family:var(--font-mono);font-size:.6875rem;padding:6px 12px;background:var(--bg-elevated);border:1px solid var(--border-visible);color:var(--text-primary);border-radius:var(--radius-sm)}
+
+/* Project grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-md)}
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);overflow:hidden;transition:border-color var(--dur-normal) var(--ease-out);cursor:pointer}
+.card:hover{border-color:var(--border-visible)}
+.card-thumb{height:160px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.25rem;color:var(--text-tertiary);position:relative}
+.card:nth-child(1) .card-thumb{background:linear-gradient(135deg,#1a1512,#12161a)}
+.card:nth-child(2) .card-thumb{background:linear-gradient(135deg,#121a14,#14181a)}
+.card:nth-child(3) .card-thumb{background:linear-gradient(135deg,#181214,#14181a)}
+.card:nth-child(4) .card-thumb{background:linear-gradient(135deg,#12161a,#1a1512)}
+.card:nth-child(5) .card-thumb{background:linear-gradient(135deg,#14181a,#121a14)}
+.card-badge{position:absolute;top:var(--space-sm);right:var(--space-sm);font-family:var(--font-mono);font-size:.625rem;padding:2px 8px;border-radius:var(--radius-sm)}
+.card-badge.complete{background:rgba(126,216,154,.10);color:var(--status-success)}
+.card-badge.draft{background:rgba(229,184,76,.10);color:var(--status-warning)}
+.card-badge.generating{background:rgba(103,216,174,.10);color:var(--accent)}
+.card-body{padding:var(--space-md)}
+.card-title{font-size:.8125rem;font-weight:500;color:var(--text-primary);margin-bottom:6px}
+.card-desc{font-size:.75rem;color:var(--text-secondary);margin-bottom:var(--space-sm);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{display:flex;gap:var(--space-md);font-family:var(--font-mono);font-size:.625rem;color:var(--text-tertiary);align-items:center}
+.card-meta-dot{width:4px;height:4px;border-radius:50%;background:var(--text-tertiary)}
+
+/* New project card */
+.card-new{border:1px dashed var(--border-subtle);background:transparent;display:flex;align-items:center;justify-content:center;min-height:284px;transition:all var(--dur-normal)}
+.card-new:hover{border-color:var(--border-visible);border-style:solid}
+.card-new-inner{text-align:center}
+.card-new-icon{font-size:1.5rem;color:var(--text-tertiary);margin-bottom:var(--space-sm);opacity:.5}
+.card-new-text{font-size:.8125rem;color:var(--text-secondary)}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:var(--space-sm);margin-top:var(--space-2xl)}
+.page-btn{font-family:var(--font-mono);font-size:.6875rem;padding:6px 12px;border-radius:var(--radius-sm);color:var(--text-tertiary);border:1px solid var(--border-subtle);transition:all var(--dur-fast)}
+.page-btn:hover:not(.page-active){border-color:var(--border-visible);color:var(--text-secondary)}
+.page-btn.page-active{border-color:var(--accent);color:var(--accent);background:var(--selected)}
+
+/* Empty state */
+.empty-state{display:none;text-align:center;padding:var(--space-3xl) var(--space-xl);max-width:480px;margin:0 auto}
+.empty-state-icon{font-size:2.5rem;margin-bottom:var(--space-lg);opacity:.5}
+.empty-state h3{font-family:var(--font-display);font-size:1.5rem;font-weight:300;margin-bottom:var(--space-sm)}
+.empty-state p{font-size:.875rem;color:var(--text-secondary);margin-bottom:var(--space-lg)}
+.empty-state .btn-primary{margin-bottom:var(--space-md)}
+
+@media(max-width:768px){
+  .topbar{padding:var(--space-sm) var(--space-md)}
+  .topbar-nav a{font-size:.625rem}
+  .main{padding:var(--space-lg) var(--space-md)}
+  .page-header{flex-direction:column;gap:var(--space-md)}
+  .quick-stats{flex-wrap:wrap;gap:var(--space-md)}
+  .grid{grid-template-columns:1fr}
+  .toolbar-row{flex-wrap:wrap}
+  .search-input{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="topbar-brand">DreamCast</span>
+  <nav class="topbar-nav">
+    <a href="#">Workspace</a>
+    <a href="#" class="active">Projects</a>
+    <a href="#">Resources</a>
+    <a href="#">Settings</a>
+  </nav>
+  <div class="topbar-right">
+    <span class="topbar-pts">18,500 pts</span>
+    <div class="topbar-avatar">L</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <h1>Projects</h1>
+      <p>8 projects · 4 active · 2,450 pts used today</p>
+    </div>
+    <button class="btn-primary">+ New Project</button>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="quick-stats">
+    <div class="quick-stat">
+      <div class="quick-stat-num">8</div>
+      <div class="quick-stat-label">Total Projects</div>
+      <div class="quick-stat-change up">+3 this week</div>
+    </div>
+    <div class="quick-stat">
+      <div class="quick-stat-num">42</div>
+      <div class="quick-stat-label">Content Generated</div>
+      <div class="quick-stat-change up">+12 vs last week</div>
+    </div>
+    <div class="quick-stat">
+      <div class="quick-stat-num">2,450</div>
+      <div class="quick-stat-label">Points Used Today</div>
+      <div class="quick-stat-change down">18% below daily avg</div>
+    </div>
+    <div class="quick-stat">
+      <div class="quick-stat-num">12d</div>
+      <div class="quick-stat-label">Trial Remaining</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="toolbar-row">
+    <input class="search-input" placeholder="Search projects..." type="text">
+    <button class="filter-pill active">All</button>
+    <button class="filter-pill">Active</button>
+    <button class="filter-pill">Draft</button>
+    <button class="filter-pill">Completed</button>
+    <span class="filter-spacer"></span>
+    <span class="sort-label">Sort</span>
+    <select class="sort-select">
+      <option>Recent</option>
+      <option>Name</option>
+      <option>Points used</option>
+    </select>
+  </div>
+
+  <!-- Project grid -->
+  <div class="grid" id="projectGrid">
+    <div class="card">
+      <div class="card-thumb">
+        <span>スキンケア美容液</span>
+        <span class="card-badge complete">Complete</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Hyaluronic Serum — Amazon JP</div>
+        <div class="card-desc">3 copy variants, 2 product images generated with FLUX model. Japanese A+ Content template applied.</div>
+        <div class="card-meta">
+          <span>3 versions</span>
+          <span class="card-meta-dot"></span>
+          <span>150 pts</span>
+          <span class="card-meta-dot"></span>
+          <span>2 hours ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-thumb">
+        <span>ワイヤレスイヤホン</span>
+        <span class="card-badge draft">Draft</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Wireless Earbuds Pro — Amazon US</div>
+        <div class="card-desc">5x copy variants generated. English market optimized. Bullet-point style. Images pending.</div>
+        <div class="card-meta">
+          <span>5 versions</span>
+          <span class="card-meta-dot"></span>
+          <span>250 pts</span>
+          <span class="card-meta-dot"></span>
+          <span>5 hours ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-thumb">
+        <span>ヨガマット</span>
+        <span class="card-badge complete">Complete</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Eco Yoga Mat — Amazon JP</div>
+        <div class="card-desc">Full A+ Content with 6 lifestyle images. Best-performing listing. Copy scored highest in internal quality check.</div>
+        <div class="card-meta">
+          <span>6 images</span>
+          <span class="card-meta-dot"></span>
+          <span>1,200 pts</span>
+          <span class="card-meta-dot"></span>
+          <span>1 day ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-thumb">
+        <span>有機緑茶セット</span>
+        <span class="card-badge generating">Generating</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Organic Green Tea Gift Set — Amazon JP</div>
+        <div class="card-desc">Generating product images in progress... 2/5 completed. White-background style preset.</div>
+        <div class="card-meta">
+          <span>Processing</span>
+          <span class="card-meta-dot"></span>
+          <span>400 pts</span>
+          <span class="card-meta-dot"></span>
+          <span>now</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-thumb">
+        <span>スマホケース</span>
+        <span class="card-badge draft">Draft</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Phone Case Collection — Shopee SEA</div>
+        <div class="card-desc">3 variants generated. Indonesian market. Need native speaker review before finalizing.</div>
+        <div class="card-meta">
+          <span>3 versions</span>
+          <span class="card-meta-dot"></span>
+          <span>150 pts</span>
+          <span class="card-meta-dot"></span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- New project -->
+    <div class="card card-new">
+      <div class="card-new-inner">
+        <div class="card-new-icon">+</div>
+        <div class="card-new-text">New Project</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state (hidden by default) -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-state-icon">&#127917;</div>
+    <h3>Your workspace is ready</h3>
+    <p>No projects yet. Start with the demo project to see what DreamCast can do, or create your first product listing.</p>
+    <button class="btn-primary">Explore Demo Project</button>
+    <p style="font-size:.75rem;color:var(--text-tertiary)">Pre-loaded with a sample Japanese skincare listing</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button class="page-btn page-active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn" style="border:none;color:var(--text-tertiary)">...</button>
+    <button class="page-btn">6</button>
+  </div>
+</main>
+
+<script>
+// Toggle empty state for demo
+document.getElementById('emptyState').style.display = 'none';
+
+document.querySelectorAll('.filter-pill').forEach(p => {
+  p.addEventListener('click', function() {
+    document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// New project click feedback
+document.querySelector('.card-new').addEventListener('click', () => {
+  alert('Create new project');
+});
+</script>
+</body>
+</html>

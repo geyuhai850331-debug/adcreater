@@ -171,7 +171,7 @@ function formatDate(dateStr: string) {
 
 async function fetchBalance() {
   try {
-    const res = await client.get('/billing/balance') as any
+    const res = await client.get('/app-api/billing/balance') as any
     balance.value = res?.balance ?? res?.data?.balance ?? 0
   } catch {
     // ignore
@@ -181,11 +181,19 @@ async function fetchBalance() {
 async function fetchTransactions() {
   loadingTransactions.value = true
   try {
-    const res = await client.get('/billing/transaction/page', {
-      params: { page: currentPage.value, pageSize: pageSize.value }
+    const res = await client.get('/app-api/billing/transaction/page', {
+      params: { pageNo: currentPage.value, pageSize: pageSize.value }
     }) as any
     const data = res?.data ?? res
-    transactions.value = data?.records ?? data?.list ?? []
+    const list = data?.records ?? data?.list ?? []
+    transactions.value = Array.isArray(list)
+      ? list.map((item: any) => ({
+          ...item,
+          type: item.type === 'earn' ? 'CHARGE' : item.type === 'consume' ? 'CONSUME' : item.type,
+          description: item.description ?? item.remark ?? '',
+          createdAt: item.createdAt ?? item.createTime
+        }))
+      : []
     total.value = data?.total ?? 0
   } catch {
     transactions.value = []
@@ -206,7 +214,7 @@ async function handleRecharge() {
 
   recharging.value = true
   try {
-    const res = await client.post('/billing/recharge', {
+    const res = await client.post('/app-api/billing/recharge', {
       packageId: pkg.id,
       points: pkg.points,
       amount: pkg.price

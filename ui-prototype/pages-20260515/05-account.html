@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DreamCast — Account</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base:#080808;--bg-surface:#111;--bg-elevated:#18181A;
+  --border-subtle:#252528;--border-visible:#333338;
+  --text-primary:#F0EDE8;--text-secondary:#8B8680;--text-tertiary:#55514D;
+  --accent:#67D8AE;--accent-soft:#8FE0C2;--status-success:#7ED89A;--status-warning:#E5B84C;--status-error:#D94A4A;
+  --hover:rgba(255,255,255,.04);--selected:rgba(103,216,174,.10);
+  --font-display:'Cormorant Garamond',serif;--font-ui:'Work Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --sp:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:32px;--sp-2xl:48px;
+  --r-sm:2px;--r-md:4px;--ease:cubic-bezier(.16,1,.3,1);--dur:250ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);min-height:100vh;line-height:1.6}
+button{font-family:var(--font-ui);cursor:pointer;border:none;color:inherit;background:none}
+input,select{font-family:var(--font-ui);font-size:.875rem;padding:8px 12px;background:var(--bg-elevated);border:1px solid var(--border-visible);color:var(--text-primary);border-radius:var(--r-sm);transition:border-color var(--dur);width:100%}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+
+.topbar{display:flex;align-items:center;padding:var(--sp-md) var(--sp-xl);border-bottom:1px solid var(--border-subtle);gap:var(--sp-xl)}
+.brand{font-family:var(--font-display);font-size:1.5rem;font-weight:300;letter-spacing:.08em}
+.nav{display:flex;gap:var(--sp-xl)}
+.nav a{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);text-decoration:none;padding:var(--sp) 0;border-bottom:1px solid transparent;transition:all var(--dur)}
+.nav a:hover,.nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tr{margin-left:auto;display:flex;align-items:center;gap:var(--sp-md)}
+.pts{font-family:var(--font-mono);font-size:.75rem;color:var(--accent)}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;font-weight:500;display:flex;align-items:center;justify-content:center}
+
+.main{max-width:960px;margin:0 auto;padding:var(--sp-2xl) var(--sp-xl)}
+
+h1{font-family:var(--font-display);font-size:2rem;font-weight:300;letter-spacing:.02em;margin-bottom:var(--sp-xs)}
+h2{font-family:var(--font-display);font-size:1.25rem;font-weight:300;margin-bottom:var(--sp-lg)}
+.p-sub{font-size:.875rem;color:var(--text-secondary);margin-bottom:var(--sp-2xl)}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:var(--sp-2xl);border-bottom:1px solid var(--border-subtle)}
+.tab{padding:var(--sp-sm) 0;margin-right:var(--sp-lg);font-family:var(--font-mono);font-size:.6875rem;color:var(--text-tertiary);border-bottom:1px solid transparent;transition:all var(--dur);background:none}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:var(--text-secondary)}
+
+/* Cards */
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:var(--sp-lg);margin-bottom:var(--sp-lg)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-lg)}
+.card-header h3{font-size:.8125rem;font-weight:500}
+.card-row{display:flex;gap:var(--sp-md);margin-bottom:var(--sp-md)}
+.card-row .field{flex:1}
+.field label{display:block;font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:var(--sp)}
+
+.btn{font-size:.8125rem;padding:8px 20px;border-radius:var(--r-sm);font-weight:500;transition:all var(--dur)}
+.btn-primary{background:var(--accent);color:var(--bg-base);font-family:var(--font-mono);font-size:.75rem;letter-spacing:.02em}
+.btn-primary:hover{background:var(--accent-soft)}
+.btn-outline{color:var(--text-primary);border:1px solid var(--border-visible)}
+.btn-outline:hover{background:var(--hover)}
+.btn-danger{color:var(--status-error);border:1px solid rgba(217,74,74,.3)}
+.btn-danger:hover{background:rgba(217,74,74,.08)}
+
+/* Stat grid */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-md);margin-bottom:var(--sp-lg)}
+.stat{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:var(--sp-lg);text-align:center}
+.stat-num{font-family:var(--font-mono);font-size:1.5rem;color:var(--accent);margin-bottom:var(--sp)}
+.stat-label{font-size:.625rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary)}
+
+/* Table */
+.table{width:100%;border-collapse:collapse;font-size:.8125rem}
+.table th{text-align:left;padding:var(--sp-sm) var(--sp-md);font-size:.625rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);border-bottom:1px solid var(--border-subtle)}
+.table td{padding:var(--sp-sm) var(--sp-md);border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);white-space:nowrap}
+.table td.mono{font-family:var(--font-mono);font-size:.75rem}
+.table tr:hover td{background:var(--hover)}
+.badge{font-family:var(--font-mono);font-size:.625rem;padding:2px 8px;border-radius:var(--r-sm)}
+.badge-success{background:rgba(126,216,154,.1);color:var(--status-success)}
+.badge-warning{background:rgba(229,184,76,.1);color:var(--status-warning)}
+
+@media(max-width:768px){
+  .topbar{padding:var(--sp-sm) var(--sp-md)}.main{padding:var(--sp-lg) var(--sp-md)}
+  .stats{grid-template-columns:repeat(2,1fr)}.card-row{flex-direction:column}
+  .nav a{font-size:.625rem}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">DreamCast</span>
+  <nav class="nav">
+    <a href="#">Workspace</a><a href="#">Projects</a><a href="#" class="active">Account</a>
+  </nav>
+  <div class="tr"><span class="pts">18,500 pts</span><div class="av">L</div></div>
+</header>
+
+<main class="main">
+  <h1>Account</h1>
+  <p class="p-sub">Manage your profile, billing, and subscription</p>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num">18,500</div><div class="stat-label">Points Available</div></div>
+    <div class="stat"><div class="stat-num">98 ¥</div><div class="stat-label">Monthly Plan</div></div>
+    <div class="stat"><div class="stat-num">12d</div><div class="stat-label">Trial Remaining</div></div>
+    <div class="stat"><div class="stat-num">4,200</div><div class="stat-label">Total Generated</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('profile')">Profile</button>
+    <button class="tab" onclick="switchTab('billing')">Billing History</button>
+    <button class="tab" onclick="switchTab('security')">Security</button>
+  </div>
+
+  <!-- Profile tab -->
+  <div id="tab-profile">
+    <div class="card">
+      <div class="card-header"><h3>Personal Information</h3><button class="btn btn-outline">Edit</button></div>
+      <div class="card-row">
+        <div class="field"><label>Name</label><input value="Li Wei" readonly></div>
+        <div class="field"><label>Company (optional)</label><input placeholder="Your company name" readonly></div>
+      </div>
+      <div class="card-row">
+        <div class="field"><label>Email</label><input value="liwei@example.com" readonly></div>
+        <div class="field"><label>Phone</label><input value="+86 138-xxxx-xxxx" readonly></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Subscription</h3><span class="badge badge-success">Active</span></div>
+      <div class="card-row">
+        <div class="field"><label>Plan</label><input value="98¥ / month · 20,000 pts/day" readonly></div>
+        <div class="field"><label>Next Billing</label><input value="June 15, 2026" readonly></div>
+      </div>
+      <div style="display:flex;gap:var(--sp-md);margin-top:var(--sp-md)">
+        <button class="btn btn-outline">Change Plan</button>
+        <button class="btn btn-danger">Cancel Subscription</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Danger Zone</h3></div>
+      <p style="font-size:.8125rem;color:var(--text-secondary);margin-bottom:var(--sp-lg)">Permanently delete your account and all associated data. This action cannot be undone.</p>
+      <button class="btn btn-danger">Delete Account</button>
+    </div>
+  </div>
+
+  <!-- Billing tab -->
+  <div id="tab-billing" style="display:none">
+    <div class="card">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Points</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">2026-05-15</td><td>Top-up · Alipay</td><td class="mono">¥50</td><td class="mono">+20,000</td><td><span class="badge badge-success">Success</span></td></tr>
+          <tr><td class="mono">2026-05-12</td><td>Subscription · Monthly</td><td class="mono">¥98</td><td class="mono">+600,000</td><td><span class="badge badge-success">Success</span></td></tr>
+          <tr><td class="mono">2026-05-08</td><td>Top-up · WeChat Pay</td><td class="mono">¥20</td><td class="mono">+8,000</td><td><span class="badge badge-success">Success</span></td></tr>
+          <tr><td class="mono">2026-05-01</td><td>Top-up · Alipay</td><td class="mono">¥5</td><td class="mono">+2,000</td><td><span class="badge badge-success">Success</span></td></tr>
+          <tr><td class="mono">2026-04-28</td><td>Refund · Support</td><td class="mono">-¥5</td><td class="mono">-2,000</td><td><span class="badge badge-warning">Refunded</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Security tab -->
+  <div id="tab-security" style="display:none">
+    <div class="card">
+      <div class="card-header"><h3>Change Password</h3></div>
+      <div class="field" style="margin-bottom:var(--sp-md)"><label>Current Password</label><input type="password" placeholder="········"></div>
+      <div class="card-row">
+        <div class="field"><label>New Password</label><input type="password" placeholder="Min 8 characters"></div>
+        <div class="field"><label>Confirm Password</label><input type="password" placeholder="Repeat new password"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:var(--sp-md)">Update Password</button>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Active Sessions</h3></div>
+      <table class="table">
+        <thead><tr><th>Device</th><th>Location</th><th>Last Active</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Mac · Chrome</td><td>Shanghai, CN</td><td class="mono">Now</td><td><span class="badge badge-success">Current</span></td></tr>
+          <tr><td>iPhone · Safari</td><td>Shanghai, CN</td><td class="mono">2 hours ago</td><td><button class="btn btn-outline" style="font-size:.6875rem;padding:4px 12px">Revoke</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('[id^="tab-"]').forEach(d=>d.style.display='none');
+  document.getElementById('tab-'+name).style.display='block';
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -26,7 +26,20 @@ public interface AuthConvert {
     SmsCodeUseReqDTO convert(AppMemberUserResetPasswordReqVO reqVO, SmsSceneEnum scene, String usedIp);
     SmsCodeUseReqDTO convert(AppAuthSmsLoginReqVO reqVO, Integer scene, String usedIp);
 
-    AppAuthLoginRespVO convert(OAuth2AccessTokenRespDTO bean, String openid);
+    default AppAuthLoginRespVO convert(OAuth2AccessTokenRespDTO bean, String openid) {
+        if (bean == null && openid == null) {
+            return null;
+        }
+        AppAuthLoginRespVO respVO = new AppAuthLoginRespVO();
+        if (bean != null) {
+            respVO.setUserId(bean.getUserId());
+            respVO.setAccessToken(bean.getAccessToken());
+            respVO.setRefreshToken(bean.getRefreshToken());
+            respVO.setExpiresTime(bean.getExpiresTime());
+        }
+        respVO.setOpenid(openid);
+        return respVO;
+    }
 
     SmsCodeValidateReqDTO convert(AppAuthSmsValidateReqVO bean);
 
