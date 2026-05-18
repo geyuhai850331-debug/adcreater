@@ -1,7 +1,6 @@
 package com.djb.module.ai.adapter;
 
 import com.djb.module.ai.dal.dataobject.AiModelConfigDO;
-import com.djb.module.ai.util.AiApiKeyCodec;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;

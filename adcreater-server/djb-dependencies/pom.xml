@@ -92,6 +92,7 @@
         <html2image.version>0.9</html2image.version>
         <tinypinyin.version>2.0.3</tinypinyin.version>
         <weixin-java.version>4.7.9-20251224.161447</weixin-java.version>
+        <spring-ai.version>1.0.2</spring-ai.version>
         <alipay-sdk-java.version>4.40.607.ALL</alipay-sdk-java.version>
 
     </properties>
@@ -124,6 +125,13 @@
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
                 <version>${spring.cloud.alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
