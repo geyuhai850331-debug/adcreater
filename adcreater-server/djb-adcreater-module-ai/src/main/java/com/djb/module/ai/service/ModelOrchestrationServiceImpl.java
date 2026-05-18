@@ -26,13 +26,6 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
     @Resource
     private ApplicationContext applicationContext;
 
-    /** 硬编码 fallback：模型管理未实现时使用 spring.ai.openai 配置 */
-    @Value("${spring.ai.openai.api-key:}")
-    private String fallbackApiKey;
-
-    @Value("${spring.ai.openai.base-url:https://api.openai.com}")
-    private String fallbackBaseUrl;
-
     @Override
     public AiResult generateImage(AiRequest request, Consumer<String> progressCallback) {
         return executeWithFallback("image", request, progressCallback);
@@ -53,17 +46,36 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
         return executeWithFallback("copy", request, null);
     }
 
+    /**
+     *
+     * @param request
+     * @param progressCallback
+     * @return
+     */
     @Override
     public AiResult generateDigitalHuman(AiRequest request, Consumer<String> progressCallback) {
         return executeWithFallback("digital_human", request, progressCallback);
     }
-
+    /**
+     * 调用大模型，根据配置调用模型并生成回答
+     * @param request
+     * @param progressCallback
+     * @return
+     */
     private AiResult executeWithFallback(String taskType, AiRequest request,
                                           Consumer<String> progressCallback) {
-        List<AiModelConfigDO> configs = aiModelConfigMapper.selectList(
-            new LambdaQueryWrapper<AiModelConfigDO>()
-                .eq(AiModelConfigDO::getIsEnabled, true)
-                .orderByAsc(AiModelConfigDO::getPriority));
+        List<AiModelConfigDO> configs;
+        try {
+            // 取得对应的大模型
+            configs = aiModelConfigMapper.selectList(
+                new LambdaQueryWrapper<AiModelConfigDO>()
+                    .eq(AiModelConfigDO::getIsEnabled, true)
+                    .orderByAsc(AiModelConfigDO::getPriority));
+        } catch (Exception e) {
+            // DB 表不存在或查询异常时，使用硬编码 fallback（模型管理上线前临时策略）
+            log.warn("[executeWithFallback][DB 查询异常，使用 fallback] taskType={}, error={}", taskType, e.getMessage());
+            return executeWithFallbackConfig(request);
+        }
 
         if (configs.isEmpty()) {
             log.warn("No enabled model in DB for task type: {}, using hardcoded fallback", taskType);
@@ -98,15 +110,11 @@ public class ModelOrchestrationServiceImpl implements ModelOrchestrationService 
      * 后续模型管理上线后，此方法可删除，走 DB 查询路径
      */
     private AiResult executeWithFallbackConfig(AiRequest request) {
-        if (fallbackApiKey == null || fallbackApiKey.isBlank()) {
-            return AiResult.builder().success(false)
-                .errorMessage("No model configured. Please set spring.ai.openai.api-key in application.yaml").build();
-        }
         AiModelConfigDO fallbackConfig = new AiModelConfigDO();
-        fallbackConfig.setModelName("gpt-4o-mini");
-        fallbackConfig.setAdapterClass("com.djb.module.ai.adapter.OpenAIChatAdapter");
-        fallbackConfig.setApiKey(Base64.getEncoder().encodeToString(fallbackApiKey.getBytes()));
-        fallbackConfig.setEndpointUrl(fallbackBaseUrl);
+        fallbackConfig.setModelName("deepseek-v4-flash");
+        fallbackConfig.setAdapterClass("com.djb.module.ai.adapter.OpenAIAdapter");
+        fallbackConfig.setApiKey("sk-e88b5c754e70453ea2ef693b86a9ca17");
+        fallbackConfig.setEndpointUrl("https://api.deepseek.com");
         fallbackConfig.setIsEnabled(true);
         fallbackConfig.setPriority(0);
 

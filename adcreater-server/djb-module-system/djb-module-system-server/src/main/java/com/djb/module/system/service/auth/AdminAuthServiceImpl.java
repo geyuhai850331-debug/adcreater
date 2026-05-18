@@ -22,6 +22,7 @@ import com.djb.module.system.service.social.SocialUserService;
 import com.djb.module.system.service.user.AdminUserService;
 import com.djb.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.djb.module.system.api.sms.SmsCodeApi;
+import com.djb.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.djb.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import com.djb.module.system.api.social.dto.SocialUserBindReqDTO;
 import com.djb.module.system.api.social.dto.SocialUserRespDTO;
@@ -131,7 +132,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             throw exception(AUTH_MOBILE_NOT_EXISTS);
         }
         // 发送验证码
-        smsCodeApi.sendSmsCode(AuthConvert.INSTANCE.convert(reqVO).setCreateIp(getClientIP()));
+        SmsCodeSendReqDTO smsDto = AuthConvert.INSTANCE.convert(reqVO);
+        smsDto.setCreateIp(getClientIP());
+        smsCodeApi.sendSmsCode(smsDto);
     }
 
     @Override
@@ -294,12 +297,12 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
 
-        smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
-                .setCode(reqVO.getCode())
-                .setMobile(reqVO.getMobile())
-                .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
-                .setUsedIp(getClientIP())
-        ).checkError();
+        SmsCodeUseReqDTO useReqDTO = new SmsCodeUseReqDTO();
+        useReqDTO.setCode(reqVO.getCode());
+        useReqDTO.setMobile(reqVO.getMobile());
+        useReqDTO.setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene());
+        useReqDTO.setUsedIp(getClientIP());
+        smsCodeApi.useSmsCode(useReqDTO).checkError();
 
         userService.updateUserPassword(userByMobile.getId(), reqVO.getPassword());
     }
